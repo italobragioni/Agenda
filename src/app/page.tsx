@@ -1,23 +1,34 @@
+import Link from "next/link";
 import { CalendarCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
     <main className="flex flex-1 items-center justify-center px-4 py-16">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
+      <div className="w-full max-w-md text-center">
         <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-brand-foreground">
           <CalendarCheck className="h-7 w-7" aria-hidden="true" />
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground">
           Agenda
         </h1>
-        <p className="mt-2 text-sm text-muted">
+        <p className="mx-auto mt-3 max-w-sm text-muted">
           Agendamento simples para lava-jatos, detalhamento e estética
-          automotiva.
+          automotiva. Controle sua agenda, clientes e faturamento em um só
+          lugar.
         </p>
-        <p className="mt-6 rounded-lg bg-background px-3 py-2 text-xs text-muted">
-          Projeto iniciado com sucesso. Próximas etapas: banco de dados,
-          autenticação e agenda.
-        </p>
+        <div className="mx-auto mt-8 flex max-w-xs flex-col gap-3">
+          <Link href="/cadastro">
+            <Button fullWidth size="lg">
+              Criar conta grátis
+            </Button>
+          </Link>
+          <Link href="/login">
+            <Button fullWidth size="lg" variant="secondary">
+              Entrar
+            </Button>
+          </Link>
+        </div>
       </div>
     </main>
   );
