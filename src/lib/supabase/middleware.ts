@@ -10,6 +10,7 @@ const PROTECTED_PREFIXES = [
   "/financeiro",
   "/configuracoes",
   "/onboarding",
+  "/menu",
 ];
 
 /** Rotas de autenticação (usuário logado não deve ver estas). */
