@@ -4,7 +4,7 @@ import { LogoutButton } from "@/features/auth/logout-button";
 import { Sidebar } from "@/components/layout/sidebar";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { BillingBanner } from "@/features/billing/billing-banner";
-import { CarviWordmark } from "@/components/brand/logo";
+import { CarviLogo } from "@/components/brand/logo";
 
 export default async function DashboardLayout({
   children,
@@ -24,7 +24,7 @@ export default async function DashboardLayout({
         {/* Cabeçalho — apenas no celular (no PC a sidebar já mostra o nome) */}
         <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 md:hidden">
           <div className="flex min-w-0 items-center gap-2">
-            <CarviWordmark className="text-lg" />
+            <CarviLogo className="h-7" />
             <span className="truncate text-xs text-muted">
               · {ctx.business.name}
             </span>

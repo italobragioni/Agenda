@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Plus } from "lucide-react";
 import { navItems } from "@/features/navigation/nav-items";
-import { CarviWordmark } from "@/components/brand/logo";
+import { CarviLogo } from "@/components/brand/logo";
 import { cn } from "@/lib/utils";
 
 export function Sidebar({ businessName }: { businessName: string }) {
@@ -13,8 +13,8 @@ export function Sidebar({ businessName }: { businessName: string }) {
   return (
     <aside className="hidden w-60 shrink-0 flex-col border-r border-border bg-card md:flex">
       <div className="border-b border-border px-5 py-4">
-        <CarviWordmark className="text-xl" />
-        <p className="mt-0.5 truncate text-xs text-muted">{businessName}</p>
+        <CarviLogo className="h-9" />
+        <p className="mt-1 truncate text-xs text-muted">{businessName}</p>
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4">

@@ -4,10 +4,10 @@ import { CarviLogo } from "@/components/brand/logo";
 
 export default function Home() {
   return (
-    <main className="flex flex-1 items-center justify-center bg-slate-950 px-4 py-16">
+    <main className="flex flex-1 items-center justify-center bg-white px-4 py-16">
       <div className="w-full max-w-md text-center">
-        <CarviLogo className="mx-auto h-40" />
-        <p className="mx-auto mt-2 max-w-sm text-slate-300">
+        <CarviLogo className="mx-auto h-28" />
+        <p className="mx-auto mt-2 max-w-sm text-muted">
           Agendamento simples para lava-jatos, detalhamento e estética
           automotiva. Controle sua agenda, clientes e faturamento em um só
           lugar.
@@ -18,11 +18,10 @@ export default function Home() {
               Criar conta grátis
             </Button>
           </Link>
-          <Link
-            href="/login"
-            className="inline-flex h-12 w-full items-center justify-center rounded-xl border border-white/25 text-base font-medium text-white transition-colors hover:bg-white/10"
-          >
-            Entrar
+          <Link href="/login">
+            <Button fullWidth size="lg" variant="secondary">
+              Entrar
+            </Button>
           </Link>
         </div>
       </div>
