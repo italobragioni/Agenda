@@ -1,17 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { redirect } from "next/navigation";
 import { navItems } from "@/features/navigation/nav-items";
 import { logout } from "@/features/auth/actions";
+import { getCurrentContext } from "@/features/auth/current";
+import { PlanStatusCard } from "@/features/billing/plan-status";
 import { PageHeader } from "@/components/ui/page-header";
 import { LogOut } from "lucide-react";
 
 export const metadata: Metadata = { title: "Menu — Agenda" };
 
-export default function MenuPage() {
+export default async function MenuPage() {
+  const ctx = await getCurrentContext();
+  if (!ctx) redirect("/login");
+
   return (
     <div className="mx-auto max-w-md">
       <PageHeader title="Menu" />
+
+      <PlanStatusCard business={ctx.business} className="mb-4" />
 
       <nav className="overflow-hidden rounded-2xl border border-border bg-card">
         {navItems.map((item) => (

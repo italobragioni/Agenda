@@ -16,7 +16,14 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-full">
-      <Sidebar businessName={ctx.business.name} />
+      <Sidebar
+        businessName={ctx.business.name}
+        planFields={{
+          plan: ctx.business.plan,
+          trial_ends_at: ctx.business.trial_ends_at,
+          paid_until: ctx.business.paid_until,
+        }}
+      />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <BillingBanner business={ctx.business} />

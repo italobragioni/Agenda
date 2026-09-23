@@ -5,9 +5,17 @@ import { usePathname } from "next/navigation";
 import { Plus } from "lucide-react";
 import { navItems } from "@/features/navigation/nav-items";
 import { CarviLogo } from "@/components/brand/logo";
+import { PlanStatusChip } from "@/features/billing/plan-status";
+import type { PlanFields } from "@/features/billing/plan";
 import { cn } from "@/lib/utils";
 
-export function Sidebar({ businessName }: { businessName: string }) {
+export function Sidebar({
+  businessName,
+  planFields,
+}: {
+  businessName: string;
+  planFields: PlanFields;
+}) {
   const pathname = usePathname();
 
   return (
@@ -39,7 +47,8 @@ export function Sidebar({ businessName }: { businessName: string }) {
         })}
       </nav>
 
-      <div className="px-3 pb-4">
+      <div className="space-y-2 px-3 pb-4">
+        <PlanStatusChip business={planFields} />
         <Link
           href="/agenda/novo"
           className="flex items-center justify-center gap-2 rounded-xl bg-brand px-3 py-2.5 text-sm font-medium text-brand-foreground hover:bg-brand-hover"
