@@ -5,6 +5,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizePhone } from "@/lib/phone";
 import { localToUtc } from "@/lib/datetime";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { planState, canCreateAppointment } from "@/features/billing/plan";
+import { countMonthlyAppointments } from "@/features/billing/usage";
 
 export interface PublicBookingResult {
   ok: boolean;
@@ -63,10 +65,28 @@ export async function createPublicBooking(input: {
 
   const { data: business } = await admin
     .from("businesses")
-    .select("id, timezone")
+    .select("id, timezone, plan, trial_ends_at, paid_until")
     .eq("slug", input.slug)
     .maybeSingle();
   if (!business) return { ok: false, error: "Estabelecimento não encontrado." };
+
+  // Verifica o plano/limite do estabelecimento.
+  const state = planState({
+    plan: business.plan,
+    trial_ends_at: business.trial_ends_at,
+    paid_until: business.paid_until,
+  });
+  const monthlyCount = await countMonthlyAppointments(
+    admin,
+    business.id as string,
+    business.timezone as string,
+  );
+  if (canCreateAppointment(state, monthlyCount)) {
+    return {
+      ok: false,
+      error: "Agendamentos indisponíveis no momento. Fale com o estabelecimento.",
+    };
+  }
 
   const { data: service } = await admin
     .from("services")

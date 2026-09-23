@@ -96,6 +96,9 @@ export async function signup(
   try {
     const slug = await generateUniqueSlug(admin, businessName);
 
+    const trialEndsAt = new Date(
+      Date.now() + 7 * 24 * 60 * 60 * 1000,
+    ).toISOString();
     const { data: business, error: bizErr } = await admin
       .from("businesses")
       .insert({
@@ -103,6 +106,8 @@ export async function signup(
         slug,
         phone: normalizedPhone,
         whatsapp: normalizedPhone,
+        plan: "trial",
+        trial_ends_at: trialEndsAt,
       })
       .select("id")
       .single();

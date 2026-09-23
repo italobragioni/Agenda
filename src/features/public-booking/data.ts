@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { offsetDayString, WEEKDAY_LABELS } from "@/lib/datetime";
+import { planState } from "@/features/billing/plan";
 import type { Business, Service } from "@/types/database";
 
 export interface PublicDay {
@@ -11,8 +12,18 @@ export interface PublicDay {
 export interface PublicBusinessData {
   business: Pick<
     Business,
-    "id" | "name" | "slug" | "timezone" | "whatsapp" | "phone"
+    | "id"
+    | "name"
+    | "slug"
+    | "timezone"
+    | "whatsapp"
+    | "phone"
+    | "plan"
+    | "trial_ends_at"
+    | "paid_until"
   >;
+  /** O estabelecimento pode receber agendamentos (plano ativo)? */
+  active: boolean;
   services: Pick<
     Service,
     "id" | "name" | "description" | "price_cents" | "duration_minutes"
@@ -37,7 +48,9 @@ export async function getPublicBusiness(
 
   const { data: business } = await admin
     .from("businesses")
-    .select("id, name, slug, timezone, whatsapp, phone")
+    .select(
+      "id, name, slug, timezone, whatsapp, phone, plan, trial_ends_at, paid_until",
+    )
     .eq("slug", slug)
     .maybeSingle();
   if (!business) return null;
@@ -68,8 +81,15 @@ export async function getPublicBusiness(
     days.push({ date, weekday, open: openWeekdays.includes(weekday) });
   }
 
+  const active = planState({
+    plan: business.plan,
+    trial_ends_at: business.trial_ends_at,
+    paid_until: business.paid_until,
+  }).active;
+
   return {
     business: business as PublicBusinessData["business"],
+    active,
     services: (services ?? []) as PublicBusinessData["services"],
     openWeekdays,
     days,

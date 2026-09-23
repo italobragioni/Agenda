@@ -5,6 +5,7 @@ import {
   Wrench,
   DollarSign,
   Settings,
+  CreditCard,
   Menu as MenuIcon,
   type LucideIcon,
 } from "lucide-react";
@@ -22,6 +23,7 @@ export const navItems: NavItem[] = [
   { href: "/clientes", label: "Clientes", icon: Users },
   { href: "/servicos", label: "Serviços", icon: Wrench },
   { href: "/financeiro", label: "Financeiro", icon: DollarSign },
+  { href: "/assinatura", label: "Assinatura", icon: CreditCard },
   { href: "/configuracoes", label: "Configurações", icon: Settings },
 ];
 

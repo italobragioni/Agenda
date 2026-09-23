@@ -7,8 +7,16 @@ import { getCurrentContext } from "@/features/auth/current";
 import { normalizePhone } from "@/lib/phone";
 import { parseCurrencyToCents } from "@/lib/money";
 import { localToUtc } from "@/lib/datetime";
+import { planState, canCreateAppointment } from "@/features/billing/plan";
+import { countMonthlyAppointments } from "@/features/billing/usage";
 import type { ActionState } from "@/lib/forms";
 import type { AppointmentStatus } from "@/types/database";
+
+function planErrorMessage(code: "PLANO_EXPIRADO" | "LIMITE_ATINGIDO"): string {
+  return code === "LIMITE_ATINGIDO"
+    ? "Você atingiu o limite de 20 agendamentos deste mês (plano Básico). Faça upgrade para o Premium."
+    : "Seu período de teste terminou. Assine um plano para continuar agendando.";
+}
 
 /** Traduz os erros vindos da função do banco para mensagens amigáveis. */
 function mapDbError(message: string): string {
@@ -63,9 +71,20 @@ export async function createAppointmentByOwner(
 
   if (Object.keys(fieldErrors).length > 0) return { fieldErrors };
 
+  const supabase = await createClient();
+
+  // Verifica o plano e o limite mensal antes de criar.
+  const state = planState(ctx.business);
+  const monthlyCount = await countMonthlyAppointments(
+    supabase,
+    ctx.business.id,
+    ctx.business.timezone,
+  );
+  const blocked = canCreateAppointment(state, monthlyCount);
+  if (blocked) return { error: planErrorMessage(blocked) };
+
   const startAt = localToUtc(date, time, ctx.business.timezone).toISOString();
 
-  const supabase = await createClient();
   const { error } = await supabase.rpc("create_appointment", {
     p_business_id: ctx.business.id,
     p_service_id: serviceId,

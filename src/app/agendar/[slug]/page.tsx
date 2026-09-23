@@ -27,6 +27,22 @@ export default async function AgendarPage({
   const data = await getPublicBusiness(slug);
   if (!data) notFound();
 
+  if (!data.active) {
+    return (
+      <main className="flex flex-1 items-center justify-center px-4 py-16">
+        <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 text-center">
+          <h1 className="text-lg font-semibold text-foreground">
+            {data.business.name}
+          </h1>
+          <p className="mt-2 text-sm text-muted">
+            Os agendamentos online estão temporariamente indisponíveis. Entre em
+            contato diretamente com o estabelecimento.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="flex flex-1 flex-col">
       <PublicBooking
