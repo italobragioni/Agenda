@@ -169,13 +169,7 @@ export async function login(
     return { error: "E-mail ou senha incorretos." };
   }
 
-  // Decide o destino conforme o onboarding.
-  const { data: business } = await supabase
-    .from("businesses")
-    .select("onboarding_completed")
-    .maybeSingle();
-
-  redirect(business?.onboarding_completed ? "/inicio" : "/onboarding");
+  redirect("/inicio");
 }
 
 // ---------------------------------------------------------------------
