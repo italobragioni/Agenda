@@ -7,10 +7,10 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center px-4 py-10">
+    <main className="flex flex-1 flex-col items-center justify-center bg-slate-950 px-4 py-10">
       <div className="w-full max-w-sm">
         <Link href="/" className="mb-6 flex justify-center">
-          <CarviLogo imgClassName="h-16" />
+          <CarviLogo className="h-24" />
         </Link>
         <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
           {children}

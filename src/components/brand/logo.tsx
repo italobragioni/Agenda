@@ -2,32 +2,19 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * Logo da Carvi (imagem). A arte tem texto claro e fundo transparente,
- * então fica sobre um fundo escuro para garantir contraste.
+ * Logo da Carvi (PNG transparente). Como o texto "Car" é claro, use sobre
+ * um fundo escuro para garantir o contraste.
  */
-export function CarviLogo({
-  className,
-  imgClassName = "h-16",
-}: {
-  className?: string;
-  imgClassName?: string;
-}) {
+export function CarviLogo({ className }: { className?: string }) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center justify-center rounded-2xl bg-slate-950 p-3",
-        className,
-      )}
-    >
-      <Image
-        src="/logo.png"
-        alt="Carvi"
-        width={1254}
-        height={1254}
-        priority
-        className={cn("w-auto", imgClassName)}
-      />
-    </span>
+    <Image
+      src="/logo.png"
+      alt="Carvi"
+      width={1254}
+      height={1254}
+      priority
+      className={cn("w-auto", className)}
+    />
   );
 }
 
