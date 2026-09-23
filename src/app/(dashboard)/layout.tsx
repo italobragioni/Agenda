@@ -23,12 +23,7 @@ export default async function DashboardLayout({
 
         {/* Cabeçalho — apenas no celular (no PC a sidebar já mostra o nome) */}
         <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 md:hidden">
-          <div className="flex min-w-0 items-center gap-2">
-            <CarviLogo className="h-7" />
-            <span className="truncate text-xs text-muted">
-              · {ctx.business.name}
-            </span>
-          </div>
+          <CarviLogo className="h-8" />
           <LogoutButton />
         </header>
 
