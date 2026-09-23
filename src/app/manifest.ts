@@ -7,8 +7,8 @@ import type { MetadataRoute } from "next";
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Agenda — Agendamento automotivo",
-    short_name: "Agenda",
+    name: "Carvi — Agendamento automotivo",
+    short_name: "Carvi",
     description:
       "Agendamento para lava-jatos, detalhamento e estética automotiva.",
     start_url: "/inicio",
@@ -21,6 +21,12 @@ export default function manifest(): MetadataRoute.Manifest {
         src: "/icon.svg",
         sizes: "any",
         type: "image/svg+xml",
+        purpose: "any",
+      },
+      {
+        src: "/logo.png",
+        sizes: "1254x1254",
+        type: "image/png",
         purpose: "any",
       },
     ],

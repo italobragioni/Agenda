@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPublicBusiness } from "@/features/public-booking/data";
 import { PublicBooking } from "@/features/public-booking/public-booking";
+import { CarviLogo } from "@/components/brand/logo";
 
 export async function generateMetadata({
   params,
@@ -53,6 +54,10 @@ export default async function AgendarPage({
         days={data.days}
         tz={data.business.timezone}
       />
+      <footer className="flex items-center justify-center gap-2 py-6 text-xs text-muted">
+        Agendamento por
+        <CarviLogo className="p-1.5" imgClassName="h-5" />
+      </footer>
     </main>
   );
 }

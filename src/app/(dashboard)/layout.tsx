@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import { CalendarCheck } from "lucide-react";
 import { getCurrentContext } from "@/features/auth/current";
 import { LogoutButton } from "@/features/auth/logout-button";
 import { Sidebar } from "@/components/layout/sidebar";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { BillingBanner } from "@/features/billing/billing-banner";
+import { CarviWordmark } from "@/components/brand/logo";
 
 export default async function DashboardLayout({
   children,
@@ -24,11 +24,9 @@ export default async function DashboardLayout({
         {/* Cabeçalho — apenas no celular (no PC a sidebar já mostra o nome) */}
         <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 md:hidden">
           <div className="flex min-w-0 items-center gap-2">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand text-brand-foreground">
-              <CalendarCheck className="h-4 w-4" aria-hidden />
-            </span>
-            <span className="truncate text-sm font-semibold text-foreground">
-              {ctx.business.name}
+            <CarviWordmark className="text-lg" />
+            <span className="truncate text-xs text-muted">
+              · {ctx.business.name}
             </span>
           </div>
           <LogoutButton />

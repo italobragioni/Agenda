@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarCheck, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { navItems } from "@/features/navigation/nav-items";
+import { CarviWordmark } from "@/components/brand/logo";
 import { cn } from "@/lib/utils";
 
 export function Sidebar({ businessName }: { businessName: string }) {
@@ -11,13 +12,9 @@ export function Sidebar({ businessName }: { businessName: string }) {
 
   return (
     <aside className="hidden w-60 shrink-0 flex-col border-r border-border bg-card md:flex">
-      <div className="flex items-center gap-2 border-b border-border px-5 py-4">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-brand-foreground">
-          <CalendarCheck className="h-4 w-4" aria-hidden />
-        </span>
-        <span className="truncate text-sm font-semibold text-foreground">
-          {businessName}
-        </span>
+      <div className="border-b border-border px-5 py-4">
+        <CarviWordmark className="text-xl" />
+        <p className="mt-0.5 truncate text-xs text-muted">{businessName}</p>
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4">

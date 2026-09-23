@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Agenda — Agendamento para estética automotiva",
+  title: "Carvi — Agendamento para estética automotiva",
   description:
     "Sistema de agendamento para lava-jatos, detalhamento e estética automotiva.",
 };
