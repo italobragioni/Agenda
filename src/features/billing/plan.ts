@@ -15,8 +15,8 @@ export const PLANS: Record<"basic" | "premium", PlanInfo> = {
     id: "basic",
     name: "Básico",
     priceCents: 990,
-    monthlyLimit: 20,
-    features: ["Até 20 agendamentos por mês", "Página pública de agendamento", "Clientes e financeiro"],
+    monthlyLimit: 50,
+    features: ["Até 50 agendamentos por mês", "Página pública de agendamento", "Clientes e financeiro"],
   },
   premium: {
     id: "premium",

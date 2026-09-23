@@ -14,7 +14,7 @@ import type { AppointmentStatus } from "@/types/database";
 
 function planErrorMessage(code: "PLANO_EXPIRADO" | "LIMITE_ATINGIDO"): string {
   return code === "LIMITE_ATINGIDO"
-    ? "Você atingiu o limite de 20 agendamentos deste mês (plano Básico). Faça upgrade para o Premium."
+    ? "Você atingiu o limite de 50 agendamentos deste mês (plano Básico). Faça upgrade para o Premium."
     : "Seu período de teste terminou. Assine um plano para continuar agendando.";
 }
 
