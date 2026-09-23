@@ -12,7 +12,9 @@
   --card: #ffffff;
   --muted: #64748b; /* slate-500 */
   --border: #e2e8f0; /* slate-200 */
-  --brand: #4f46e5; /* indigo-600 */
+  --brand: #0a84ff; /* azul Carvi */
+  --brand-hover: #0a6cd6; /* azul Carvi (hover) */
+  --brand-soft: #e8f3ff; /* azul bem claro (fundos/destaques) */
   --brand-foreground: #ffffff;
 }
 
@@ -23,6 +25,8 @@
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-soft: var(--brand-soft);
   --color-brand-foreground: var(--brand-foreground);
   --font-sans: var(--font-inter);
 }

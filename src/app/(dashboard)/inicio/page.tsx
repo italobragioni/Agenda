@@ -78,7 +78,7 @@ export default async function InicioPage() {
       </div>
 
       {nextAppointment && (
-        <Card className="mb-6 flex items-center gap-3 border-brand/30 bg-indigo-50/50">
+        <Card className="mb-6 flex items-center gap-3 border-brand/30 bg-brand-soft">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-brand-foreground">
             <Clock className="h-5 w-5" aria-hidden />
           </span>

@@ -48,7 +48,7 @@ export default async function OnboardingPage() {
       <div className="space-y-3">
         {STEPS.map((s) => (
           <Card key={s.title} className="flex items-center gap-4">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-brand">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand">
               <s.icon className="h-5 w-5" aria-hidden />
             </span>
             <div className="min-w-0 flex-1">

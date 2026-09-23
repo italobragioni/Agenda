@@ -48,7 +48,7 @@ export function LinkForm({
           <button
             type="button"
             onClick={copy}
-            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-brand px-3 py-2 text-sm font-medium text-brand-foreground hover:bg-indigo-700"
+            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-brand px-3 py-2 text-sm font-medium text-brand-foreground hover:bg-brand-hover"
           >
             {copied ? (
               <>

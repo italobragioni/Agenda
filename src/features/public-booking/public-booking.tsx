@@ -307,7 +307,7 @@ export function PublicBooking({
             type="button"
             onClick={confirm}
             disabled={submitting}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand text-base font-medium text-brand-foreground hover:bg-indigo-700 disabled:opacity-60"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand text-base font-medium text-brand-foreground hover:bg-brand-hover disabled:opacity-60"
           >
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
             {submitting ? "Confirmando..." : "Confirmar agendamento"}

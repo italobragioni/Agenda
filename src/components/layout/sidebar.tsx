@@ -45,7 +45,7 @@ export function Sidebar({ businessName }: { businessName: string }) {
       <div className="px-3 pb-4">
         <Link
           href="/agenda/novo"
-          className="flex items-center justify-center gap-2 rounded-xl bg-brand px-3 py-2.5 text-sm font-medium text-brand-foreground hover:bg-indigo-700"
+          className="flex items-center justify-center gap-2 rounded-xl bg-brand px-3 py-2.5 text-sm font-medium text-brand-foreground hover:bg-brand-hover"
         >
           <Plus className="h-5 w-5" aria-hidden />
           Novo agendamento
