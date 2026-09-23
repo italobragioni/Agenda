@@ -13,6 +13,13 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      // Buscar dados em useEffect e resetar estado de carregamento é um
+      // padrão legítimo aqui; a regra experimental gera falsos positivos.
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

@@ -11,6 +11,15 @@ export function localDayString(tz: string, date: Date = new Date()): string {
   return formatInTimeZone(date, tz, "yyyy-MM-dd");
 }
 
+/** Data local deslocada em N dias a partir de hoje, como "yyyy-MM-dd". */
+export function offsetDayString(tz: string, days: number): string {
+  return formatInTimeZone(
+    new Date(Date.now() + days * 24 * 60 * 60 * 1000),
+    tz,
+    "yyyy-MM-dd",
+  );
+}
+
 /**
  * Dado um dia local ("yyyy-MM-dd") e o timezone, retorna o intervalo
  * [início, fim) desse dia em UTC (Date).
