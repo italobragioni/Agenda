@@ -17,7 +17,7 @@ export function AdminRowActions({ businessId }: { businessId: string }) {
           if (window.confirm("Liberar Premium de cortesia para este estabelecimento?"))
             start(() => grantPremium(businessId));
         }}
-        className="inline-flex items-center gap-1 rounded-lg bg-brand-soft px-2.5 py-1.5 text-xs font-medium text-brand hover:bg-blue-100 disabled:opacity-50"
+        className="tap inline-flex items-center gap-1 rounded-lg bg-brand-soft px-2.5 py-1.5 text-xs font-medium text-brand hover:bg-blue-100 disabled:opacity-50"
       >
         <Crown className="h-3.5 w-3.5" /> Premium
       </button>
@@ -28,7 +28,7 @@ export function AdminRowActions({ businessId }: { businessId: string }) {
           if (window.confirm("Reiniciar o teste grátis (7 dias) deste estabelecimento?"))
             start(() => restartTrial(businessId));
         }}
-        className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200 disabled:opacity-50"
+        className="tap inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200 disabled:opacity-50"
       >
         <RotateCcw className="h-3.5 w-3.5" /> Teste
       </button>
