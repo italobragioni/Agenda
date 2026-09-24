@@ -33,35 +33,40 @@ export async function uploadLogo(
     return { error: "Imagem muito grande. Máximo de 2 MB." };
   }
 
-  const admin = createAdminClient();
+  try {
+    const admin = createAdminClient();
 
-  // Garante que o bucket público existe (ignora se já existir).
-  await admin.storage
-    .createBucket(BUCKET, { public: true, fileSizeLimit: MAX_BYTES })
-    .catch(() => {});
+    // Garante que o bucket público existe (ignora se já existir).
+    await admin.storage
+      .createBucket(BUCKET, { public: true })
+      .catch(() => {});
 
-  const ext = ALLOWED[file.type];
-  const path = `${ctx.business.id}/logo.${ext}`;
+    const ext = ALLOWED[file.type];
+    const path = `${ctx.business.id}/logo.${ext}`;
+    const bytes = new Uint8Array(await file.arrayBuffer());
 
-  const { error: upErr } = await admin.storage
-    .from(BUCKET)
-    .upload(path, file, { upsert: true, contentType: file.type });
-  if (upErr) {
+    const { error: upErr } = await admin.storage
+      .from(BUCKET)
+      .upload(path, bytes, { upsert: true, contentType: file.type });
+    if (upErr) {
+      return { error: "Não foi possível enviar a imagem. Tente novamente." };
+    }
+
+    const { data } = admin.storage.from(BUCKET).getPublicUrl(path);
+    // Acrescenta um parâmetro para atualizar o cache do navegador.
+    const publicUrl = `${data.publicUrl}?t=${Date.now()}`;
+
+    const { error: dbErr } = await admin
+      .from("businesses")
+      .update({ logo_url: publicUrl })
+      .eq("id", ctx.business.id);
+    if (dbErr) return { error: "Não foi possível salvar a logo." };
+
+    revalidatePath("/configuracoes");
+    return { success: "Logo atualizada!" };
+  } catch {
     return { error: "Não foi possível enviar a imagem. Tente novamente." };
   }
-
-  const { data } = admin.storage.from(BUCKET).getPublicUrl(path);
-  // Acrescenta um parâmetro para atualizar o cache do navegador.
-  const publicUrl = `${data.publicUrl}?t=${Date.now()}`;
-
-  const { error: dbErr } = await admin
-    .from("businesses")
-    .update({ logo_url: publicUrl })
-    .eq("id", ctx.business.id);
-  if (dbErr) return { error: "Não foi possível salvar a logo." };
-
-  revalidatePath("/configuracoes");
-  return { success: "Logo atualizada!" };
 }
 
 export async function removeLogo(): Promise<void> {
