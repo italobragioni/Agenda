@@ -37,12 +37,41 @@ body {
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
 }
 
-/* Micro-interações e transições (desativadas se o usuário prefere menos movimento) */
+/* Feedback ao toque (sempre ativo: é um retorno funcional ao clique) */
+.tap {
+  transition:
+    transform 0.12s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.tap:active {
+  transform: scale(0.96);
+}
+
+/* Transição de entrada de tela: fade suave para todos */
+@keyframes pageFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.page-enter {
+  animation: pageFade 0.25s ease-out both;
+}
+.fade-in {
+  animation: pageFade 0.2s ease-out both;
+}
+
+/* Quando o movimento é permitido, adiciona um leve deslize */
 @media (prefers-reduced-motion: no-preference) {
-  @keyframes pageEnter {
+  @keyframes pageEnterMove {
     from {
       opacity: 0;
-      transform: translateY(8px);
+      transform: translateY(10px);
     }
     to {
       opacity: 1;
@@ -50,32 +79,7 @@ body {
     }
   }
   .page-enter {
-    animation: pageEnter 0.28s ease-out both;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-  .fade-in {
-    animation: fadeIn 0.2s ease-out both;
-  }
-}
-
-/* Feedback ao toque: leve "afundar" em elementos interativos */
-@media (prefers-reduced-motion: no-preference) {
-  .tap {
-    transition:
-      transform 0.12s ease,
-      background-color 0.15s ease,
-      border-color 0.15s ease,
-      box-shadow 0.15s ease;
-  }
-  .tap:active {
-    transform: scale(0.97);
+    animation-name: pageEnterMove;
+    animation-duration: 0.3s;
   }
 }
