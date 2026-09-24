@@ -4,7 +4,6 @@ import {
   Building2,
   Clock,
   Timer,
-  LinkIcon,
   Ban,
   UserCircle,
 } from "lucide-react";
@@ -15,7 +14,6 @@ import { Card } from "@/components/ui/card";
 import { BusinessInfoForm } from "@/features/settings/business-info-form";
 import { HoursForm } from "@/features/settings/hours-form";
 import { IntervalForm } from "@/features/settings/interval-form";
-import { LinkForm } from "@/features/settings/link-form";
 import { BlockedTimesManager } from "@/features/settings/blocked-times-manager";
 import { LogoutButton } from "@/features/auth/logout-button";
 import { localDayString } from "@/lib/datetime";
@@ -68,7 +66,6 @@ export default async function ConfiguracoesPage() {
 
   const hours = (hoursData ?? []) as BusinessHours[];
   const blocks = (blocksData ?? []) as BlockedTime[];
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
   const today = localDayString(tz);
 
   return (
@@ -93,10 +90,6 @@ export default async function ConfiguracoesPage() {
 
       <Section icon={Ban} title="Bloqueios de horário">
         <BlockedTimesManager blocks={blocks} tz={tz} today={today} />
-      </Section>
-
-      <Section icon={LinkIcon} title="Link de agendamento">
-        <LinkForm siteUrl={siteUrl} slug={ctx.business.slug} />
       </Section>
 
       <Section icon={UserCircle} title="Conta">

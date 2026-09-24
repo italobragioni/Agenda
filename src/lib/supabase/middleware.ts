@@ -13,6 +13,7 @@ const PROTECTED_PREFIXES = [
   "/menu",
   "/assinatura",
   "/admin",
+  "/link",
 ];
 
 /** Rotas de autenticação (usuário logado não deve ver estas). */
