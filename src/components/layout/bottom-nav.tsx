@@ -21,12 +21,25 @@ function NavLink({
     <Link
       href={href}
       className={cn(
-        "tap flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-xs",
+        "tap relative flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-xs",
         active ? "text-brand" : "text-muted",
       )}
     >
-      <Icon className="h-5 w-5" />
-      <span>{label}</span>
+      {/* indicador do item ativo (aparece no topo) */}
+      <span
+        className={cn(
+          "absolute top-0 h-1 rounded-full bg-brand transition-all duration-300",
+          active ? "w-8 opacity-100" : "w-0 opacity-0",
+        )}
+      />
+      <Icon
+        key={active ? "on" : "off"}
+        className={cn(
+          "h-5 w-5",
+          active ? "nav-pop" : "transition-transform duration-200",
+        )}
+      />
+      <span className="transition-colors">{label}</span>
     </Link>
   );
 }
@@ -48,7 +61,7 @@ export function BottomNav() {
           <Link
             href="/agenda/novo"
             aria-label="Novo agendamento"
-            className="-mt-5 flex h-14 w-14 items-center justify-center rounded-full bg-brand text-brand-foreground shadow-lg ring-4 ring-background transition-transform active:scale-95"
+            className="-mt-5 flex h-14 w-14 items-center justify-center rounded-full bg-brand text-brand-foreground shadow-lg ring-4 ring-background transition-transform duration-200 hover:scale-105 active:rotate-90 active:scale-95"
           >
             <Plus className="h-7 w-7" />
           </Link>
