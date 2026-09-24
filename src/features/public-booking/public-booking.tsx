@@ -149,6 +149,7 @@ export function PublicBooking({
         </button>
       )}
 
+      <div key={step} className="step-enter">
       {/* PASSO 1 — SERVIÇO */}
       {step === "service" && (
         <div className="space-y-3">
@@ -318,8 +319,8 @@ export function PublicBooking({
       {/* PASSO 5 — SUCESSO */}
       {step === "success" && result && (
         <div className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600">
-            <CheckCircle2 className="h-9 w-9" />
+          <div className="ring-pulse check-pop relative mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600">
+            <CheckCircle2 className="relative h-9 w-9" />
           </div>
           <h1 className="text-xl font-semibold text-foreground">
             Agendamento confirmado! 🚗
@@ -365,6 +366,7 @@ export function PublicBooking({
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
