@@ -6,12 +6,14 @@ import {
   Timer,
   Ban,
   UserCircle,
+  Image as ImageIcon,
 } from "lucide-react";
 import { getCurrentContext } from "@/features/auth/current";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { BusinessInfoForm } from "@/features/settings/business-info-form";
+import { LogoForm } from "@/features/settings/logo-form";
 import { HoursForm } from "@/features/settings/hours-form";
 import { IntervalForm } from "@/features/settings/interval-form";
 import { BlockedTimesManager } from "@/features/settings/blocked-times-manager";
@@ -78,6 +80,10 @@ export default async function ConfiguracoesPage() {
           phone={ctx.business.phone}
           whatsapp={ctx.business.whatsapp}
         />
+      </Section>
+
+      <Section icon={ImageIcon} title="Logo do estabelecimento">
+        <LogoForm logoUrl={ctx.business.logo_url} />
       </Section>
 
       <Section icon={Clock} title="Horários de funcionamento">

@@ -33,6 +33,7 @@ type Step = "service" | "date" | "time" | "details" | "success";
 export function PublicBooking({
   slug,
   businessName,
+  businessLogoUrl,
   businessWhatsapp,
   services,
   days,
@@ -40,6 +41,7 @@ export function PublicBooking({
 }: {
   slug: string;
   businessName: string;
+  businessLogoUrl?: string | null;
   businessWhatsapp: string | null;
   services: Service[];
   days: Day[];
@@ -132,6 +134,14 @@ export function PublicBooking({
       {/* Cabeçalho do estabelecimento */}
       {step !== "success" && (
         <div className="mb-6 text-center">
+          {businessLogoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={businessLogoUrl}
+              alt={businessName}
+              className="mx-auto mb-3 h-20 w-auto object-contain"
+            />
+          )}
           <h1 className="text-xl font-semibold text-foreground">
             {businessName}
           </h1>

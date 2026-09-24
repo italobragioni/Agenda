@@ -22,6 +22,7 @@ export interface Business {
   slug: string;
   phone: string | null;
   whatsapp: string | null;
+  logo_url: string | null;
   timezone: string;
   appointment_interval_minutes: number;
   onboarding_completed: boolean;

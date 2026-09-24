@@ -49,6 +49,7 @@ export default async function AgendarPage({
       <PublicBooking
         slug={data.business.slug}
         businessName={data.business.name}
+        businessLogoUrl={data.business.logo_url}
         businessWhatsapp={data.business.whatsapp}
         services={data.services}
         days={data.days}
