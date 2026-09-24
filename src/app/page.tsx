@@ -106,7 +106,7 @@ export default function Home() {
       {/* Barra superior */}
       <header className="sticky top-0 z-20 border-b border-border bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <CarviLogo className="h-8" />
+          <CarviLogo className="h-8" transparent />
           <div className="flex items-center gap-2">
             <Link
               href="/login"
@@ -434,7 +434,7 @@ export default function Home() {
       {/* RODAPÉ */}
       <footer className="border-t border-border bg-white px-4 py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
-          <CarviLogo className="h-7" />
+          <CarviLogo className="h-7" transparent />
           <div className="flex items-center gap-4 text-sm text-muted">
             <Link href="/login" className="hover:text-foreground">
               Entrar
