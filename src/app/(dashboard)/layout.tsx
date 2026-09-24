@@ -4,7 +4,7 @@ import { LogoutButton } from "@/features/auth/logout-button";
 import { Sidebar } from "@/components/layout/sidebar";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { BillingBanner } from "@/features/billing/billing-banner";
-import { CarviLogo } from "@/components/brand/logo";
+import { EstablishmentLogo } from "@/components/brand/logo";
 import { isAdminEmail } from "@/features/admin/config";
 
 export default async function DashboardLayout({
@@ -19,6 +19,7 @@ export default async function DashboardLayout({
     <div className="flex min-h-full">
       <Sidebar
         businessName={ctx.business.name}
+        logoUrl={ctx.business.logo_url}
         isAdmin={isAdminEmail(ctx.email)}
         planFields={{
           plan: ctx.business.plan,
@@ -32,7 +33,10 @@ export default async function DashboardLayout({
 
         {/* Cabeçalho — apenas no celular (no PC a sidebar já mostra o nome) */}
         <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 md:hidden">
-          <CarviLogo className="h-8" />
+          <EstablishmentLogo
+            logoUrl={ctx.business.logo_url}
+            className="h-8 max-w-[150px]"
+          />
           <LogoutButton />
         </header>
 

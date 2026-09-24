@@ -4,17 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Plus, ShieldCheck } from "lucide-react";
 import { navItems } from "@/features/navigation/nav-items";
-import { CarviLogo } from "@/components/brand/logo";
+import { EstablishmentLogo } from "@/components/brand/logo";
 import { PlanStatusChip } from "@/features/billing/plan-status";
 import type { PlanFields } from "@/features/billing/plan";
 import { cn } from "@/lib/utils";
 
 export function Sidebar({
   businessName,
+  logoUrl,
   planFields,
   isAdmin,
 }: {
   businessName: string;
+  logoUrl?: string | null;
   planFields: PlanFields;
   isAdmin?: boolean;
 }) {
@@ -23,7 +25,7 @@ export function Sidebar({
   return (
     <aside className="hidden w-60 shrink-0 flex-col border-r border-border bg-card md:flex">
       <div className="border-b border-border px-5 py-4">
-        <CarviLogo className="h-9" />
+        <EstablishmentLogo logoUrl={logoUrl} className="h-10 max-w-[160px]" />
         <p className="mt-1 truncate text-xs text-muted">{businessName}</p>
       </div>
 

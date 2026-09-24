@@ -25,6 +25,32 @@ export function CarviLogo({
 }
 
 /**
+ * Logo do estabelecimento (se enviada) ou a marca Carvi como padrão.
+ * Usada no painel para dar a "cara" do negócio.
+ */
+export function EstablishmentLogo({
+  logoUrl,
+  className,
+}: {
+  logoUrl?: string | null;
+  className?: string;
+}) {
+  if (logoUrl) {
+    return (
+      <Image
+        src={logoUrl}
+        alt="Logo"
+        width={240}
+        height={140}
+        unoptimized
+        className={cn("w-auto object-contain", className)}
+      />
+    );
+  }
+  return <CarviLogo className={className} />;
+}
+
+/**
  * Marca em texto "Carvi" (fallback para casos muito compactos).
  * "Car" na cor do texto e "vi" no azul da marca, como no logotipo.
  */
