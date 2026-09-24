@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { BillingBanner } from "@/features/billing/billing-banner";
 import { CarviLogo } from "@/components/brand/logo";
+import { isAdminEmail } from "@/features/admin/config";
 
 export default async function DashboardLayout({
   children,
@@ -18,6 +19,7 @@ export default async function DashboardLayout({
     <div className="flex min-h-full">
       <Sidebar
         businessName={ctx.business.name}
+        isAdmin={isAdminEmail(ctx.email)}
         planFields={{
           plan: ctx.business.plan,
           trial_ends_at: ctx.business.trial_ends_at,

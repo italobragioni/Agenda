@@ -5,9 +5,10 @@ import { redirect } from "next/navigation";
 import { navItems } from "@/features/navigation/nav-items";
 import { logout } from "@/features/auth/actions";
 import { getCurrentContext } from "@/features/auth/current";
+import { isAdminEmail } from "@/features/admin/config";
 import { PlanStatusCard } from "@/features/billing/plan-status";
 import { PageHeader } from "@/components/ui/page-header";
-import { LogOut } from "lucide-react";
+import { LogOut, ShieldCheck } from "lucide-react";
 
 export const metadata: Metadata = { title: "Menu — Agenda" };
 
@@ -20,6 +21,19 @@ export default async function MenuPage() {
       <PageHeader title="Menu" />
 
       <PlanStatusCard business={ctx.business} className="mb-4" />
+
+      {isAdminEmail(ctx.email) && (
+        <Link
+          href="/admin"
+          className="mb-4 flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5 hover:bg-slate-50"
+        >
+          <ShieldCheck className="h-5 w-5 text-brand" aria-hidden />
+          <span className="flex-1 text-sm font-medium text-foreground">
+            Administrador
+          </span>
+          <ChevronRight className="h-4 w-4 text-muted" aria-hidden />
+        </Link>
+      )}
 
       <nav className="overflow-hidden rounded-2xl border border-border bg-card">
         {navItems.map((item) => (

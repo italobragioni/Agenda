@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, ShieldCheck } from "lucide-react";
 import { navItems } from "@/features/navigation/nav-items";
 import { CarviLogo } from "@/components/brand/logo";
 import { PlanStatusChip } from "@/features/billing/plan-status";
@@ -12,9 +12,11 @@ import { cn } from "@/lib/utils";
 export function Sidebar({
   businessName,
   planFields,
+  isAdmin,
 }: {
   businessName: string;
   planFields: PlanFields;
+  isAdmin?: boolean;
 }) {
   const pathname = usePathname();
 
@@ -45,6 +47,21 @@ export function Sidebar({
             </Link>
           );
         })}
+
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className={cn(
+              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+              pathname.startsWith("/admin")
+                ? "bg-brand text-brand-foreground"
+                : "text-muted hover:bg-slate-100 hover:text-foreground",
+            )}
+          >
+            <ShieldCheck className="h-5 w-5" aria-hidden />
+            Administrador
+          </Link>
+        )}
       </nav>
 
       <div className="space-y-2 px-3 pb-4">

@@ -12,6 +12,7 @@ const PROTECTED_PREFIXES = [
   "/onboarding",
   "/menu",
   "/assinatura",
+  "/admin",
 ];
 
 /** Rotas de autenticação (usuário logado não deve ver estas). */

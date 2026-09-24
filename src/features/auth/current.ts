@@ -7,6 +7,7 @@ import type { Business, Profile } from "@/types/database";
  */
 export async function getCurrentContext(): Promise<{
   userId: string;
+  email: string | null;
   profile: Profile;
   business: Business;
 } | null> {
@@ -30,5 +31,5 @@ export async function getCurrentContext(): Promise<{
     .maybeSingle();
   if (!business) return null;
 
-  return { userId: user.id, profile, business };
+  return { userId: user.id, email: user.email ?? null, profile, business };
 }
