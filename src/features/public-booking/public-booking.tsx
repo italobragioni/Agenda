@@ -168,7 +168,7 @@ export function PublicBooking({
                 setService(s);
                 setStep("date");
               }}
-              className="flex w-full items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left transition-colors hover:border-brand"
+              className="tap flex w-full items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left hover:border-brand"
             >
               <div className="min-w-0">
                 <p className="truncate font-medium text-foreground">{s.name}</p>
@@ -205,7 +205,7 @@ export function PublicBooking({
                     setTime("");
                     setStep("time");
                   }}
-                  className="rounded-xl border border-border bg-card px-2 py-3 text-sm font-medium text-foreground transition-colors hover:border-brand"
+                  className="tap rounded-xl border border-border bg-card px-2 py-3 text-sm font-medium text-foreground hover:border-brand"
                 >
                   {dayLabel(d)}
                 </button>
@@ -235,7 +235,7 @@ export function PublicBooking({
                     setTime(s);
                     setStep("details");
                   }}
-                  className="h-11 rounded-lg border border-border bg-card text-sm font-medium text-foreground transition-colors hover:border-brand"
+                  className="tap h-11 rounded-lg border border-border bg-card text-sm font-medium text-foreground hover:border-brand"
                 >
                   {s}
                 </button>
@@ -307,7 +307,7 @@ export function PublicBooking({
             type="button"
             onClick={confirm}
             disabled={submitting}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand text-base font-medium text-brand-foreground hover:bg-brand-hover disabled:opacity-60"
+            className="tap flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand text-base font-medium text-brand-foreground hover:bg-brand-hover disabled:opacity-60"
           >
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
             {submitting ? "Confirmando..." : "Confirmar agendamento"}

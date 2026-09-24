@@ -66,7 +66,7 @@ export function PlanStatusCard({
     <Link
       href="/assinatura"
       className={cn(
-        "flex items-center gap-3 rounded-2xl border px-4 py-3 transition-colors",
+        "tap flex items-center gap-3 rounded-2xl border px-4 py-3",
         toneClasses[s.tone],
         className,
       )}

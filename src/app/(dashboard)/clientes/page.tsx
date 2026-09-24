@@ -86,7 +86,7 @@ export default async function ClientesPage({
             return (
               <li key={c.id}>
                 <Link href={`/clientes/${c.id}`}>
-                  <Card className="flex items-center gap-3 p-4 transition-colors hover:bg-slate-50">
+                  <Card className="tap flex items-center gap-3 p-4 hover:bg-slate-50">
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-foreground">
                         {c.name}

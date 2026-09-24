@@ -74,7 +74,7 @@ export function PlanCards({ currentPlan }: { currentPlan: string }) {
                 disabled={pending || isCurrent}
                 onClick={() => subscribe(key)}
                 className={cn(
-                  "mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-medium transition-colors disabled:opacity-60",
+                  "tap mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-medium disabled:opacity-60",
                   highlight
                     ? "bg-brand text-brand-foreground hover:bg-brand-hover"
                     : "border border-border bg-card text-foreground hover:bg-slate-50",

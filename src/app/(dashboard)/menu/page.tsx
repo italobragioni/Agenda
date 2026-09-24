@@ -40,7 +40,7 @@ export default async function MenuPage() {
           <Link
             key={item.href}
             href={item.href}
-            className="flex items-center gap-3 border-b border-border px-4 py-3.5 last:border-b-0 hover:bg-slate-50"
+            className="tap flex items-center gap-3 border-b border-border px-4 py-3.5 last:border-b-0 hover:bg-slate-50"
           >
             <item.icon className="h-5 w-5 text-muted" aria-hidden />
             <span className="flex-1 text-sm font-medium text-foreground">

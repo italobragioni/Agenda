@@ -21,7 +21,7 @@ function NavLink({
     <Link
       href={href}
       className={cn(
-        "flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-xs",
+        "tap flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-xs",
         active ? "text-brand" : "text-muted",
       )}
     >
