@@ -5,10 +5,16 @@ import { cn } from "@/lib/utils";
  * Logo da Carvi. A arte tem fundo branco e texto escuro, ideal para
  * superfícies claras (que é o padrão do app).
  */
-export function CarviLogo({ className }: { className?: string }) {
+export function CarviLogo({
+  className,
+  transparent = false,
+}: {
+  className?: string;
+  transparent?: boolean;
+}) {
   return (
     <Image
-      src="/logo.jpg"
+      src={transparent ? "/logo-transparent.png" : "/logo.jpg"}
       alt="Carvi"
       width={1774}
       height={887}

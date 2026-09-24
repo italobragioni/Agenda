@@ -55,7 +55,7 @@ export default async function AgendarPage({
         tz={data.business.timezone}
       />
       <footer className="flex items-center justify-center gap-2 py-6 text-xs text-muted">
-        Agendamento por <CarviLogo className="h-6" />
+        Agendamento por <CarviLogo className="h-6" transparent />
       </footer>
     </main>
   );
