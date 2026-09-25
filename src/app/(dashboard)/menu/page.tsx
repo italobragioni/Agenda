@@ -8,7 +8,8 @@ import { getCurrentContext } from "@/features/auth/current";
 import { isAdminEmail } from "@/features/admin/config";
 import { PlanStatusCard } from "@/features/billing/plan-status";
 import { PageHeader } from "@/components/ui/page-header";
-import { LogOut, ShieldCheck } from "lucide-react";
+import { SUPPORT_WHATSAPP_URL } from "@/lib/support";
+import { LogOut, ShieldCheck, MessageCircle } from "lucide-react";
 
 export const metadata: Metadata = { title: "Menu — Agenda" };
 
@@ -50,6 +51,19 @@ export default async function MenuPage() {
           </Link>
         ))}
       </nav>
+
+      <a
+        href={SUPPORT_WHATSAPP_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="tap mt-4 flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5 hover:bg-slate-50"
+      >
+        <MessageCircle className="h-5 w-5 text-green-600" aria-hidden />
+        <span className="flex-1 text-sm font-medium text-foreground">
+          Falar com o suporte
+        </span>
+        <span className="text-xs text-muted">WhatsApp</span>
+      </a>
 
       <form action={logout} className="mt-4">
         <button
