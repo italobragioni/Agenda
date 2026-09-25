@@ -13,10 +13,12 @@ export function BusinessInfoForm({
   name,
   phone,
   whatsapp,
+  address,
 }: {
   name: string;
   phone: string | null;
   whatsapp: string | null;
+  address: string | null;
 }) {
   const [state, action] = useActionState(updateBusinessInfo, {} as ActionState);
   const fe = state.fieldErrors ?? {};
@@ -52,6 +54,20 @@ export function BusinessInfoForm({
           />
         </FormField>
       </div>
+
+      <FormField
+        label="Endereço"
+        htmlFor="address"
+        error={fe.address}
+        hint="Aparece com um mapa na sua página de agendamento."
+      >
+        <Input
+          id="address"
+          name="address"
+          defaultValue={address ?? ""}
+          placeholder="Rua, número, bairro, cidade"
+        />
+      </FormField>
 
       <SubmitButton pendingText="Salvando...">Salvar</SubmitButton>
     </form>

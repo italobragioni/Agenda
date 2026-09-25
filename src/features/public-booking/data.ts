@@ -19,6 +19,7 @@ export interface PublicBusinessData {
     | "whatsapp"
     | "phone"
     | "logo_url"
+    | "address"
     | "plan"
     | "trial_ends_at"
     | "paid_until"
@@ -50,7 +51,7 @@ export async function getPublicBusiness(
   const { data: business } = await admin
     .from("businesses")
     .select(
-      "id, name, slug, timezone, whatsapp, phone, logo_url, plan, trial_ends_at, paid_until",
+      "id, name, slug, timezone, whatsapp, phone, logo_url, address, plan, trial_ends_at, paid_until",
     )
     .eq("slug", slug)
     .maybeSingle();

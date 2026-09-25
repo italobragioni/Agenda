@@ -79,6 +79,7 @@ export default async function ConfiguracoesPage() {
           name={ctx.business.name}
           phone={ctx.business.phone}
           whatsapp={ctx.business.whatsapp}
+          address={ctx.business.address}
         />
       </Section>
 

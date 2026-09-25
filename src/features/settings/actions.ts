@@ -22,10 +22,11 @@ export async function updateBusinessInfo(
     name: formData.get("name"),
     phone: formData.get("phone"),
     whatsapp: formData.get("whatsapp"),
+    address: formData.get("address"),
   });
   if (!parsed.success) return { fieldErrors: zodFieldErrors(parsed.error) };
 
-  const { name, phone, whatsapp } = parsed.data;
+  const { name, phone, whatsapp, address } = parsed.data;
   const supabase = await createClient();
   const { error } = await supabase
     .from("businesses")
@@ -33,6 +34,7 @@ export async function updateBusinessInfo(
       name,
       phone: phone ? normalizePhone(phone) : null,
       whatsapp: whatsapp ? normalizePhone(whatsapp) : null,
+      address,
     })
     .eq("id", ctx.business.id);
   if (error) return { error: "Não foi possível salvar." };

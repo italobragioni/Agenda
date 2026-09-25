@@ -15,6 +15,12 @@ export const businessInfoSchema = z.object({
     .optional()
     .transform((v) => (v ? v : ""))
     .refine((v) => v === "" || normalizePhone(v) !== null, "WhatsApp inválido"),
+  address: z
+    .string()
+    .trim()
+    .max(200, "Endereço muito longo")
+    .optional()
+    .transform((v) => (v ? v : null)),
 });
 
 export const slugSchema = z.object({
