@@ -17,19 +17,20 @@ export async function getCurrentContext(): Promise<{
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: profile } = await supabase
+  // Uma única consulta: perfil + estabelecimento (via join).
+  const { data } = await supabase
     .from("profiles")
-    .select("*")
+    .select("*, business:businesses(*)")
     .eq("id", user.id)
     .maybeSingle();
-  if (!profile) return null;
+  if (!data || !data.business) return null;
 
-  const { data: business } = await supabase
-    .from("businesses")
-    .select("*")
-    .eq("id", profile.business_id)
-    .maybeSingle();
-  if (!business) return null;
+  const { business, ...profile } = data as Profile & { business: Business };
 
-  return { userId: user.id, email: user.email ?? null, profile, business };
+  return {
+    userId: user.id,
+    email: user.email ?? null,
+    profile: profile as Profile,
+    business: business as Business,
+  };
 }
