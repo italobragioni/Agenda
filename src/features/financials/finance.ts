@@ -71,6 +71,41 @@ export function sumForDays(
   return { cents, count };
 }
 
+export type EntryLite = {
+  type: "income" | "expense";
+  amount_cents: number;
+  occurred_on: string; // yyyy-MM-dd
+};
+
+/** Soma de lançamentos (entradas e saídas) para um conjunto de dias. */
+export function sumEntriesForDays(
+  entries: EntryLite[],
+  daySet: Set<string>,
+): { income: number; expense: number } {
+  let income = 0;
+  let expense = 0;
+  for (const e of entries) {
+    if (!daySet.has(e.occurred_on)) continue;
+    if (e.type === "income") income += e.amount_cents;
+    else expense += e.amount_cents;
+  }
+  return { income, expense };
+}
+
+/** Agrupa lançamentos por dia: dia -> {income, expense}. */
+export function bucketEntriesByDay(
+  entries: EntryLite[],
+): Map<string, { income: number; expense: number }> {
+  const map = new Map<string, { income: number; expense: number }>();
+  for (const e of entries) {
+    const cur = map.get(e.occurred_on) ?? { income: 0, expense: 0 };
+    if (e.type === "income") cur.income += e.amount_cents;
+    else cur.expense += e.amount_cents;
+    map.set(e.occurred_on, cur);
+  }
+  return map;
+}
+
 /** Ranking de serviços mais realizados no período. */
 export function topServices(
   completed: CompletedAppt[],

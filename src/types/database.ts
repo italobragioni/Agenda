@@ -95,6 +95,19 @@ export interface BusinessHours {
   end_time: string | null;
 }
 
+export type FinanceEntryType = "income" | "expense";
+
+export interface FinanceEntry {
+  id: string;
+  business_id: string;
+  type: FinanceEntryType;
+  description: string | null;
+  category: string | null;
+  amount_cents: number;
+  occurred_on: string; // "yyyy-MM-dd"
+  created_at: string;
+}
+
 export interface BlockedTime {
   id: string;
   business_id: string;
