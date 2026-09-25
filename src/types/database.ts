@@ -26,6 +26,7 @@ export interface Business {
   address: string | null;
   timezone: string;
   appointment_interval_minutes: number;
+  capacity: number;
   onboarding_completed: boolean;
   plan: Plan;
   trial_ends_at: string | null;

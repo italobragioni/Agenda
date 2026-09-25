@@ -67,6 +67,30 @@ export async function updateInterval(
   return { success: "Intervalo atualizado." };
 }
 
+// --- Capacidade (nº de boxes / atendimentos simultâneos) ---
+export async function updateCapacity(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const ctx = await getCurrentContext();
+  if (!ctx) redirect("/login");
+
+  const capacity = Number(formData.get("capacity"));
+  if (!Number.isInteger(capacity) || capacity < 1 || capacity > 50) {
+    return { error: "Informe um número entre 1 e 50." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("businesses")
+    .update({ capacity })
+    .eq("id", ctx.business.id);
+  if (error) return { error: "Não foi possível salvar." };
+
+  revalidatePath("/configuracoes");
+  return { success: "Capacidade atualizada." };
+}
+
 // --- Horários de funcionamento ---
 export async function updateHours(
   _prev: ActionState,

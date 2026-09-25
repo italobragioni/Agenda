@@ -23,12 +23,13 @@ export async function getAvailableSlots(params: {
 
   const { data: business } = await admin
     .from("businesses")
-    .select("timezone, appointment_interval_minutes")
+    .select("timezone, appointment_interval_minutes, capacity")
     .eq("id", businessId)
     .maybeSingle();
   if (!business) return [];
   const tz = business.timezone as string;
   const intervalMin = business.appointment_interval_minutes as number;
+  const capacity = Math.max(1, (business.capacity as number) ?? 1);
 
   const { data: service } = await admin
     .from("services")
@@ -95,6 +96,7 @@ export async function getAvailableSlots(params: {
     existing,
     blocked,
     now: new Date(),
+    capacity,
   });
 
   return slots.map((d) => formatInTimeZone(d, tz, "HH:mm"));

@@ -7,6 +7,7 @@ import {
   Ban,
   UserCircle,
   Image as ImageIcon,
+  Boxes,
 } from "lucide-react";
 import { getCurrentContext } from "@/features/auth/current";
 import { createClient } from "@/lib/supabase/server";
@@ -16,6 +17,7 @@ import { BusinessInfoForm } from "@/features/settings/business-info-form";
 import { LogoForm } from "@/features/settings/logo-form";
 import { HoursForm } from "@/features/settings/hours-form";
 import { IntervalForm } from "@/features/settings/interval-form";
+import { CapacityForm } from "@/features/settings/capacity-form";
 import { BlockedTimesManager } from "@/features/settings/blocked-times-manager";
 import { LogoutButton } from "@/features/auth/logout-button";
 import { localDayString } from "@/lib/datetime";
@@ -89,6 +91,10 @@ export default async function ConfiguracoesPage() {
 
       <Section icon={Clock} title="Horários de funcionamento">
         <HoursForm hours={hours} />
+      </Section>
+
+      <Section icon={Boxes} title="Capacidade (boxes)">
+        <CapacityForm value={ctx.business.capacity} />
       </Section>
 
       <Section icon={Timer} title="Intervalo entre clientes">

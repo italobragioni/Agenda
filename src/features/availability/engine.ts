@@ -40,6 +40,8 @@ export function computeAvailableSlots(opts: {
   existing: Interval[];
   blocked: Interval[];
   now: Date;
+  /** Quantos atendimentos simultâneos o estabelecimento suporta (boxes). */
+  capacity?: number;
 }): Date[] {
   const {
     openUtc,
@@ -51,6 +53,7 @@ export function computeAvailableSlots(opts: {
     blocked,
     now,
   } = opts;
+  const capacity = Math.max(1, opts.capacity ?? 1);
 
   if (!openUtc || !closeUtc || durationMin <= 0 || stepMin <= 0) return [];
 
@@ -64,11 +67,16 @@ export function computeAvailableSlots(opts: {
     if (end > close) break; // ultrapassaria o fechamento
     if (start <= nowMs) continue; // no passado
 
-    // Bloqueios: sem folga.
+    // Bloqueios: ocupam todo o estabelecimento.
     if (blocked.some((b) => overlaps(start, end, b, 0))) continue;
 
-    // Agendamentos existentes: respeitando o intervalo entre clientes.
-    if (existing.some((a) => overlaps(start, end, a, intervalMin))) continue;
+    // Conta quantos agendamentos já ocupam esse período (com intervalo).
+    // Só bloqueia quando atingir a capacidade (número de boxes).
+    let conflicts = 0;
+    for (const a of existing) {
+      if (overlaps(start, end, a, intervalMin)) conflicts += 1;
+    }
+    if (conflicts >= capacity) continue;
 
     slots.push(new Date(start));
   }
