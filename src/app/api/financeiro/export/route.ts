@@ -2,12 +2,16 @@ import { getCurrentContext } from "@/features/auth/current";
 import { createClient } from "@/lib/supabase/server";
 import { localDayString, dayRangeUtc } from "@/lib/datetime";
 import { periodDayStrings, type Period } from "@/features/financials/finance";
+import { hasProAccess } from "@/features/billing/plan";
 import type { Appointment, FinanceEntry } from "@/types/database";
 
 /** GET /api/financeiro/export?p=7d|30d|mes → baixa CSV do período. */
 export async function GET(request: Request) {
   const ctx = await getCurrentContext();
   if (!ctx) return new Response("não autorizado", { status: 401 });
+  if (!hasProAccess(ctx.business)) {
+    return new Response("recurso disponível no plano Premium", { status: 403 });
+  }
   const tz = ctx.business.timezone;
 
   const { searchParams } = new URL(request.url);

@@ -73,6 +73,15 @@ export function planState(b: PlanFields, now: Date = new Date()): PlanState {
   };
 }
 
+/**
+ * Acesso aos recursos avançados (ex.: gestão financeira completa):
+ * disponível no teste grátis (ativo) e no plano Premium (ativo).
+ */
+export function hasProAccess(b: PlanFields, now: Date = new Date()): boolean {
+  const s = planState(b, now);
+  return s.active && (s.isTrial || s.kind === "premium");
+}
+
 function daysBetween(from: Date, to: Date): number {
   const ms = to.getTime() - from.getTime();
   return ms <= 0 ? 0 : Math.ceil(ms / (24 * 60 * 60 * 1000));

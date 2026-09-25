@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Download } from "lucide-react";
+import { Download, Lock } from "lucide-react";
 import { getCurrentContext } from "@/features/auth/current";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { FinanceChart, type FinanceBar } from "@/components/ui/finance-chart";
+import { BarChart, type BarDatum } from "@/components/ui/bar-chart";
 import { EntryForm } from "@/features/financials/entry-form";
 import { EntryDeleteButton } from "@/features/financials/entry-delete-button";
+import { hasProAccess } from "@/features/billing/plan";
 import { formatCents } from "@/lib/money";
 import { localDayString, formatDateBR } from "@/lib/datetime";
 import {
@@ -47,6 +50,7 @@ export default async function FinanceiroPage({
   const ctx = await getCurrentContext();
   if (!ctx) redirect("/login");
   const tz = ctx.business.timezone;
+  const full = hasProAccess(ctx.business);
 
   const { p } = await searchParams;
   const period: Period = p === "30d" || p === "mes" ? (p as Period) : "7d";
@@ -61,11 +65,13 @@ export default async function FinanceiroPage({
       .select("start_at, price_cents, service_name_snapshot, status")
       .eq("status", "completed")
       .gte("start_at", earliest.toISOString()),
-    supabase
-      .from("finance_entries")
-      .select("*")
-      .gte("occurred_on", earliestDay)
-      .order("occurred_on", { ascending: false }),
+    full
+      ? supabase
+          .from("finance_entries")
+          .select("*")
+          .gte("occurred_on", earliestDay)
+          .order("occurred_on", { ascending: false })
+      : Promise.resolve({ data: [] as FinanceEntry[] }),
   ]);
 
   const completed = (apptData ?? []) as CompletedAppt[];
@@ -87,11 +93,34 @@ export default async function FinanceiroPage({
     entriesLite,
     daySet,
   );
-  const totalEntradas = fatur.cents + outras;
-  const lucro = totalEntradas - despesas;
+  const lucro = fatur.cents + outras - despesas;
   const ticket = fatur.count > 0 ? Math.round(fatur.cents / fatur.count) : 0;
 
-  const series: FinanceBar[] = chartDays.map((d) => {
+  const ranking = topServices(completed, tz, daySet);
+  const periodEntries = entries.filter((e) => daySet.has(e.occurred_on));
+  const today = localDayString(tz);
+
+  // Cards: básico mostra faturamento/ticket/serviços; Premium acrescenta lucro.
+  const cards = full
+    ? [
+        { label: "Faturamento", value: formatCents(fatur.cents), tone: "" },
+        { label: "Outras entradas", value: formatCents(outras), tone: "" },
+        { label: "Despesas", value: formatCents(despesas), tone: "text-red-600" },
+        {
+          label: "Lucro",
+          value: formatCents(lucro),
+          tone: lucro >= 0 ? "text-emerald-600" : "text-red-600",
+        },
+        { label: "Ticket médio", value: formatCents(ticket), tone: "" },
+        { label: "Serviços", value: String(fatur.count), tone: "" },
+      ]
+    : [
+        { label: "Faturamento", value: formatCents(fatur.cents), tone: "" },
+        { label: "Ticket médio", value: formatCents(ticket), tone: "" },
+        { label: "Serviços", value: String(fatur.count), tone: "" },
+      ];
+
+  const financeSeries: FinanceBar[] = chartDays.map((d) => {
     const l = dayLabel(d);
     const ab = apptBucket.get(d);
     const eb = entryBucket.get(d);
@@ -104,35 +133,34 @@ export default async function FinanceiroPage({
     };
   });
 
-  const ranking = topServices(completed, tz, daySet);
-  const periodEntries = entries.filter((e) => daySet.has(e.occurred_on));
-  const today = localDayString(tz);
-
-  const cards = [
-    { label: "Faturamento", value: formatCents(fatur.cents), tone: "" },
-    { label: "Outras entradas", value: formatCents(outras), tone: "" },
-    { label: "Despesas", value: formatCents(despesas), tone: "text-red-600" },
-    {
-      label: "Lucro",
-      value: formatCents(lucro),
-      tone: lucro >= 0 ? "text-emerald-600" : "text-red-600",
-    },
-    { label: "Ticket médio", value: formatCents(ticket), tone: "" },
-    { label: "Serviços", value: String(fatur.count), tone: "" },
-  ];
+  const revenueSeries: BarDatum[] = chartDays.map((d) => {
+    const l = dayLabel(d);
+    return {
+      key: d,
+      label: l.short,
+      fullLabel: l.full,
+      value: apptBucket.get(d)?.cents ?? 0,
+    };
+  });
 
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader
         title="Financeiro"
-        description="Faturamento, despesas e lucro do seu negócio."
+        description={
+          full
+            ? "Faturamento, despesas e lucro do seu negócio."
+            : "Acompanhe seu faturamento."
+        }
         action={
-          <a href={`/api/financeiro/export?p=${period}`}>
-            <span className="tap inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-slate-50">
-              <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">Exportar</span>
-            </span>
-          </a>
+          full ? (
+            <a href={`/api/financeiro/export?p=${period}`}>
+              <span className="tap inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-slate-50">
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">Exportar</span>
+              </span>
+            </a>
+          ) : undefined
         }
       />
 
@@ -166,53 +194,82 @@ export default async function FinanceiroPage({
         ))}
       </div>
 
-      {/* Gráfico entradas x saídas */}
+      {/* Gráfico */}
       <Card className="mb-6">
         <h2 className="mb-4 text-sm font-semibold text-foreground">
-          Entradas × Saídas por dia
+          {full ? "Entradas × Saídas por dia" : "Faturamento por dia"}
         </h2>
-        <FinanceChart data={series} />
-      </Card>
-
-      {/* Lançamentos */}
-      <Card className="mb-6">
-        <h2 className="mb-3 text-sm font-semibold text-foreground">
-          Lançar despesa ou entrada
-        </h2>
-        <EntryForm today={today} />
-
-        {periodEntries.length > 0 && (
-          <ul className="mt-5 space-y-2 border-t border-border pt-4">
-            {periodEntries.map((e) => (
-              <li
-                key={e.id}
-                className="flex items-center justify-between gap-3 text-sm"
-              >
-                <div className="min-w-0">
-                  <p className="truncate font-medium text-foreground">
-                    {e.description || (e.type === "income" ? "Entrada" : "Despesa")}
-                  </p>
-                  <p className="text-xs text-muted">
-                    {formatDateBR(`${e.occurred_on}T12:00:00Z`, "UTC")}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span
-                    className={cn(
-                      "shrink-0 font-semibold",
-                      e.type === "income" ? "text-emerald-600" : "text-red-600",
-                    )}
-                  >
-                    {e.type === "income" ? "+" : "−"}
-                    {formatCents(e.amount_cents)}
-                  </span>
-                  <EntryDeleteButton id={e.id} />
-                </div>
-              </li>
-            ))}
-          </ul>
+        {full ? (
+          <FinanceChart data={financeSeries} />
+        ) : (
+          <BarChart data={revenueSeries} />
         )}
       </Card>
+
+      {/* Lançamentos (Premium) ou convite de upgrade (Básico) */}
+      {full ? (
+        <Card className="mb-6">
+          <h2 className="mb-3 text-sm font-semibold text-foreground">
+            Lançar despesa ou entrada
+          </h2>
+          <EntryForm today={today} />
+
+          {periodEntries.length > 0 && (
+            <ul className="mt-5 space-y-2 border-t border-border pt-4">
+              {periodEntries.map((e) => (
+                <li
+                  key={e.id}
+                  className="flex items-center justify-between gap-3 text-sm"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-foreground">
+                      {e.description ||
+                        (e.type === "income" ? "Entrada" : "Despesa")}
+                    </p>
+                    <p className="text-xs text-muted">
+                      {formatDateBR(`${e.occurred_on}T12:00:00Z`, "UTC")}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={cn(
+                        "shrink-0 font-semibold",
+                        e.type === "income"
+                          ? "text-emerald-600"
+                          : "text-red-600",
+                      )}
+                    >
+                      {e.type === "income" ? "+" : "−"}
+                      {formatCents(e.amount_cents)}
+                    </span>
+                    <EntryDeleteButton id={e.id} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      ) : (
+        <Card className="mb-6 flex flex-col items-start gap-3 border-brand/30 bg-brand-soft sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand text-brand-foreground">
+              <Lock className="h-5 w-5" aria-hidden />
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                Gestão financeira completa
+              </p>
+              <p className="text-xs text-muted">
+                Despesas, lucro, lançamentos e exportação em planilha estão no
+                plano Premium.
+              </p>
+            </div>
+          </div>
+          <Link href="/assinatura" className="shrink-0">
+            <Button size="sm">Fazer upgrade</Button>
+          </Link>
+        </Card>
+      )}
 
       {/* Ranking de serviços */}
       <Card>
