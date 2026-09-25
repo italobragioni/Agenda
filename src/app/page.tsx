@@ -110,16 +110,6 @@ export default function Home() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <CarviLogo className="h-8" transparent />
           <div className="flex items-center gap-2">
-            <a
-              href={SUPPORT_WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Falar no WhatsApp"
-              className="tap inline-flex h-9 items-center gap-1.5 rounded-xl bg-green-600 px-3 text-sm font-medium text-white hover:bg-green-700"
-            >
-              <MessageCircle className="h-4 w-4" />
-              <span className="hidden sm:inline">WhatsApp</span>
-            </a>
             <Link
               href="/login"
               className="tap rounded-xl px-3 py-2 text-sm font-medium text-foreground hover:bg-slate-100"
@@ -475,6 +465,17 @@ export default function Home() {
           </Button>
         </Link>
       </div>
+
+      {/* BOTÃO FLUTUANTE DO WHATSAPP (acima da barra fixa no celular) */}
+      <a
+        href={SUPPORT_WHATSAPP_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Falar no WhatsApp"
+        className="tap fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 sm:bottom-6 sm:right-6"
+      >
+        <MessageCircle className="h-7 w-7" />
+      </a>
     </div>
   );
 }
