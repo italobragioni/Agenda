@@ -6,7 +6,6 @@ import {
   CalendarClock,
   Link2,
   ShieldCheck,
-  Wallet,
   Users,
   Smartphone,
   Clock,
@@ -15,6 +14,8 @@ import {
   ArrowRight,
   Star,
   MessageCircle,
+  TrendingUp,
+  CarFront,
 } from "lucide-react";
 import { CarviLogo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
@@ -39,58 +40,6 @@ function Eyebrow({ children }: { children: string }) {
   );
 }
 
-/** Mockup do produto (a página pública de agendamento dentro de um celular). */
-function HeroMockup() {
-  return (
-    <div className="relative mx-auto w-[260px]">
-      <div className="rounded-[2.2rem] border-[10px] border-slate-900 bg-white shadow-2xl">
-        <div className="rounded-[1.5rem] overflow-hidden">
-          {/* topo */}
-          <div className="flex flex-col items-center gap-1 bg-slate-50 px-4 pb-3 pt-6">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-xs font-bold text-white">
-              EP
-            </span>
-            <p className="text-sm font-semibold text-foreground">
-              Estética Premium
-            </p>
-            <p className="text-[11px] text-muted">Agende seu horário</p>
-          </div>
-          {/* serviço */}
-          <div className="space-y-2 px-4 py-3">
-            <div className="flex items-center justify-between rounded-xl border border-brand bg-brand-soft px-3 py-2">
-              <div>
-                <p className="text-xs font-semibold text-foreground">
-                  Lavagem Completa
-                </p>
-                <p className="text-[10px] text-muted">60 min</p>
-              </div>
-              <span className="text-xs font-bold text-brand">R$ 80</span>
-            </div>
-            {/* horários */}
-            <div className="grid grid-cols-4 gap-1.5 pt-1">
-              {["09:00", "10:00", "11:00", "14:00"].map((h, i) => (
-                <span
-                  key={h}
-                  className={
-                    i === 1
-                      ? "rounded-md bg-brand py-1 text-center text-[10px] font-semibold text-white"
-                      : "rounded-md border border-border py-1 text-center text-[10px] text-foreground"
-                  }
-                >
-                  {h}
-                </span>
-              ))}
-            </div>
-            <div className="mt-1 rounded-lg bg-brand py-2 text-center text-[11px] font-semibold text-white">
-              Confirmar agendamento
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function PrimaryCta({ children = "Começar grátis" }: { children?: string }) {
   return (
     <Link href={CTA_HREF}>
@@ -99,6 +48,156 @@ function PrimaryCta({ children = "Começar grátis" }: { children?: string }) {
         <ArrowRight className="h-4 w-4" aria-hidden />
       </Button>
     </Link>
+  );
+}
+
+/* ============================================================
+   MOCKUPS — telas do app desenhadas (sem precisar de fotos reais)
+   ============================================================ */
+
+/** Moldura de celular reutilizável. */
+function Phone({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`relative w-[250px] ${className}`}>
+      <div className="rounded-[2.2rem] border-[10px] border-slate-900 bg-white shadow-2xl">
+        <div className="overflow-hidden rounded-[1.5rem]">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/** Tela 1: página pública de agendamento (o que o cliente vê). */
+function BookingMockup() {
+  return (
+    <Phone>
+      <div className="flex flex-col items-center gap-1 bg-slate-50 px-4 pb-3 pt-6">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-xs font-bold text-white">
+          EP
+        </span>
+        <p className="text-sm font-semibold text-foreground">Estética Premium</p>
+        <p className="text-[11px] text-muted">Agende seu horário</p>
+      </div>
+      <div className="space-y-2 px-4 py-3">
+        <div className="flex items-center justify-between rounded-xl border border-brand bg-brand-soft px-3 py-2">
+          <div>
+            <p className="text-xs font-semibold text-foreground">
+              Lavagem Completa
+            </p>
+            <p className="text-[10px] text-muted">60 min</p>
+          </div>
+          <span className="text-xs font-bold text-brand">R$ 80</span>
+        </div>
+        <div className="grid grid-cols-4 gap-1.5 pt-1">
+          {["09:00", "10:00", "11:00", "14:00"].map((h, i) => (
+            <span
+              key={h}
+              className={
+                i === 1
+                  ? "rounded-md bg-brand py-1 text-center text-[10px] font-semibold text-white"
+                  : "rounded-md border border-border py-1 text-center text-[10px] text-foreground"
+              }
+            >
+              {h}
+            </span>
+          ))}
+        </div>
+        <div className="mt-1 rounded-lg bg-brand py-2 text-center text-[11px] font-semibold text-white">
+          Confirmar agendamento
+        </div>
+      </div>
+    </Phone>
+  );
+}
+
+/** Tela 2: agenda do dono (o que você vê no painel). */
+function AgendaMockup() {
+  const items = [
+    { h: "09:00", s: "Lavagem Completa", c: "João · Civic", on: true },
+    { h: "10:00", s: "Polimento", c: "Marcos · HB20", on: true },
+    { h: "11:00", s: "Higienização", c: "Ana · Corolla", on: false },
+    { h: "14:00", s: "Lavagem Simples", c: "Rafa · Onix", on: true },
+  ];
+  return (
+    <Phone>
+      <div className="bg-slate-50 px-4 pb-2 pt-6">
+        <p className="text-[11px] font-medium text-muted">Hoje, {YEAR}</p>
+        <p className="text-sm font-bold text-foreground">Sua agenda</p>
+      </div>
+      <div className="space-y-1.5 px-3 py-3">
+        {items.map((it) => (
+          <div
+            key={it.h}
+            className="flex items-center gap-2 rounded-xl border border-border bg-white px-2.5 py-2"
+          >
+            <span className="w-9 shrink-0 text-[11px] font-bold text-brand">
+              {it.h}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[11px] font-semibold text-foreground">
+                {it.s}
+              </p>
+              <p className="truncate text-[10px] text-muted">{it.c}</p>
+            </div>
+            <span
+              className={
+                it.on
+                  ? "flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"
+                  : "flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 text-amber-600"
+              }
+            >
+              {it.on ? (
+                <Check className="h-3 w-3" />
+              ) : (
+                <Clock className="h-3 w-3" />
+              )}
+            </span>
+          </div>
+        ))}
+      </div>
+    </Phone>
+  );
+}
+
+/** Tela 3: financeiro (faturamento e lucro). */
+function FinanceMockup() {
+  const bars = [40, 65, 30, 80, 55, 95, 70];
+  return (
+    <Phone>
+      <div className="bg-slate-50 px-4 pb-2 pt-6">
+        <p className="text-[11px] font-medium text-muted">Este mês</p>
+        <p className="text-sm font-bold text-foreground">Financeiro</p>
+      </div>
+      <div className="space-y-3 px-3 py-3">
+        <div className="grid grid-cols-2 gap-1.5">
+          <div className="rounded-xl border border-border bg-white px-2.5 py-2">
+            <p className="text-[9px] font-medium text-muted">Faturamento</p>
+            <p className="text-[13px] font-bold text-foreground">R$ 8.420</p>
+          </div>
+          <div className="rounded-xl border border-border bg-white px-2.5 py-2">
+            <p className="text-[9px] font-medium text-muted">Lucro</p>
+            <p className="text-[13px] font-bold text-emerald-600">R$ 5.180</p>
+          </div>
+        </div>
+        <div className="rounded-xl border border-border bg-white p-2.5">
+          <p className="mb-2 text-[9px] font-medium text-muted">Por dia</p>
+          <div className="flex h-16 items-end justify-between gap-1">
+            {bars.map((h, i) => (
+              <span
+                key={i}
+                className="flex-1 rounded-t bg-brand"
+                style={{ height: `${h}%` }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </Phone>
   );
 }
 
@@ -125,7 +224,6 @@ export default function Home() {
 
       {/* HERO */}
       <section className="relative overflow-hidden">
-        {/* brilho de fundo */}
         <div
           className="pointer-events-none absolute -top-24 right-0 h-96 w-96 rounded-full bg-gradient-to-br from-cyan-300/40 to-brand/30 blur-3xl"
           aria-hidden
@@ -159,26 +257,27 @@ export default function Home() {
             </div>
           </div>
           <div className="flex justify-center lg:justify-end">
-            <HeroMockup />
+            <BookingMockup />
           </div>
         </div>
       </section>
 
-      {/* FAIXA DE CONFIANÇA */}
-      <section className="border-y border-border bg-slate-50">
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-8 gap-y-2 px-4 py-4 text-sm font-medium text-muted">
-          <span className="inline-flex items-center gap-2">
-            <Clock className="h-4 w-4 text-brand" /> Agendamento 24 horas
-          </span>
-          <span className="inline-flex items-center gap-2">
-            <Smartphone className="h-4 w-4 text-brand" /> Sem instalar app
-          </span>
-          <span className="inline-flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-brand" /> Sem conflito de horário
-          </span>
-          <span className="inline-flex items-center gap-2">
-            <Wallet className="h-4 w-4 text-brand" /> A partir de R$ 9,90/mês
-          </span>
+      {/* NÚMEROS / FAIXA DE CONFIANÇA */}
+      <section className="border-y border-border bg-slate-950">
+        <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 px-4 py-8 sm:grid-cols-4">
+          {[
+            { n: "24h", l: "Agenda aberta" },
+            { n: "0", l: "Horário duplicado" },
+            { n: "5 min", l: "Para começar" },
+            { n: "R$ 9,90", l: "Por mês" },
+          ].map((s) => (
+            <div key={s.l} className="text-center">
+              <p className="text-2xl font-extrabold text-white sm:text-3xl">
+                {s.n}
+              </p>
+              <p className="mt-1 text-xs text-slate-400">{s.l}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -212,10 +311,60 @@ export default function Home() {
         </ul>
       </section>
 
-      {/* SOLUÇÃO */}
+      {/* ANTES × DEPOIS */}
       <section className="bg-slate-50 px-4 py-16">
         <div className="mx-auto max-w-2xl text-center">
-          <Eyebrow>A solução</Eyebrow>
+          <Eyebrow>A virada de chave</Eyebrow>
+          <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            O antes e o depois da Carvi
+          </h2>
+        </div>
+        <div className="mx-auto mt-10 grid max-w-3xl gap-5 sm:grid-cols-2">
+          {/* Antes */}
+          <div className="rounded-3xl border border-border bg-card p-6">
+            <p className="inline-flex items-center gap-2 text-sm font-semibold text-red-600">
+              <X className="h-4 w-4" /> Sem a Carvi
+            </p>
+            <ul className="mt-4 space-y-3 text-sm text-muted">
+              {[
+                "Responder cada cliente na mão, um por um",
+                "Agenda no caderno ou na cabeça",
+                "Cliente some porque não teve resposta",
+                "Contas de cabeça, sem saber o lucro",
+              ].map((t) => (
+                <li key={t} className="flex items-start gap-2.5">
+                  <X className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+          {/* Depois */}
+          <div className="rounded-3xl border border-brand/30 bg-brand-soft p-6">
+            <p className="inline-flex items-center gap-2 text-sm font-semibold text-brand">
+              <Check className="h-4 w-4" /> Com a Carvi
+            </p>
+            <ul className="mt-4 space-y-3 text-sm text-foreground">
+              {[
+                "Cliente agenda sozinho pelo seu link",
+                "Agenda organizada e sincronizada",
+                "Atende 24h, até quando a loja está fechada",
+                "Faturamento e lucro na tela, em tempo real",
+              ].map((t) => (
+                <li key={t} className="flex items-start gap-2.5">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* SOLUÇÃO / COMO FUNCIONA */}
+      <section className="px-4 py-16">
+        <div className="mx-auto max-w-2xl text-center">
+          <Eyebrow>Como funciona</Eyebrow>
           <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             Sua agenda trabalhando sozinha
           </h2>
@@ -230,9 +379,21 @@ export default function Home() {
         </div>
         <div className="mx-auto mt-10 grid max-w-3xl gap-4 sm:grid-cols-3">
           {[
-            { icon: Link2, t: "1. Compartilhe o link", d: "No status, na bio ou no grupo." },
-            { icon: CalendarClock, t: "2. Cliente agenda", d: "Sozinho, 24h, sem baixar app." },
-            { icon: Check, t: "3. Agenda organizada", d: "Sem furo, sem conflito." },
+            {
+              icon: Link2,
+              t: "1. Compartilhe o link",
+              d: "No status, na bio ou no grupo.",
+            },
+            {
+              icon: CalendarClock,
+              t: "2. Cliente agenda",
+              d: "Sozinho, 24h, sem baixar app.",
+            },
+            {
+              icon: Check,
+              t: "3. Agenda organizada",
+              d: "Sem furo, sem conflito.",
+            },
           ].map((s) => (
             <div
               key={s.t}
@@ -248,6 +409,47 @@ export default function Home() {
         </div>
       </section>
 
+      {/* VITRINE DE TELAS */}
+      <section className="overflow-hidden bg-slate-950 px-4 py-16">
+        <div className="mx-auto max-w-2xl text-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-300">
+            Por dentro do app
+          </span>
+          <h2 className="mt-4 text-2xl font-bold tracking-tight text-white sm:text-3xl">
+            Tudo no seu celular, simples de usar
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-slate-400">
+            Da página que o cliente vê até o seu financeiro. Feito pra quem não
+            tem tempo a perder.
+          </p>
+        </div>
+        <div className="mx-auto mt-12 grid max-w-4xl items-start gap-10 sm:grid-cols-3 sm:gap-6">
+          {[
+            {
+              mock: <BookingMockup />,
+              t: "Página de agendamento",
+              d: "Seu link com a sua marca. O cliente marca em segundos.",
+            },
+            {
+              mock: <AgendaMockup />,
+              t: "Sua agenda do dia",
+              d: "Todos os horários e carros organizados numa tela.",
+            },
+            {
+              mock: <FinanceMockup />,
+              t: "Financeiro completo",
+              d: "Faturamento, despesas e lucro sempre à mão.",
+            },
+          ].map((c) => (
+            <div key={c.t} className="flex flex-col items-center text-center">
+              <div className="scale-90 sm:scale-100">{c.mock}</div>
+              <p className="mt-5 text-sm font-semibold text-white">{c.t}</p>
+              <p className="mt-1 max-w-[220px] text-xs text-slate-400">{c.d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* BENEFÍCIOS */}
       <section className="px-4 py-16">
         <div className="mx-auto max-w-3xl text-center">
@@ -258,14 +460,46 @@ export default function Home() {
         </div>
         <div className="mx-auto mt-10 grid max-w-4xl gap-4 sm:grid-cols-2">
           {[
-            { icon: CalendarClock, t: "Pare de perder cliente", d: "Ele agenda sozinho, 24h, até de madrugada." },
-            { icon: MessageSquareOff, t: "Chega de WhatsApp lotado", d: "O link responde por você." },
-            { icon: ShieldCheck, t: "Nunca mais horário duplicado", d: "O sistema simplesmente não deixa." },
-            { icon: Sparkles, t: "Sua marca na frente", d: "Página de agendamento com a sua logo." },
-            { icon: Wallet, t: "Saiba quanto entra", d: "Faturamento do dia, semana e mês na tela." },
-            { icon: Users, t: "Clientes organizados", d: "Histórico e WhatsApp de cada um." },
-            { icon: Smartphone, t: "Tudo no celular", d: "Simples até pra quem não é de tecnologia." },
-            { icon: Clock, t: "Comece hoje", d: "Pronto em minutos, sem instalar nada." },
+            {
+              icon: CalendarClock,
+              t: "Pare de perder cliente",
+              d: "Ele agenda sozinho, 24h, até de madrugada.",
+            },
+            {
+              icon: MessageSquareOff,
+              t: "Chega de WhatsApp lotado",
+              d: "O link responde por você.",
+            },
+            {
+              icon: ShieldCheck,
+              t: "Nunca mais horário duplicado",
+              d: "O sistema simplesmente não deixa.",
+            },
+            {
+              icon: CarFront,
+              t: "Controle os boxes",
+              d: "Diga quantos carros lava ao mesmo tempo.",
+            },
+            {
+              icon: Sparkles,
+              t: "Sua marca na frente",
+              d: "Página de agendamento com a sua logo.",
+            },
+            {
+              icon: TrendingUp,
+              t: "Saiba seu lucro",
+              d: "Faturamento, despesas e lucro na tela.",
+            },
+            {
+              icon: Users,
+              t: "Clientes organizados",
+              d: "Histórico e WhatsApp de cada um.",
+            },
+            {
+              icon: Smartphone,
+              t: "Tudo no celular",
+              d: "Simples até pra quem não é de tecnologia.",
+            },
           ].map((b) => (
             <div
               key={b.t}
@@ -321,7 +555,9 @@ export default function Home() {
             <div className="relative flex flex-col rounded-3xl bg-gradient-to-br from-cyan-400 to-brand p-[2px] shadow-lg">
               <div className="flex flex-1 flex-col rounded-[calc(1.5rem-2px)] bg-card p-6 text-left">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-foreground">Premium</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    Premium
+                  </p>
                   <span className="inline-flex items-center gap-1 rounded-full bg-brand px-2.5 py-0.5 text-xs font-medium text-brand-foreground">
                     <Star className="h-3 w-3" /> Popular
                   </span>
@@ -381,13 +617,34 @@ export default function Home() {
           </div>
           <div className="mt-8 space-y-2.5">
             {[
-              { q: "Preciso instalar algum aplicativo?", a: "Não. Funciona no navegador, no celular ou no computador." },
-              { q: "Meus clientes precisam criar conta?", a: "Não. Eles só abrem seu link, escolhem o horário e confirmam." },
-              { q: "Quanto tempo pra começar a usar?", a: "Cerca de 5 minutos: cadastra os serviços, define os horários e pronto." },
-              { q: "Serve pra estética e detalhamento também?", a: "Sim. Lava-jato, estética automotiva e detalhamento." },
-              { q: "Como funciona o teste grátis?", a: "7 dias liberados na hora, sem cartão. Depois você escolhe Básico ou Premium." },
-              { q: "Quais as formas de pagamento?", a: "Cartão ou Pix. E você cancela quando quiser." },
-              { q: "Posso colocar a logo do meu negócio?", a: "Pode. Sua página de agendamento fica com a sua marca." },
+              {
+                q: "Preciso instalar algum aplicativo?",
+                a: "Não. Funciona no navegador, no celular ou no computador.",
+              },
+              {
+                q: "Meus clientes precisam criar conta?",
+                a: "Não. Eles só abrem seu link, escolhem o horário e confirmam.",
+              },
+              {
+                q: "Quanto tempo pra começar a usar?",
+                a: "Cerca de 5 minutos: cadastra os serviços, define os horários e pronto.",
+              },
+              {
+                q: "Serve pra estética e detalhamento também?",
+                a: "Sim. Lava-jato, estética automotiva e detalhamento.",
+              },
+              {
+                q: "Como funciona o teste grátis?",
+                a: "7 dias liberados na hora, sem cartão. Depois você escolhe Básico ou Premium.",
+              },
+              {
+                q: "Quais as formas de pagamento?",
+                a: "Cartão ou Pix. E você cancela quando quiser.",
+              },
+              {
+                q: "Posso colocar a logo do meu negócio?",
+                a: "Pode. Sua página de agendamento fica com a sua marca.",
+              },
             ].map((item) => (
               <details
                 key={item.q}
