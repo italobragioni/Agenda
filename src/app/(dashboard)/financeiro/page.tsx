@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FinanceChart, type FinanceBar } from "@/components/ui/finance-chart";
 import { BarChart, type BarDatum } from "@/components/ui/bar-chart";
+import { DonutChart, type DonutSlice } from "@/components/ui/donut-chart";
 import { EntryForm } from "@/features/financials/entry-form";
 import { EntryDeleteButton } from "@/features/financials/entry-delete-button";
 import { hasProAccess } from "@/features/billing/plan";
@@ -97,6 +98,11 @@ export default async function FinanceiroPage({
   const ticket = fatur.count > 0 ? Math.round(fatur.cents / fatur.count) : 0;
 
   const ranking = topServices(completed, tz, daySet);
+  const donutData: DonutSlice[] = ranking.map((r) => ({
+    key: r.name,
+    label: r.name,
+    value: r.cents,
+  }));
   const periodEntries = entries.filter((e) => daySet.has(e.occurred_on));
   const today = localDayString(tz);
 
@@ -204,6 +210,14 @@ export default async function FinanceiroPage({
         ) : (
           <BarChart data={revenueSeries} />
         )}
+      </Card>
+
+      {/* Faturamento por serviço (gráfico de rosca) */}
+      <Card className="mb-6">
+        <h2 className="mb-4 text-sm font-semibold text-foreground">
+          Faturamento por serviço
+        </h2>
+        <DonutChart data={donutData} />
       </Card>
 
       {/* Lançamentos (Premium) ou convite de upgrade (Básico) */}
