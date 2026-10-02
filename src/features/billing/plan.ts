@@ -53,7 +53,8 @@ export function planState(b: PlanFields, now: Date = new Date()): PlanState {
     return {
       active,
       kind: "trial",
-      monthlyLimit: null,
+      // O teste grátis tem a experiência do plano Básico (50/mês), não Premium.
+      monthlyLimit: PLANS.basic.monthlyLimit,
       until,
       daysLeft: until ? daysBetween(now, until) : 0,
       isTrial: true,
@@ -75,11 +76,12 @@ export function planState(b: PlanFields, now: Date = new Date()): PlanState {
 
 /**
  * Acesso aos recursos avançados (ex.: gestão financeira completa):
- * disponível no teste grátis (ativo) e no plano Premium (ativo).
+ * disponível APENAS no plano Premium ativo. O teste grátis tem a experiência
+ * do plano Básico (sem as funções exclusivas do Premium).
  */
 export function hasProAccess(b: PlanFields, now: Date = new Date()): boolean {
   const s = planState(b, now);
-  return s.active && (s.isTrial || s.kind === "premium");
+  return s.active && s.kind === "premium";
 }
 
 function daysBetween(from: Date, to: Date): number {

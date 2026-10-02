@@ -60,7 +60,7 @@ export default async function OnboardingPage({
               Você ganhou 7 dias grátis! 🎉
             </p>
             <p className="text-xs text-muted">
-              Aproveite todos os recursos.{" "}
+              Organize sua agenda e teste o sistema.{" "}
               {trialDays > 0
                 ? `Seu teste termina em ${trialDays} ${trialDays === 1 ? "dia" : "dias"}.`
                 : "Seu teste termina hoje."}
