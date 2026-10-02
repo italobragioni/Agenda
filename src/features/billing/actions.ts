@@ -59,7 +59,7 @@ export async function createCheckoutSession(
     client_reference_id: ctx.business.id,
     metadata: { business_id: ctx.business.id, plan },
     subscription_data: { metadata: { business_id: ctx.business.id, plan } },
-    success_url: `${siteUrl()}/assinatura?sucesso=1`,
+    success_url: `${siteUrl()}/assinatura?sucesso=1&plano=${plan}`,
     cancel_url: `${siteUrl()}/assinatura?cancelado=1`,
     locale: "pt-BR",
   });

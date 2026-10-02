@@ -9,19 +9,22 @@ import { PlanCards } from "@/features/billing/plan-cards";
 import { ManageSubscriptionButton } from "@/features/billing/manage-button";
 import { planState, PLANS } from "@/features/billing/plan";
 import { formatDateBR } from "@/lib/datetime";
+import { TrackSubscribe } from "@/components/analytics/track-subscribe";
 
 export const metadata: Metadata = { title: "Assinatura — Agenda" };
 
 export default async function AssinaturaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sucesso?: string; cancelado?: string }>;
+  searchParams: Promise<{ sucesso?: string; cancelado?: string; plano?: string }>;
 }) {
   const ctx = await getCurrentContext();
   if (!ctx) redirect("/login");
   const tz = ctx.business.timezone;
 
-  const { sucesso, cancelado } = await searchParams;
+  const { sucesso, cancelado, plano } = await searchParams;
+  const subscribedValueCents =
+    plano === "premium" ? PLANS.premium.priceCents : PLANS.basic.priceCents;
   const state = planState(ctx.business);
 
   const planLabel =
@@ -36,9 +39,12 @@ export default async function AssinaturaPage({
       <PageHeader title="Assinatura" description="Escolha o plano ideal." />
 
       {sucesso && (
-        <Alert tone="success">
-          Assinatura confirmada! Pode levar alguns segundos para atualizar.
-        </Alert>
+        <>
+          <TrackSubscribe valueCents={subscribedValueCents} plan={plano ?? "basic"} />
+          <Alert tone="success">
+            Assinatura confirmada! Pode levar alguns segundos para atualizar.
+          </Alert>
+        </>
       )}
       {cancelado && (
         <Alert tone="info">Pagamento cancelado. Você pode tentar de novo.</Alert>

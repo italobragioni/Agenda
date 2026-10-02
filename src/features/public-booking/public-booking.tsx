@@ -14,6 +14,7 @@ import { formatCents } from "@/lib/money";
 import { formatDateBR, formatTimeBR, WEEKDAY_LABELS } from "@/lib/datetime";
 import { whatsappLink } from "@/lib/phone";
 import { buildIcs, icsDataUrl } from "@/lib/ics";
+import { trackMeta } from "@/components/analytics/meta-pixel";
 
 interface Service {
   id: string;
@@ -114,6 +115,12 @@ export function PublicBooking({
     if (res.ok && res.booking) {
       setResult(res.booking);
       setStep("success");
+      // Evento de conversão: cliente concluiu um agendamento.
+      trackMeta("Schedule", {
+        currency: "BRL",
+        value: res.booking.priceCents / 100,
+        content_name: res.booking.serviceName,
+      });
     } else {
       setError(res.error ?? "Não foi possível concluir.");
       // Se o horário foi ocupado, volta para escolher outro.
