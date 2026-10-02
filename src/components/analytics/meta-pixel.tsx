@@ -3,6 +3,19 @@ import Script from "next/script";
 /** ID do Meta (Facebook) Pixel. */
 export const META_PIXEL_ID = "1430296232575065";
 
+declare global {
+  interface Window {
+    fbq?: (...args: unknown[]) => void;
+  }
+}
+
+/** Dispara um evento padrão do Meta Pixel, se já estiver carregado. */
+export function trackMeta(event: string, params?: Record<string, unknown>) {
+  if (typeof window !== "undefined" && typeof window.fbq === "function") {
+    window.fbq("track", event, params);
+  }
+}
+
 /**
  * Meta Pixel — rastreamento de conversões (campanhas no Facebook/Instagram).
  * Carrega o script base e dispara um PageView inicial.

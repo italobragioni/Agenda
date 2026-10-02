@@ -147,7 +147,9 @@ export async function signup(
     redirect("/login");
   }
 
-  redirect("/onboarding");
+  // ?novo=1 marca o cadastro recém-concluído para disparar o evento
+  // "Concluir inscrição" (CompleteRegistration) no Meta Pixel.
+  redirect("/onboarding?novo=1");
 }
 
 // ---------------------------------------------------------------------
