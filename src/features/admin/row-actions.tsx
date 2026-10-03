@@ -1,8 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import { Loader2, Crown, RotateCcw } from "lucide-react";
-import { grantPremium, restartTrial } from "./actions";
+import { Loader2, Crown, RotateCcw, Tag } from "lucide-react";
+import { grantPremium, grantBasic, restartTrial } from "./actions";
 
 export function AdminRowActions({ businessId }: { businessId: string }) {
   const [pending, start] = useTransition();
@@ -20,6 +20,17 @@ export function AdminRowActions({ businessId }: { businessId: string }) {
         className="tap inline-flex items-center gap-1 rounded-lg bg-brand-soft px-2.5 py-1.5 text-xs font-medium text-brand hover:bg-blue-100 disabled:opacity-50"
       >
         <Crown className="h-3.5 w-3.5" /> Premium
+      </button>
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() => {
+          if (window.confirm("Definir este estabelecimento como plano Básico (de cortesia)?"))
+            start(() => grantBasic(businessId));
+        }}
+        className="tap inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200 disabled:opacity-50"
+      >
+        <Tag className="h-3.5 w-3.5" /> Básico
       </button>
       <button
         type="button"

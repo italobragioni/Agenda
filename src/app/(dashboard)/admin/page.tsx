@@ -11,6 +11,7 @@ import { planStatusText } from "@/features/billing/plan-status";
 import { planState, PLANS } from "@/features/billing/plan";
 import { formatCents } from "@/lib/money";
 import { formatDateBR } from "@/lib/datetime";
+import { formatPhone, whatsappLink } from "@/lib/phone";
 import type { Business } from "@/types/database";
 
 export const metadata: Metadata = { title: "Administrador — Carvi" };
@@ -28,7 +29,7 @@ export default async function AdminPage() {
       admin
         .from("businesses")
         .select(
-          "id, name, slug, plan, trial_ends_at, paid_until, created_at",
+          "id, name, slug, phone, whatsapp, plan, trial_ends_at, paid_until, created_at",
         )
         .order("created_at", { ascending: false }),
       admin.from("profiles").select("id, business_id"),
@@ -100,6 +101,7 @@ export default async function AdminPage() {
         <ul className="space-y-2">
           {businesses.map((b) => {
             const st = planStatusText(b);
+            const tel = b.whatsapp || b.phone;
             return (
               <li key={b.id}>
                 <Card className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
@@ -109,6 +111,20 @@ export default async function AdminPage() {
                     </p>
                     <p className="truncate text-xs text-muted">
                       {bizEmail.get(b.id) ?? "—"} · /{b.slug}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted">
+                      {tel ? (
+                        <a
+                          href={whatsappLink(tel)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-brand hover:underline"
+                        >
+                          {formatPhone(tel)}
+                        </a>
+                      ) : (
+                        "Sem telefone"
+                      )}
                     </p>
                     <p className="mt-0.5 text-xs text-muted">
                       Cadastro: {formatDateBR(b.created_at, tz)}

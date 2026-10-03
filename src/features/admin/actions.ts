@@ -25,6 +25,17 @@ export async function grantPremium(businessId: string) {
   revalidatePath("/admin");
 }
 
+/** Libera Básico de cortesia (sem expiração) para um estabelecimento. */
+export async function grantBasic(businessId: string) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  await admin
+    .from("businesses")
+    .update({ plan: "basic", paid_until: FAR_FUTURE })
+    .eq("id", businessId);
+  revalidatePath("/admin");
+}
+
 /** Estende (ou reinicia) o teste grátis por 7 dias a partir de agora. */
 export async function restartTrial(businessId: string) {
   await requireAdmin();
