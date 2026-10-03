@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentContext } from "@/features/auth/current";
 import { isAdminEmail } from "@/features/admin/config";
@@ -106,9 +108,13 @@ export default async function AdminPage() {
               <li key={b.id}>
                 <Card className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-foreground">
-                      {b.name}
-                    </p>
+                    <Link
+                      href={`/admin/${b.id}`}
+                      className="tap inline-flex max-w-full items-center gap-1 truncate text-sm font-semibold text-foreground hover:text-brand"
+                    >
+                      <span className="truncate">{b.name}</span>
+                      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted" />
+                    </Link>
                     <p className="truncate text-xs text-muted">
                       {bizEmail.get(b.id) ?? "—"} · /{b.slug}
                     </p>
