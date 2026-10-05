@@ -14,6 +14,7 @@ import { planState, PLANS } from "@/features/billing/plan";
 import { formatCents } from "@/lib/money";
 import { formatDateBR } from "@/lib/datetime";
 import { formatPhone, whatsappLink } from "@/lib/phone";
+import { onboardingWhatsappMessage } from "@/lib/support";
 import type { Business } from "@/types/database";
 
 export const metadata: Metadata = { title: "Administrador — Carvi" };
@@ -34,20 +35,26 @@ export default async function AdminPage() {
           "id, name, slug, phone, whatsapp, plan, trial_ends_at, paid_until, created_at",
         )
         .order("created_at", { ascending: false }),
-      admin.from("profiles").select("id, business_id"),
+      admin.from("profiles").select("id, business_id, full_name"),
       admin.auth.admin.listUsers({ perPage: 1000 }),
     ]);
 
   const businesses = (businessesData ?? []) as Business[];
-  const profiles = (profilesData ?? []) as { id: string; business_id: string }[];
+  const profiles = (profilesData ?? []) as {
+    id: string;
+    business_id: string;
+    full_name: string | null;
+  }[];
 
-  // Mapa business_id -> email do dono.
+  // Mapa business_id -> email e nome do dono.
   const userEmail = new Map<string, string>();
   for (const u of usersRes.data?.users ?? []) {
     if (u.id && u.email) userEmail.set(u.id, u.email);
   }
   const bizEmail = new Map<string, string>();
+  const bizOwnerName = new Map<string, string | null>();
   for (const p of profiles) {
+    bizOwnerName.set(p.business_id, p.full_name);
     const email = userEmail.get(p.id);
     if (email) bizEmail.set(p.business_id, email);
   }
@@ -121,7 +128,10 @@ export default async function AdminPage() {
                     <p className="mt-0.5 text-xs text-muted">
                       {tel ? (
                         <a
-                          href={whatsappLink(tel)}
+                          href={whatsappLink(
+                            tel,
+                            onboardingWhatsappMessage(bizOwnerName.get(b.id)),
+                          )}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="font-medium text-brand hover:underline"

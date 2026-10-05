@@ -22,6 +22,7 @@ import { planStatusText } from "@/features/billing/plan-status";
 import { formatCents } from "@/lib/money";
 import { formatDateBR } from "@/lib/datetime";
 import { formatPhone, whatsappLink } from "@/lib/phone";
+import { onboardingWhatsappMessage } from "@/lib/support";
 import type { Business, Service, Appointment } from "@/types/database";
 
 export const metadata: Metadata = { title: "Detalhes — Carvi" };
@@ -150,7 +151,10 @@ export default async function AdminBusinessDetailPage({
           <Users className="h-4 w-4 shrink-0 text-muted" />
           {tel ? (
             <a
-              href={whatsappLink(tel)}
+              href={whatsappLink(
+                tel,
+                onboardingWhatsappMessage(profileData?.full_name),
+              )}
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-brand hover:underline"
