@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Check,
   X,
@@ -8,7 +9,6 @@ import {
   ShieldCheck,
   Users,
   Smartphone,
-  Clock,
   Sparkles,
   MessageSquareOff,
   ArrowRight,
@@ -40,6 +40,35 @@ function Eyebrow({ children }: { children: string }) {
   );
 }
 
+/** Moldura de celular com um screenshot real do app. */
+function PhoneShot({
+  src,
+  alt,
+  priority = false,
+  className = "",
+}: {
+  src: string;
+  alt: string;
+  priority?: boolean;
+  className?: string;
+}) {
+  return (
+    <div className={`mx-auto w-[230px] sm:w-[250px] ${className}`}>
+      <div className="rounded-[2.4rem] border-[9px] border-slate-900 bg-slate-900 shadow-2xl">
+        <Image
+          src={src}
+          alt={alt}
+          width={1050}
+          height={2532}
+          priority={priority}
+          className="block h-auto w-full rounded-[1.7rem]"
+          sizes="250px"
+        />
+      </div>
+    </div>
+  );
+}
+
 function PrimaryCta({ children = "Começar grátis" }: { children?: string }) {
   return (
     <Link href={CTA_HREF}>
@@ -51,153 +80,47 @@ function PrimaryCta({ children = "Começar grátis" }: { children?: string }) {
   );
 }
 
-/* ============================================================
-   MOCKUPS — telas do app desenhadas (sem precisar de fotos reais)
-   ============================================================ */
-
-/** Moldura de celular reutilizável. */
-function Phone({
-  children,
-  className = "",
+/** Linha de funcionalidade: screenshot real + texto, alternando o lado. */
+function FeatureRow({
+  src,
+  alt,
+  eyebrow,
+  title,
+  description,
+  points,
+  reverse = false,
 }: {
-  children: React.ReactNode;
-  className?: string;
+  src: string;
+  alt: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+  points: string[];
+  reverse?: boolean;
 }) {
   return (
-    <div className={`relative w-[250px] ${className}`}>
-      <div className="rounded-[2.2rem] border-[10px] border-slate-900 bg-white shadow-2xl">
-        <div className="overflow-hidden rounded-[1.5rem]">{children}</div>
+    <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
+      <div className={reverse ? "lg:order-2" : ""}>
+        <Eyebrow>{eyebrow}</Eyebrow>
+        <h3 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          {title}
+        </h3>
+        <p className="mt-3 text-muted">{description}</p>
+        <ul className="mt-5 space-y-2.5">
+          {points.map((p) => (
+            <li key={p} className="flex items-start gap-2.5 text-sm text-foreground">
+              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand">
+                <Check className="h-3.5 w-3.5" />
+              </span>
+              {p}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className={reverse ? "lg:order-1" : ""}>
+        <PhoneShot src={src} alt={alt} />
       </div>
     </div>
-  );
-}
-
-/** Tela 1: página pública de agendamento (o que o cliente vê). */
-function BookingMockup() {
-  return (
-    <Phone>
-      <div className="flex flex-col items-center gap-1 bg-slate-50 px-4 pb-3 pt-6">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-xs font-bold text-white">
-          EP
-        </span>
-        <p className="text-sm font-semibold text-foreground">Estética Premium</p>
-        <p className="text-[11px] text-muted">Agende seu horário</p>
-      </div>
-      <div className="space-y-2 px-4 py-3">
-        <div className="flex items-center justify-between rounded-xl border border-brand bg-brand-soft px-3 py-2">
-          <div>
-            <p className="text-xs font-semibold text-foreground">
-              Lavagem Completa
-            </p>
-            <p className="text-[10px] text-muted">60 min</p>
-          </div>
-          <span className="text-xs font-bold text-brand">R$ 80</span>
-        </div>
-        <div className="grid grid-cols-4 gap-1.5 pt-1">
-          {["09:00", "10:00", "11:00", "14:00"].map((h, i) => (
-            <span
-              key={h}
-              className={
-                i === 1
-                  ? "rounded-md bg-brand py-1 text-center text-[10px] font-semibold text-white"
-                  : "rounded-md border border-border py-1 text-center text-[10px] text-foreground"
-              }
-            >
-              {h}
-            </span>
-          ))}
-        </div>
-        <div className="mt-1 rounded-lg bg-brand py-2 text-center text-[11px] font-semibold text-white">
-          Confirmar agendamento
-        </div>
-      </div>
-    </Phone>
-  );
-}
-
-/** Tela 2: agenda do dono (o que você vê no painel). */
-function AgendaMockup() {
-  const items = [
-    { h: "09:00", s: "Lavagem Completa", c: "João · Civic", on: true },
-    { h: "10:00", s: "Polimento", c: "Marcos · HB20", on: true },
-    { h: "11:00", s: "Higienização", c: "Ana · Corolla", on: false },
-    { h: "14:00", s: "Lavagem Simples", c: "Rafa · Onix", on: true },
-  ];
-  return (
-    <Phone>
-      <div className="bg-slate-50 px-4 pb-2 pt-6">
-        <p className="text-[11px] font-medium text-muted">Hoje, {YEAR}</p>
-        <p className="text-sm font-bold text-foreground">Sua agenda</p>
-      </div>
-      <div className="space-y-1.5 px-3 py-3">
-        {items.map((it) => (
-          <div
-            key={it.h}
-            className="flex items-center gap-2 rounded-xl border border-border bg-white px-2.5 py-2"
-          >
-            <span className="w-9 shrink-0 text-[11px] font-bold text-brand">
-              {it.h}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[11px] font-semibold text-foreground">
-                {it.s}
-              </p>
-              <p className="truncate text-[10px] text-muted">{it.c}</p>
-            </div>
-            <span
-              className={
-                it.on
-                  ? "flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"
-                  : "flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 text-amber-600"
-              }
-            >
-              {it.on ? (
-                <Check className="h-3 w-3" />
-              ) : (
-                <Clock className="h-3 w-3" />
-              )}
-            </span>
-          </div>
-        ))}
-      </div>
-    </Phone>
-  );
-}
-
-/** Tela 3: financeiro (faturamento e lucro). */
-function FinanceMockup() {
-  const bars = [40, 65, 30, 80, 55, 95, 70];
-  return (
-    <Phone>
-      <div className="bg-slate-50 px-4 pb-2 pt-6">
-        <p className="text-[11px] font-medium text-muted">Este mês</p>
-        <p className="text-sm font-bold text-foreground">Financeiro</p>
-      </div>
-      <div className="space-y-3 px-3 py-3">
-        <div className="grid grid-cols-2 gap-1.5">
-          <div className="rounded-xl border border-border bg-white px-2.5 py-2">
-            <p className="text-[9px] font-medium text-muted">Faturamento</p>
-            <p className="text-[13px] font-bold text-foreground">R$ 8.420</p>
-          </div>
-          <div className="rounded-xl border border-border bg-white px-2.5 py-2">
-            <p className="text-[9px] font-medium text-muted">Lucro</p>
-            <p className="text-[13px] font-bold text-emerald-600">R$ 5.180</p>
-          </div>
-        </div>
-        <div className="rounded-xl border border-border bg-white p-2.5">
-          <p className="mb-2 text-[9px] font-medium text-muted">Por dia</p>
-          <div className="flex h-16 items-end justify-between gap-1">
-            {bars.map((h, i) => (
-              <span
-                key={i}
-                className="flex-1 rounded-t bg-brand"
-                style={{ height: `${h}%` }}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    </Phone>
   );
 }
 
@@ -257,12 +180,16 @@ export default function Home() {
             </div>
           </div>
           <div className="flex justify-center lg:justify-end">
-            <BookingMockup />
+            <PhoneShot
+              src="/app/agendar.png"
+              alt="Tela de agendamento da Carvi no celular"
+              priority
+            />
           </div>
         </div>
       </section>
 
-      {/* NÚMEROS / FAIXA DE CONFIANÇA */}
+      {/* NÚMEROS */}
       <section className="border-y border-border bg-slate-950">
         <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 px-4 py-8 sm:grid-cols-4">
           {[
@@ -311,6 +238,104 @@ export default function Home() {
         </ul>
       </section>
 
+      {/* FUNCIONALIDADES (screenshots reais do app) */}
+      <section className="bg-slate-50 px-4 py-16">
+        <div className="mx-auto max-w-2xl text-center">
+          <Eyebrow>Por dentro do app</Eyebrow>
+          <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Veja como é simples na prática
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-muted">
+            Telas reais do aplicativo. Feito pra funcionar no celular, mesmo pra
+            quem não é de tecnologia.
+          </p>
+        </div>
+
+        <div className="mx-auto mt-14 max-w-5xl space-y-16 sm:space-y-24">
+          <FeatureRow
+            src="/app/agendar.png"
+            alt="Página pública de agendamento da Carvi"
+            eyebrow="Para seus clientes"
+            title="Seus clientes agendam sozinhos"
+            description="Você compartilha um link com a sua marca. O cliente escolhe o serviço, vê só os horários livres e confirma — 24 horas por dia, sem instalar nada e sem criar conta."
+            points={[
+              "Link próprio com a logo do seu negócio",
+              "Mostra apenas os horários realmente disponíveis",
+              "Confirmação na hora, direto pelo celular",
+            ]}
+          />
+          <FeatureRow
+            src="/app/agenda.png"
+            alt="Tela da agenda do dono no app da Carvi"
+            eyebrow="Sua rotina"
+            title="Toda a sua agenda organizada"
+            description="Veja os atendimentos do dia, de amanhã e da semana numa tela só. Cada carro com horário, serviço, valor e status — e o sistema bloqueia dois agendamentos no mesmo horário sozinho."
+            points={[
+              "Hoje, amanhã e semana num toque",
+              "Status de cada atendimento (agendado, em atendimento, finalizado)",
+              "Fale com o cliente no WhatsApp em um clique",
+            ]}
+            reverse
+          />
+          <FeatureRow
+            src="/app/financeiro.png"
+            alt="Tela do financeiro com gráfico no app da Carvi"
+            eyebrow="Seu dinheiro"
+            title="Saiba exatamente quanto você lucra"
+            description="Faturamento, despesas e lucro na palma da mão, com gráfico de faturamento por serviço. Descubra quais serviços dão mais retorno e exporte tudo em planilha."
+            points={[
+              "Faturamento, despesas e lucro por período",
+              "Gráfico de faturamento por serviço",
+              "Exportação em planilha (Excel)",
+            ]}
+          />
+        </div>
+
+        <div className="mt-14 text-center">
+          <PrimaryCta>Testar grátis por 7 dias</PrimaryCta>
+        </div>
+      </section>
+
+      {/* COMO FUNCIONA */}
+      <section className="px-4 py-16">
+        <div className="mx-auto max-w-2xl text-center">
+          <Eyebrow>Como começar</Eyebrow>
+          <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Pronto em 3 passos
+          </h2>
+        </div>
+        <div className="mx-auto mt-10 grid max-w-3xl gap-4 sm:grid-cols-3">
+          {[
+            {
+              icon: Sparkles,
+              t: "1. Crie sua conta",
+              d: "Cadastre serviços e horários em minutos.",
+            },
+            {
+              icon: Link2,
+              t: "2. Compartilhe o link",
+              d: "No status, na bio ou no grupo.",
+            },
+            {
+              icon: CalendarClock,
+              t: "3. Receba agendamentos",
+              d: "Sua agenda enche sozinha, sem furo.",
+            },
+          ].map((s) => (
+            <div
+              key={s.t}
+              className="rounded-2xl border border-border bg-card p-6 text-center shadow-sm"
+            >
+              <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-brand-foreground">
+                <s.icon className="h-6 w-6" />
+              </span>
+              <p className="mt-4 text-sm font-semibold text-foreground">{s.t}</p>
+              <p className="mt-1 text-sm text-muted">{s.d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ANTES × DEPOIS */}
       <section className="bg-slate-50 px-4 py-16">
         <div className="mx-auto max-w-2xl text-center">
@@ -320,7 +345,6 @@ export default function Home() {
           </h2>
         </div>
         <div className="mx-auto mt-10 grid max-w-3xl gap-5 sm:grid-cols-2">
-          {/* Antes */}
           <div className="rounded-3xl border border-border bg-card p-6">
             <p className="inline-flex items-center gap-2 text-sm font-semibold text-red-600">
               <X className="h-4 w-4" /> Sem a Carvi
@@ -339,7 +363,6 @@ export default function Home() {
               ))}
             </ul>
           </div>
-          {/* Depois */}
           <div className="rounded-3xl border border-brand/30 bg-brand-soft p-6">
             <p className="inline-flex items-center gap-2 text-sm font-semibold text-brand">
               <Check className="h-4 w-4" /> Com a Carvi
@@ -348,7 +371,7 @@ export default function Home() {
               {[
                 "Cliente agenda sozinho pelo seu link",
                 "Agenda organizada e sincronizada",
-                "Atende 24h, até quando a loja está fechada",
+                "Atende 24h, até com a loja fechada",
                 "Faturamento e lucro na tela, em tempo real",
               ].map((t) => (
                 <li key={t} className="flex items-start gap-2.5">
@@ -358,95 +381,6 @@ export default function Home() {
               ))}
             </ul>
           </div>
-        </div>
-      </section>
-
-      {/* SOLUÇÃO / COMO FUNCIONA */}
-      <section className="px-4 py-16">
-        <div className="mx-auto max-w-2xl text-center">
-          <Eyebrow>Como funciona</Eyebrow>
-          <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Sua agenda trabalhando sozinha
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-muted">
-            Você ganha um link próprio com a sua logo. O cliente escolhe o
-            serviço, vê só os horários livres e confirma. O sistema{" "}
-            <strong className="text-foreground">
-              bloqueia conflito de horário sozinho
-            </strong>{" "}
-            — nada de dois carros no mesmo box.
-          </p>
-        </div>
-        <div className="mx-auto mt-10 grid max-w-3xl gap-4 sm:grid-cols-3">
-          {[
-            {
-              icon: Link2,
-              t: "1. Compartilhe o link",
-              d: "No status, na bio ou no grupo.",
-            },
-            {
-              icon: CalendarClock,
-              t: "2. Cliente agenda",
-              d: "Sozinho, 24h, sem baixar app.",
-            },
-            {
-              icon: Check,
-              t: "3. Agenda organizada",
-              d: "Sem furo, sem conflito.",
-            },
-          ].map((s) => (
-            <div
-              key={s.t}
-              className="rounded-2xl border border-border bg-card p-6 text-center shadow-sm"
-            >
-              <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-brand-foreground">
-                <s.icon className="h-6 w-6" />
-              </span>
-              <p className="mt-4 text-sm font-semibold text-foreground">{s.t}</p>
-              <p className="mt-1 text-sm text-muted">{s.d}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* VITRINE DE TELAS */}
-      <section className="overflow-hidden bg-slate-950 px-4 py-16">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-300">
-            Por dentro do app
-          </span>
-          <h2 className="mt-4 text-2xl font-bold tracking-tight text-white sm:text-3xl">
-            Tudo no seu celular, simples de usar
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-slate-400">
-            Da página que o cliente vê até o seu financeiro. Feito pra quem não
-            tem tempo a perder.
-          </p>
-        </div>
-        <div className="mx-auto mt-12 grid max-w-4xl items-start gap-10 sm:grid-cols-3 sm:gap-6">
-          {[
-            {
-              mock: <BookingMockup />,
-              t: "Página de agendamento",
-              d: "Seu link com a sua marca. O cliente marca em segundos.",
-            },
-            {
-              mock: <AgendaMockup />,
-              t: "Sua agenda do dia",
-              d: "Todos os horários e carros organizados numa tela.",
-            },
-            {
-              mock: <FinanceMockup />,
-              t: "Financeiro completo",
-              d: "Faturamento, despesas e lucro sempre à mão.",
-            },
-          ].map((c) => (
-            <div key={c.t} className="flex flex-col items-center text-center">
-              <div className="scale-90 sm:scale-100">{c.mock}</div>
-              <p className="mt-5 text-sm font-semibold text-white">{c.t}</p>
-              <p className="mt-1 max-w-[220px] text-xs text-slate-400">{c.d}</p>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -481,11 +415,6 @@ export default function Home() {
               d: "Diga quantos carros lava ao mesmo tempo.",
             },
             {
-              icon: Sparkles,
-              t: "Sua marca na frente",
-              d: "Página de agendamento com a sua logo.",
-            },
-            {
               icon: TrendingUp,
               t: "Saiba seu lucro",
               d: "Faturamento, despesas e lucro na tela.",
@@ -494,6 +423,11 @@ export default function Home() {
               icon: Users,
               t: "Clientes organizados",
               d: "Histórico e WhatsApp de cada um.",
+            },
+            {
+              icon: Sparkles,
+              t: "Sua marca na frente",
+              d: "Página de agendamento com a sua logo.",
             },
             {
               icon: Smartphone,
@@ -723,7 +657,7 @@ export default function Home() {
         </Link>
       </div>
 
-      {/* BOTÃO FLUTUANTE DO WHATSAPP (acima da barra fixa no celular) */}
+      {/* BOTÃO FLUTUANTE DO WHATSAPP */}
       <a
         href={SUPPORT_WHATSAPP_URL}
         target="_blank"
