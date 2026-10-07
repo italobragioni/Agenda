@@ -12,6 +12,6 @@ export function onboardingWhatsappMessage(fullName?: string | null): string {
     `${saudacao} Aqui é o Ítalo, criador da Carvi 👋\n\n` +
     "Vi que você começou a testar a plataforma e queria saber como está sendo sua experiência até agora. Conseguiu configurar sua agenda e cadastrar seus serviços direitinho?\n\n" +
     "Se tiver qualquer dúvida ou sentir falta de alguma coisa, pode me falar por aqui mesmo. Quero acompanhar de perto quem está começando a usar a Carvi e ajudar no que precisar. 🚗💙\n\n" +
-    "Aproveita bem esses 7 dias grátis e depois me conta o que achou!"
+    "Qualquer coisa, é só me chamar por aqui!"
   );
 }

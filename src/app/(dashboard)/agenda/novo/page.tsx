@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getCurrentContext } from "@/features/auth/current";
+import { requireActiveBusiness } from "@/features/billing/guard";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
@@ -11,7 +11,7 @@ import type { Service } from "@/types/database";
 export const metadata: Metadata = { title: "Novo agendamento — Agenda" };
 
 export default async function NovoAgendamentoPage() {
-  const ctx = await getCurrentContext();
+  const ctx = await requireActiveBusiness();
   if (!ctx) redirect("/login");
 
   const supabase = await createClient();

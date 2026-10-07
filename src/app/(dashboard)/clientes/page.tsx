@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Users, ChevronRight, MessageCircle } from "lucide-react";
-import { getCurrentContext } from "@/features/auth/current";
+import { requireActiveBusiness } from "@/features/billing/guard";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -21,7 +21,7 @@ export default async function ClientesPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
-  const ctx = await getCurrentContext();
+  const ctx = await requireActiveBusiness();
   if (!ctx) redirect("/login");
 
   const { q } = await searchParams;

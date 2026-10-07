@@ -9,7 +9,7 @@ import {
   Image as ImageIcon,
   Boxes,
 } from "lucide-react";
-import { getCurrentContext } from "@/features/auth/current";
+import { requireActiveBusiness } from "@/features/billing/guard";
 import { capabilitiesFor } from "@/features/billing/plan";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
@@ -59,7 +59,7 @@ function LockedNote({ children }: { children: string }) {
 }
 
 export default async function ConfiguracoesPage() {
-  const ctx = await getCurrentContext();
+  const ctx = await requireActiveBusiness();
   if (!ctx) redirect("/login");
   const tz = ctx.business.timezone;
   const caps = capabilitiesFor(ctx.business);

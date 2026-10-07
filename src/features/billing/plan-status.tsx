@@ -21,16 +21,9 @@ export function planStatusText(business: PlanFields): StatusText {
 
   if (!state.active) {
     return {
-      title: "Acesso expirado",
-      detail: "Assine para continuar",
+      title: "Sem assinatura ativa",
+      detail: "Escolha um plano",
       tone: "danger",
-    };
-  }
-  if (state.isTrial) {
-    return {
-      title: "Teste grátis",
-      detail: daysLabel(state.daysLeft),
-      tone: state.daysLeft <= 3 ? "warn" : "brand",
     };
   }
   return {

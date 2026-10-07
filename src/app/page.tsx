@@ -26,7 +26,7 @@ import { SUPPORT_WHATSAPP_URL } from "@/lib/support";
 export const metadata: Metadata = {
   title: "Carvi — Agendamento online para lava-jato e estética automotiva",
   description:
-    "Seus clientes agendam sozinhos, 24h, por um link. Agenda organizada, sem furos e sem WhatsApp lotado. Teste 7 dias grátis, sem cartão.",
+    "Seus clientes agendam sozinhos, 24h, por um link. Agenda organizada, sem furos e sem WhatsApp lotado. Planos a partir de R$ 19,90/mês.",
 };
 
 const CTA_HREF = "/cadastro";
@@ -69,7 +69,7 @@ function PhoneShot({
   );
 }
 
-function PrimaryCta({ children = "Começar grátis" }: { children?: string }) {
+function PrimaryCta({ children = "Criar minha conta" }: { children?: string }) {
   return (
     <Link href={CTA_HREF}>
       <Button size="lg" fullWidth className="sm:w-auto">
@@ -139,7 +139,7 @@ export default function Home() {
               Entrar
             </Link>
             <Link href={CTA_HREF} className="hidden sm:block">
-              <Button size="sm">Começar grátis</Button>
+              <Button size="sm">Criar conta</Button>
             </Link>
           </div>
         </div>
@@ -162,16 +162,16 @@ export default function Home() {
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-base text-muted sm:text-lg lg:mx-0">
               A Carvi organiza seus agendamentos e deixa seus clientes marcarem
-              online, 24 horas por dia. Comece grátis por 7 dias — sem cartão.
+              online, 24 horas por dia. Planos a partir de R$ 19,90/mês — cancele quando quiser.
             </p>
             <div className="mt-8 flex flex-col items-center gap-3 lg:items-start">
               <PrimaryCta>Quero minha agenda cheia</PrimaryCta>
               <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted lg:justify-start">
                 <span className="inline-flex items-center gap-1">
-                  <Check className="h-3.5 w-3.5 text-brand" /> 7 dias grátis
+                  <Check className="h-3.5 w-3.5 text-brand" /> Sem fidelidade
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <Check className="h-3.5 w-3.5 text-brand" /> Sem cartão
+                  <Check className="h-3.5 w-3.5 text-brand" /> Cartão ou Pix
                 </span>
                 <span className="inline-flex items-center gap-1">
                   <Check className="h-3.5 w-3.5 text-brand" /> Pronto em 5 min
@@ -292,7 +292,7 @@ export default function Home() {
         </div>
 
         <div className="mt-14 text-center">
-          <PrimaryCta>Testar grátis por 7 dias</PrimaryCta>
+          <PrimaryCta>Criar minha conta</PrimaryCta>
         </div>
       </section>
 
@@ -496,7 +496,7 @@ export default function Home() {
                       ))}
                     </ul>
                     <Link href={CTA_HREF} className="mt-6">
-                      <Button fullWidth>Testar 7 dias grátis</Button>
+                      <Button fullWidth>Assinar {plan.name}</Button>
                     </Link>
                   </div>
                 </div>
@@ -525,7 +525,7 @@ export default function Home() {
                   </ul>
                   <Link href={CTA_HREF} className="mt-6">
                     <Button variant="secondary" fullWidth>
-                      Começar grátis
+                      Assinar {plan.name}
                     </Button>
                   </Link>
                 </div>
@@ -533,7 +533,7 @@ export default function Home() {
             })}
           </div>
           <p className="mt-6 text-xs text-muted">
-            Sem cartão no teste • Pagamento por cartão ou Pix depois
+            Pagamento por cartão ou Pix • Cancele quando quiser
           </p>
         </div>
       </section>
@@ -544,12 +544,12 @@ export default function Home() {
           <ShieldCheck className="h-10 w-10 shrink-0 text-brand" aria-hidden />
           <div>
             <h2 className="text-lg font-bold text-foreground sm:text-xl">
-              Teste sem risco nenhum
+              Sem fidelidade e sem complicação
             </h2>
             <p className="mt-1.5 text-sm text-muted">
-              7 dias grátis, sem pedir cartão. Você usa a Carvi com seus
-              clientes de verdade antes de pagar qualquer centavo. Só continua
-              se fizer sentido pro seu negócio.
+              Você assina por mês e cancela a renovação quando quiser. Pagamento
+              seguro por cartão ou Pix, e o acesso é liberado na hora após a
+              confirmação.
             </p>
           </div>
         </div>
@@ -583,12 +583,12 @@ export default function Home() {
                 a: "Sim. Lava-jato, estética automotiva e detalhamento.",
               },
               {
-                q: "Como funciona o teste grátis?",
-                a: "7 dias liberados na hora, sem cartão. Depois você escolhe Básico ou Premium.",
+                q: "Preciso pagar para usar?",
+                a: "Sim. Você cria a conta e escolhe um plano (a partir de R$ 19,90/mês). O acesso é liberado assim que o pagamento é confirmado.",
               },
               {
                 q: "Quais as formas de pagamento?",
-                a: "Cartão ou Pix. E você cancela quando quiser.",
+                a: "Cartão ou Pix, pela Cakto. A assinatura é mensal e você cancela a renovação quando quiser.",
               },
               {
                 q: "Posso colocar a logo do meu negócio?",
@@ -628,12 +628,12 @@ export default function Home() {
           <div className="mt-8 flex flex-col items-center gap-3">
             <Link href={CTA_HREF}>
               <Button size="lg">
-                Começar grátis por 7 dias
+                Criar minha conta
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Button>
             </Link>
             <p className="text-xs text-slate-400">
-              Sem cartão • Pronto em 5 minutos • Cancela quando quiser
+              Cartão ou Pix • Pronto em 5 minutos • Cancele quando quiser
             </p>
             <a
               href={SUPPORT_WHATSAPP_URL}
@@ -667,7 +667,7 @@ export default function Home() {
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-white/95 p-3 backdrop-blur sm:hidden">
         <Link href={CTA_HREF}>
           <Button fullWidth size="lg">
-            Começar grátis por 7 dias
+            Criar minha conta
           </Button>
         </Link>
       </div>

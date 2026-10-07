@@ -20,19 +20,21 @@ import type { Business } from "@/types/database";
 
 export const metadata: Metadata = { title: "Administrador — Carvi" };
 
-type Filter = "todos" | "assinantes" | "teste" | "expirados";
+type Filter = "todos" | "assinantes" | "expirados";
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: "todos", label: "Todos" },
   { key: "assinantes", label: "Assinantes" },
-  { key: "teste", label: "Em teste" },
-  { key: "expirados", label: "Expirados" },
+  { key: "expirados", label: "Sem acesso" },
 ];
 
-/** Assinante de verdade: plano pago ativo com assinatura no Stripe. */
+/** Assinante de verdade: plano pago ativo com assinatura confirmada (Cakto). */
 function isPaidSubscriber(b: Business, now: Date): boolean {
   const st = planState(b, now);
-  return st.active && !st.isTrial && !!b.stripe_subscription_id;
+  return (
+    st.active &&
+    (!!b.cakto_subscription_id || b.subscription_status === "active")
+  );
 }
 
 export default async function AdminPage({
@@ -46,9 +48,7 @@ export default async function AdminPage({
 
   const { f } = await searchParams;
   const filter: Filter =
-    f === "assinantes" || f === "teste" || f === "expirados"
-      ? (f as Filter)
-      : "todos";
+    f === "assinantes" || f === "expirados" ? (f as Filter) : "todos";
 
   const admin = createAdminClient();
   const tz = ctx.business.timezone;
@@ -58,7 +58,7 @@ export default async function AdminPage({
       admin
         .from("businesses")
         .select(
-          "id, name, slug, phone, whatsapp, plan, trial_ends_at, paid_until, stripe_subscription_id, created_at, updated_at",
+          "id, name, slug, phone, whatsapp, plan, trial_ends_at, paid_until, cakto_subscription_id, subscription_status, created_at, updated_at",
         )
         .order("created_at", { ascending: false }),
       admin.from("profiles").select("id, business_id, full_name"),
@@ -87,14 +87,12 @@ export default async function AdminPage({
 
   // Estatísticas.
   const now = new Date();
-  let emTeste = 0;
-  let expirados = 0;
+  let semAcesso = 0;
   let assinantes = 0;
   let mrrCents = 0;
   for (const b of businesses) {
     const st = planState(b, now);
-    if (!st.active) expirados += 1;
-    else if (st.isTrial) emTeste += 1;
+    if (!st.active) semAcesso += 1;
     else if (b.plan !== "trial") {
       mrrCents += PLANS[b.plan].priceCents;
     }
@@ -104,8 +102,7 @@ export default async function AdminPage({
   const stats = [
     { label: "Cadastros", value: String(businesses.length) },
     { label: "Assinantes", value: String(assinantes) },
-    { label: "Em teste", value: String(emTeste) },
-    { label: "Expirados", value: String(expirados) },
+    { label: "Sem acesso", value: String(semAcesso) },
     { label: "Receita/mês", value: formatCents(mrrCents) },
   ];
 
@@ -113,7 +110,6 @@ export default async function AdminPage({
   let visible = businesses.filter((b) => {
     const st = planState(b, now);
     if (filter === "assinantes") return isPaidSubscriber(b, now);
-    if (filter === "teste") return st.active && st.isTrial;
     if (filter === "expirados") return !st.active;
     return true;
   });
@@ -131,7 +127,7 @@ export default async function AdminPage({
         description="Todos os estabelecimentos cadastrados na Carvi."
       />
 
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {stats.map((s) => (
           <Card key={s.label} className="p-4">
             <p className="text-xs font-medium text-muted">{s.label}</p>

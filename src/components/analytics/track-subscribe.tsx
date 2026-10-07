@@ -4,9 +4,9 @@ import { useEffect } from "react";
 import { trackMeta } from "./meta-pixel";
 
 /**
- * Dispara o evento "Subscribe" (assinatura) do Meta Pixel uma única vez,
- * quando a pessoa volta do checkout do Stripe com sucesso. Depois limpa os
- * parâmetros da URL para não disparar de novo em um F5.
+ * Dispara o evento "Subscribe" (assinatura) do Meta Pixel uma única vez por
+ * período de assinatura. Usa uma marca no navegador para não recontar quando
+ * a pessoa revisita a tela de status já ativa.
  */
 export function TrackSubscribe({
   valueCents,
@@ -16,15 +16,18 @@ export function TrackSubscribe({
   plan: string;
 }) {
   useEffect(() => {
+    const key = "carvi_sub_tracked";
+    try {
+      if (localStorage.getItem(key) === plan) return;
+      localStorage.setItem(key, plan);
+    } catch {
+      // Sem localStorage (aba privada): segue e dispara mesmo assim.
+    }
     trackMeta("Subscribe", {
       currency: "BRL",
       value: valueCents / 100,
       content_name: plan,
     });
-    const url = new URL(window.location.href);
-    url.searchParams.delete("sucesso");
-    url.searchParams.delete("plano");
-    window.history.replaceState({}, "", url.pathname + url.search);
   }, [valueCents, plan]);
 
   return null;

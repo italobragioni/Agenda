@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getCurrentContext } from "@/features/auth/current";
+import { requireActiveBusiness } from "@/features/billing/guard";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { LinkForm } from "@/features/settings/link-form";
@@ -8,7 +8,7 @@ import { LinkForm } from "@/features/settings/link-form";
 export const metadata: Metadata = { title: "Link de agendamento — Carvi" };
 
 export default async function LinkPage() {
-  const ctx = await getCurrentContext();
+  const ctx = await requireActiveBusiness();
   if (!ctx) redirect("/login");
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";

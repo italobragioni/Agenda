@@ -96,9 +96,8 @@ export async function signup(
   try {
     const slug = await generateUniqueSlug(admin, businessName);
 
-    const trialEndsAt = new Date(
-      Date.now() + 7 * 24 * 60 * 60 * 1000,
-    ).toISOString();
+    // A conta nasce SEM assinatura ativa (sem teste grátis). O acesso só é
+    // liberado após a confirmação de pagamento pela Cakto (webhook).
     const { data: business, error: bizErr } = await admin
       .from("businesses")
       .insert({
@@ -106,8 +105,9 @@ export async function signup(
         slug,
         phone: normalizedPhone,
         whatsapp: normalizedPhone,
-        plan: "trial",
-        trial_ends_at: trialEndsAt,
+        plan: "basic",
+        trial_ends_at: null,
+        paid_until: null,
       })
       .select("id")
       .single();
@@ -147,9 +147,9 @@ export async function signup(
     redirect("/login");
   }
 
-  // ?novo=1 marca o cadastro recém-concluído para disparar o evento
-  // "Concluir inscrição" (CompleteRegistration) no Meta Pixel.
-  redirect("/onboarding?novo=1");
+  // Após o cadastro, segue para a escolha do plano. ?novo=1 marca o cadastro
+  // recém-concluído para disparar o evento "Concluir inscrição" (Meta Pixel).
+  redirect("/assinatura?novo=1");
 }
 
 // ---------------------------------------------------------------------

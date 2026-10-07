@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Download, Lock } from "lucide-react";
-import { getCurrentContext } from "@/features/auth/current";
+import { requireActiveBusiness } from "@/features/billing/guard";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
@@ -48,7 +48,7 @@ export default async function FinanceiroPage({
 }: {
   searchParams: Promise<{ p?: string }>;
 }) {
-  const ctx = await getCurrentContext();
+  const ctx = await requireActiveBusiness();
   if (!ctx) redirect("/login");
   const tz = ctx.business.timezone;
   const caps = capabilitiesFor(ctx.business);

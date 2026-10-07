@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Lock, UserCog, Users } from "lucide-react";
-import { getCurrentContext } from "@/features/auth/current";
+import { requireActiveBusiness } from "@/features/billing/guard";
 import { capabilitiesFor } from "@/features/billing/plan";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PageHeader } from "@/components/ui/page-header";
@@ -16,7 +16,7 @@ import type { Profile } from "@/types/database";
 export const metadata: Metadata = { title: "Equipe — Carvi" };
 
 export default async function EquipePage() {
-  const ctx = await getCurrentContext();
+  const ctx = await requireActiveBusiness();
   if (!ctx) redirect("/login");
 
   // Só o dono gerencia a equipe.

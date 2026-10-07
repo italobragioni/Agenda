@@ -47,14 +47,13 @@ export async function grantEmpresarial(businessId: string) {
   revalidatePath("/admin");
 }
 
-/** Estende (ou reinicia) o teste grátis por 7 dias a partir de agora. */
-export async function restartTrial(businessId: string) {
+/** Remove o acesso (expira a assinatura) de um estabelecimento. */
+export async function revokeAccess(businessId: string) {
   await requireAdmin();
   const admin = createAdminClient();
-  const trialEnds = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
   await admin
     .from("businesses")
-    .update({ plan: "trial", trial_ends_at: trialEnds, paid_until: null })
+    .update({ paid_until: new Date().toISOString(), subscription_status: null })
     .eq("id", businessId);
   revalidatePath("/admin");
 }

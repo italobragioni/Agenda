@@ -1,8 +1,6 @@
 import type { Plan } from "@/types/database";
 
-export const TRIAL_DAYS = 7;
-
-/** Planos pagos (exclui o teste grátis). */
+/** Planos pagos. */
 export type PaidPlan = "basic" | "premium" | "empresarial";
 
 export interface PlanInfo {
@@ -118,20 +116,8 @@ export interface PlanState {
 }
 
 export function planState(b: PlanFields, now: Date = new Date()): PlanState {
-  if (b.plan === "trial") {
-    const until = b.trial_ends_at ? new Date(b.trial_ends_at) : null;
-    const active = !!until && now < until;
-    return {
-      active,
-      kind: "trial",
-      // O teste grátis tem a experiência do plano Essencial (50/mês).
-      monthlyLimit: PLANS.basic.monthlyLimit,
-      until,
-      daysLeft: until ? daysBetween(now, until) : 0,
-      isTrial: true,
-    };
-  }
-
+  // O acesso vem exclusivamente de paid_until (pagamento confirmado).
+  // Não há mais teste grátis nem liberação automática.
   const until = b.paid_until ? new Date(b.paid_until) : null;
   const active = !!until && now < until;
   const monthlyLimit = b.plan === "basic" ? PLANS.basic.monthlyLimit : null;
@@ -145,9 +131,9 @@ export function planState(b: PlanFields, now: Date = new Date()): PlanState {
   };
 }
 
-/** Nome amigável de um plano (inclui o teste grátis). */
+/** Nome amigável de um plano. */
 export function planLabel(kind: Plan): string {
-  if (kind === "trial") return "Teste grátis";
+  if (kind === "trial") return "Sem assinatura";
   return PLANS[kind].name;
 }
 
@@ -160,9 +146,8 @@ export function capabilitiesFor(
   now: Date = new Date(),
 ): Capabilities {
   const s = planState(b, now);
-  if (!s.active) return NO_CAPS;
-  const key: PaidPlan = s.kind === "trial" ? "basic" : s.kind;
-  return CAPS[key];
+  if (!s.active || s.kind === "trial") return NO_CAPS;
+  return CAPS[s.kind];
 }
 
 function daysBetween(from: Date, to: Date): number {

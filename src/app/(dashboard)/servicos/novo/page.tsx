@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getCurrentContext } from "@/features/auth/current";
+import { requireActiveBusiness } from "@/features/billing/guard";
 import { capabilitiesFor } from "@/features/billing/plan";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { createService } from "@/features/services/actions";
 export const metadata: Metadata = { title: "Novo serviço — Agenda" };
 
 export default async function NovoServicoPage() {
-  const ctx = await getCurrentContext();
+  const ctx = await requireActiveBusiness();
   if (!ctx) redirect("/login");
 
   return (
