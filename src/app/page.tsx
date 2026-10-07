@@ -139,7 +139,7 @@ export default function Home() {
             >
               Entrar
             </Link>
-            <Link href={CTA_HREF} className="hidden sm:block">
+            <Link href={CTA_HREF}>
               <Button size="sm">Criar conta</Button>
             </Link>
           </div>
