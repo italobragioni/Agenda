@@ -37,6 +37,15 @@ body {
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
 }
 
+/* Placeholder do player Wistia (VSL) enquanto o script carrega */
+wistia-player[media-id="l1fxyqud2x"]:not(:defined) {
+  background: center / contain no-repeat
+    url("https://fast.wistia.com/embed/medias/l1fxyqud2x/swatch");
+  display: block;
+  filter: blur(5px);
+  padding-top: 177.78%;
+}
+
 /* Feedback ao toque (sempre ativo: é um retorno funcional ao clique) */
 .tap {
   transition:

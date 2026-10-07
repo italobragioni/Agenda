@@ -18,6 +18,7 @@ import {
   CarFront,
 } from "lucide-react";
 import { CarviLogo } from "@/components/brand/logo";
+import { WistiaVsl } from "@/components/marketing/wistia-vsl";
 import { Button } from "@/components/ui/button";
 import { PLANS } from "@/features/billing/plan";
 import { formatCents } from "@/lib/money";
@@ -180,11 +181,9 @@ export default function Home() {
             </div>
           </div>
           <div className="flex justify-center lg:justify-end">
-            <PhoneShot
-              src="/app/agendar.png"
-              alt="Tela de agendamento da Carvi no celular"
-              priority
-            />
+            <div className="w-full max-w-[330px] overflow-hidden rounded-3xl shadow-2xl">
+              <WistiaVsl mediaId="l1fxyqud2x" />
+            </div>
           </div>
         </div>
       </section>
