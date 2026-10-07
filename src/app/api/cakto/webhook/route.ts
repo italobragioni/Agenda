@@ -121,19 +121,12 @@ async function applyOrder(admin: Admin, event: string, order: Order) {
   const { businessId } = found;
 
   if (SUCCESS_EVENTS.has(event)) {
-    // Valida o plano/oferta no servidor.
-    let plan = found.plan;
+    // Plano = o da OFERTA efetivamente paga (validado no servidor). Se a oferta
+    // não for reconhecida (ex.: renovação sem oferta no payload), usa o plano
+    // associado no checkout/cadastro. Assim, quem paga a oferta barata recebe o
+    // plano barato — não dá para liberar plano caro pagando oferta barata.
     const offerId = order.offer?.id;
-    if (order.callback && plan && offerId) {
-      // Quando veio pelo callback, a oferta precisa bater com o plano.
-      if (planFromOfferId(offerId) !== plan) {
-        await recordUnreconciled(admin, event, order, "oferta não bate com o plano");
-        return;
-      }
-    } else if (offerId) {
-      const fromOffer = planFromOfferId(offerId);
-      if (fromOffer) plan = fromOffer;
-    }
+    const plan = (offerId && planFromOfferId(offerId)) || found.plan;
     if (!plan) {
       await recordUnreconciled(admin, event, order, "plano indeterminado");
       return;
