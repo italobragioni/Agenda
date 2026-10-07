@@ -7,6 +7,7 @@ import { localToUtc } from "@/lib/datetime";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { planState, canCreateAppointment } from "@/features/billing/plan";
 import { countMonthlyAppointments } from "@/features/billing/usage";
+import { isVehicleType, vehiclePriceCents } from "./vehicle";
 
 export interface PublicBookingResult {
   ok: boolean;
@@ -32,8 +33,6 @@ function mapDbError(message: string): string {
   };
   return table[(message || "").trim()] ?? "Não foi possível concluir o agendamento.";
 }
-
-const VEHICLE_TYPES = ["Hatch", "Sedan", "SUV", "Caminhonete"];
 
 export async function createPublicBooking(input: {
   slug: string;
@@ -93,7 +92,9 @@ export async function createPublicBooking(input: {
 
   const { data: service } = await admin
     .from("services")
-    .select("name, price_cents, duration_minutes, is_active")
+    .select(
+      "name, price_cents, price_hatch_cents, price_sedan_cents, price_suv_cents, price_caminhonete_cents, duration_minutes, is_active",
+    )
     .eq("id", input.serviceId)
     .eq("business_id", business.id)
     .maybeSingle();
@@ -108,10 +109,21 @@ export async function createPublicBooking(input: {
   );
 
   // Tipo de veículo (validado) é guardado como observação do agendamento.
-  const vehicle = VEHICLE_TYPES.includes((input.vehicle || "").trim())
-    ? (input.vehicle || "").trim()
-    : null;
+  const vTrim = (input.vehicle || "").trim();
+  const vehicle = isVehicleType(vTrim) ? vTrim : null;
   const notes = vehicle ? `Veículo: ${vehicle}` : null;
+
+  // Preço final: específico do porte, ou o preço base do serviço.
+  const priceCents = vehiclePriceCents(
+    {
+      price_cents: service.price_cents as number,
+      price_hatch_cents: service.price_hatch_cents as number | null,
+      price_sedan_cents: service.price_sedan_cents as number | null,
+      price_suv_cents: service.price_suv_cents as number | null,
+      price_caminhonete_cents: service.price_caminhonete_cents as number | null,
+    },
+    vehicle,
+  );
 
   const { data: appt, error } = await admin.rpc("create_appointment", {
     p_business_id: business.id,
@@ -120,7 +132,7 @@ export async function createPublicBooking(input: {
     p_customer_phone: phone,
     p_start_at: startAt.toISOString(),
     p_booking_source: "public",
-    p_price_cents: null,
+    p_price_cents: priceCents,
     p_duration_minutes: null,
     p_notes: notes,
     p_idempotency_key: input.idempotencyKey,
@@ -138,7 +150,7 @@ export async function createPublicBooking(input: {
         new Date(
           startAt.getTime() + (service.duration_minutes as number) * 60000,
         ).toISOString(),
-      priceCents: (appt?.price_cents as number) ?? (service.price_cents as number),
+      priceCents: (appt?.price_cents as number) ?? priceCents,
       durationMinutes: service.duration_minutes as number,
     },
   };

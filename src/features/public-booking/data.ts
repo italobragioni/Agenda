@@ -28,7 +28,15 @@ export interface PublicBusinessData {
   active: boolean;
   services: Pick<
     Service,
-    "id" | "name" | "description" | "price_cents" | "duration_minutes"
+    | "id"
+    | "name"
+    | "description"
+    | "price_cents"
+    | "price_hatch_cents"
+    | "price_sedan_cents"
+    | "price_suv_cents"
+    | "price_caminhonete_cents"
+    | "duration_minutes"
   >[];
   openWeekdays: number[];
   days: PublicDay[];
@@ -60,7 +68,9 @@ export async function getPublicBusiness(
   const [{ data: services }, { data: hours }] = await Promise.all([
     admin
       .from("services")
-      .select("id, name, description, price_cents, duration_minutes")
+      .select(
+        "id, name, description, price_cents, price_hatch_cents, price_sedan_cents, price_suv_cents, price_caminhonete_cents, duration_minutes",
+      )
       .eq("business_id", business.id)
       .eq("is_active", true)
       .order("price_cents", { ascending: true }),

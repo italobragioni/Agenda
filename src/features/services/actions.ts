@@ -21,6 +21,10 @@ export async function createService(
     name: formData.get("name"),
     description: formData.get("description"),
     price_cents: formData.get("price_cents"),
+    price_hatch_cents: formData.get("price_hatch_cents"),
+    price_sedan_cents: formData.get("price_sedan_cents"),
+    price_suv_cents: formData.get("price_suv_cents"),
+    price_caminhonete_cents: formData.get("price_caminhonete_cents"),
     duration_minutes: formData.get("duration_minutes"),
     is_active: formData.get("is_active"),
   });
@@ -52,6 +56,10 @@ export async function updateService(
     name: formData.get("name"),
     description: formData.get("description"),
     price_cents: formData.get("price_cents"),
+    price_hatch_cents: formData.get("price_hatch_cents"),
+    price_sedan_cents: formData.get("price_sedan_cents"),
+    price_suv_cents: formData.get("price_suv_cents"),
+    price_caminhonete_cents: formData.get("price_caminhonete_cents"),
     duration_minutes: formData.get("duration_minutes"),
     is_active: formData.get("is_active"),
   });

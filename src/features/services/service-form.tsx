@@ -14,6 +14,10 @@ export interface ServiceFormValues {
   name: string;
   description: string;
   price: string; // ex.: "80,00"
+  priceHatch: string;
+  priceSedan: string;
+  priceSuv: string;
+  priceCaminhonete: string;
   duration_minutes: string; // ex.: "60"
   is_active: boolean;
 }
@@ -22,6 +26,10 @@ const empty: ServiceFormValues = {
   name: "",
   description: "",
   price: "",
+  priceHatch: "",
+  priceSedan: "",
+  priceSuv: "",
+  priceCaminhonete: "",
   duration_minutes: "60",
   is_active: true,
 };
@@ -95,6 +103,56 @@ export function ServiceForm({
             required
           />
         </FormField>
+      </div>
+
+      {/* Preço por porte de veículo (opcional) */}
+      <div className="rounded-xl border border-border bg-slate-50 p-3">
+        <p className="text-sm font-medium text-foreground">
+          Preço por porte de veículo{" "}
+          <span className="font-normal text-muted">(opcional)</span>
+        </p>
+        <p className="mb-3 mt-0.5 text-xs text-muted">
+          Preencha só se o preço mudar conforme o veículo. Em branco, usa o preço
+          acima ({defaultValues.price ? `R$ ${defaultValues.price}` : "base"}).
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          <FormField label="Hatch (R$)" htmlFor="price_hatch_cents" error={fe.price_hatch_cents}>
+            <Input
+              id="price_hatch_cents"
+              name="price_hatch_cents"
+              inputMode="decimal"
+              defaultValue={defaultValues.priceHatch}
+              placeholder="opcional"
+            />
+          </FormField>
+          <FormField label="Sedan (R$)" htmlFor="price_sedan_cents" error={fe.price_sedan_cents}>
+            <Input
+              id="price_sedan_cents"
+              name="price_sedan_cents"
+              inputMode="decimal"
+              defaultValue={defaultValues.priceSedan}
+              placeholder="opcional"
+            />
+          </FormField>
+          <FormField label="SUV (R$)" htmlFor="price_suv_cents" error={fe.price_suv_cents}>
+            <Input
+              id="price_suv_cents"
+              name="price_suv_cents"
+              inputMode="decimal"
+              defaultValue={defaultValues.priceSuv}
+              placeholder="opcional"
+            />
+          </FormField>
+          <FormField label="Caminhonete (R$)" htmlFor="price_caminhonete_cents" error={fe.price_caminhonete_cents}>
+            <Input
+              id="price_caminhonete_cents"
+              name="price_caminhonete_cents"
+              inputMode="decimal"
+              defaultValue={defaultValues.priceCaminhonete}
+              placeholder="opcional"
+            />
+          </FormField>
+        </div>
       </div>
 
       <label className="flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-3">

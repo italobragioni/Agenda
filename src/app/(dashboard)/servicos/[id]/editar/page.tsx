@@ -29,10 +29,13 @@ export default async function EditarServicoPage({
   if (!data) notFound();
   const service = data as Service;
 
-  const priceStr = (service.price_cents / 100).toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  const centsToStr = (c: number | null | undefined) =>
+    typeof c === "number"
+      ? (c / 100).toLocaleString("pt-BR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })
+      : "";
 
   return (
     <div className="mx-auto max-w-lg">
@@ -43,7 +46,11 @@ export default async function EditarServicoPage({
           defaultValues={{
             name: service.name,
             description: service.description ?? "",
-            price: priceStr,
+            price: centsToStr(service.price_cents),
+            priceHatch: centsToStr(service.price_hatch_cents),
+            priceSedan: centsToStr(service.price_sedan_cents),
+            priceSuv: centsToStr(service.price_suv_cents),
+            priceCaminhonete: centsToStr(service.price_caminhonete_cents),
             duration_minutes: String(service.duration_minutes),
             is_active: service.is_active,
           }}

@@ -60,6 +60,11 @@ export interface Service {
   name: string;
   description: string | null;
   price_cents: number;
+  // Preços opcionais por porte de veículo (null = usa o preço base).
+  price_hatch_cents: number | null;
+  price_sedan_cents: number | null;
+  price_suv_cents: number | null;
+  price_caminhonete_cents: number | null;
   duration_minutes: number;
   is_active: boolean;
   created_at: string;

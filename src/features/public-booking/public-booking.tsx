@@ -12,6 +12,11 @@ import {
   Truck,
 } from "lucide-react";
 import { createPublicBooking, type PublicBookingResult } from "./actions";
+import {
+  vehiclePriceCents,
+  fromPriceCents,
+  hasVehicleVariation,
+} from "./vehicle";
 import { formatCents } from "@/lib/money";
 import { formatDateBR, formatTimeBR, WEEKDAY_LABELS } from "@/lib/datetime";
 import { whatsappLink } from "@/lib/phone";
@@ -23,6 +28,10 @@ interface Service {
   name: string;
   description: string | null;
   price_cents: number;
+  price_hatch_cents?: number | null;
+  price_sedan_cents?: number | null;
+  price_suv_cents?: number | null;
+  price_caminhonete_cents?: number | null;
   duration_minutes: number;
 }
 interface Day {
@@ -206,8 +215,17 @@ export function PublicBooking({
                   <Clock className="h-3 w-3" /> {s.duration_minutes} min
                 </p>
               </div>
-              <span className="shrink-0 font-semibold text-brand">
-                {formatCents(s.price_cents)}
+              <span className="shrink-0 text-right">
+                {hasVehicleVariation(s) && (
+                  <span className="block text-[10px] font-normal text-muted">
+                    a partir de
+                  </span>
+                )}
+                <span className="font-semibold text-brand">
+                  {formatCents(
+                    hasVehicleVariation(s) ? fromPriceCents(s) : s.price_cents,
+                  )}
+                </span>
               </span>
             </button>
           ))}
@@ -315,7 +333,7 @@ export function PublicBooking({
             {vehicle && <p className="text-muted">Veículo: {vehicle}</p>}
             <p className="text-muted">
               {formatDateBR(`${date}T12:00:00Z`, "UTC")} às {time} ·{" "}
-              {formatCents(service.price_cents)}
+              {formatCents(vehiclePriceCents(service, vehicle))}
             </p>
           </div>
 
