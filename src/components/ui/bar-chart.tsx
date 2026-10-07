@@ -40,7 +40,7 @@ export function BarChart({ data }: { data: BarDatum[] }) {
           return (
             <div
               key={d.key}
-              className="flex flex-1 flex-col items-center justify-end"
+              className="flex h-full flex-1 flex-col items-center justify-end"
               title={`${d.fullLabel}: ${formatCents(d.value)}`}
             >
               <div

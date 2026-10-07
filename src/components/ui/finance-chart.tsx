@@ -45,7 +45,7 @@ export function FinanceChart({ data }: { data: FinanceBar[] }) {
         {data.map((d) => (
           <div
             key={d.key}
-            className="flex flex-1 items-end justify-center gap-[2px]"
+            className="flex h-full flex-1 items-end justify-center gap-[2px]"
             title={`${d.fullLabel} — Entradas: ${formatCents(d.income)} · Saídas: ${formatCents(d.expense)}`}
           >
             <div
