@@ -8,6 +8,8 @@ import {
   CheckCircle2,
   CalendarPlus,
   MessageCircle,
+  Car,
+  Truck,
 } from "lucide-react";
 import { createPublicBooking, type PublicBookingResult } from "./actions";
 import { formatCents } from "@/lib/money";
@@ -29,7 +31,14 @@ interface Day {
   open: boolean;
 }
 
-type Step = "service" | "date" | "time" | "details" | "success";
+type Step = "service" | "vehicle" | "date" | "time" | "details" | "success";
+
+const VEHICLES: { label: string; icon: typeof Car }[] = [
+  { label: "Hatch", icon: Car },
+  { label: "Sedan", icon: Car },
+  { label: "SUV", icon: Car },
+  { label: "Caminhonete", icon: Truck },
+];
 
 export function PublicBooking({
   slug,
@@ -50,6 +59,7 @@ export function PublicBooking({
 }) {
   const [step, setStep] = useState<Step>("service");
   const [service, setService] = useState<Service | null>(null);
+  const [vehicle, setVehicle] = useState<string>("");
   const [date, setDate] = useState<string>("");
   const [time, setTime] = useState<string>("");
   const [slots, setSlots] = useState<string[] | null>(null);
@@ -105,6 +115,7 @@ export function PublicBooking({
     const res = await createPublicBooking({
       slug,
       serviceId: service.id,
+      vehicle,
       date,
       time,
       customerName: name,
@@ -131,7 +142,8 @@ export function PublicBooking({
   // ---- Cabeçalho com voltar ----
   const canGoBack = step !== "service" && step !== "success";
   function goBack() {
-    if (step === "date") setStep("service");
+    if (step === "vehicle") setStep("service");
+    else if (step === "date") setStep("vehicle");
     else if (step === "time") setStep("date");
     else if (step === "details") setStep("time");
   }
@@ -184,7 +196,7 @@ export function PublicBooking({
               type="button"
               onClick={() => {
                 setService(s);
-                setStep("date");
+                setStep("vehicle");
               }}
               className="tap flex w-full items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left hover:border-brand"
             >
@@ -202,7 +214,32 @@ export function PublicBooking({
         </div>
       )}
 
-      {/* PASSO 2 — DATA */}
+      {/* PASSO 2 — TIPO DE VEÍCULO */}
+      {step === "vehicle" && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-foreground">
+            Qual o tipo do veículo?
+          </h2>
+          <div className="grid grid-cols-2 gap-2">
+            {VEHICLES.map((v) => (
+              <button
+                key={v.label}
+                type="button"
+                onClick={() => {
+                  setVehicle(v.label);
+                  setStep("date");
+                }}
+                className="tap flex flex-col items-center gap-2 rounded-2xl border border-border bg-card px-3 py-5 text-sm font-medium text-foreground hover:border-brand"
+              >
+                <v.icon className="h-7 w-7 text-brand" />
+                {v.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* PASSO 3 — DATA */}
       {step === "date" && (
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-foreground">
@@ -275,6 +312,7 @@ export function PublicBooking({
           {/* Resumo */}
           <div className="rounded-xl bg-slate-50 p-3 text-sm">
             <p className="font-medium text-foreground">{service.name}</p>
+            {vehicle && <p className="text-muted">Veículo: {vehicle}</p>}
             <p className="text-muted">
               {formatDateBR(`${date}T12:00:00Z`, "UTC")} às {time} ·{" "}
               {formatCents(service.price_cents)}
@@ -344,6 +382,9 @@ export function PublicBooking({
           </h1>
           <div className="mx-auto mt-5 max-w-xs rounded-2xl border border-border bg-card p-5 text-left">
             <p className="font-medium text-foreground">{result.serviceName}</p>
+            {vehicle && (
+              <p className="mt-1 text-sm text-muted">Veículo: {vehicle}</p>
+            )}
             <p className="mt-1 text-sm text-muted">
               {formatDateBR(result.startAtIso, tz)} às{" "}
               {formatTimeBR(result.startAtIso, tz)}

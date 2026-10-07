@@ -38,6 +38,9 @@ export function AppointmentItem({
           <p className="truncate text-xs text-muted">
             {a.service_name_snapshot} · {formatCents(a.price_cents)}
           </p>
+          {a.notes && (
+            <p className="truncate text-xs text-muted">{a.notes}</p>
+          )}
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <Badge className={STATUS_INFO[a.status].badgeClass}>
               {STATUS_INFO[a.status].label}

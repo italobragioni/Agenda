@@ -33,9 +33,12 @@ function mapDbError(message: string): string {
   return table[(message || "").trim()] ?? "Não foi possível concluir o agendamento.";
 }
 
+const VEHICLE_TYPES = ["Hatch", "Sedan", "SUV", "Caminhonete"];
+
 export async function createPublicBooking(input: {
   slug: string;
   serviceId: string;
+  vehicle?: string;
   date: string;
   time: string;
   customerName: string;
@@ -104,6 +107,12 @@ export async function createPublicBooking(input: {
     business.timezone as string,
   );
 
+  // Tipo de veículo (validado) é guardado como observação do agendamento.
+  const vehicle = VEHICLE_TYPES.includes((input.vehicle || "").trim())
+    ? (input.vehicle || "").trim()
+    : null;
+  const notes = vehicle ? `Veículo: ${vehicle}` : null;
+
   const { data: appt, error } = await admin.rpc("create_appointment", {
     p_business_id: business.id,
     p_service_id: input.serviceId,
@@ -113,7 +122,7 @@ export async function createPublicBooking(input: {
     p_booking_source: "public",
     p_price_cents: null,
     p_duration_minutes: null,
-    p_notes: null,
+    p_notes: notes,
     p_idempotency_key: input.idempotencyKey,
   });
 
