@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Users, ChevronRight } from "lucide-react";
+import { Users, ChevronRight, MessageCircle } from "lucide-react";
 import { getCurrentContext } from "@/features/auth/current";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Card } from "@/components/ui/card";
 import { SearchInput } from "@/components/ui/search-input";
 import { formatCents } from "@/lib/money";
-import { formatPhone, onlyDigits } from "@/lib/phone";
+import { formatPhone, onlyDigits, whatsappLink } from "@/lib/phone";
 import { formatDateBR } from "@/lib/datetime";
 import { buildCustomerStats, getStats } from "@/features/customers/stats";
 import type { Customer, Appointment } from "@/types/database";
@@ -85,8 +85,11 @@ export default async function ClientesPage({
             const s = getStats(stats, c.id);
             return (
               <li key={c.id}>
-                <Link href={`/clientes/${c.id}`}>
-                  <Card className="tap flex items-center gap-3 p-4 hover:bg-slate-50">
+                <Card className="flex items-center gap-3 p-4">
+                  <Link
+                    href={`/clientes/${c.id}`}
+                    className="tap flex min-w-0 flex-1 items-center gap-1"
+                  >
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-foreground">
                         {c.name}
@@ -108,8 +111,17 @@ export default async function ClientesPage({
                       className="h-4 w-4 shrink-0 text-muted"
                       aria-hidden
                     />
-                  </Card>
-                </Link>
+                  </Link>
+                  <a
+                    href={whatsappLink(c.phone)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Chamar ${c.name} no WhatsApp`}
+                    className="tap flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50 text-green-600 hover:bg-green-100"
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                  </a>
+                </Card>
               </li>
             );
           })}
