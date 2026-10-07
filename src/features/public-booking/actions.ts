@@ -91,10 +91,10 @@ export async function createPublicBooking(input: {
   }
 
   const { data: service } = await admin
+    // "*" é resiliente caso a migração 0010 (preço por porte) ainda não tenha
+    // sido aplicada: cai no preço base em vez de quebrar o agendamento.
     .from("services")
-    .select(
-      "name, price_cents, price_hatch_cents, price_sedan_cents, price_suv_cents, price_caminhonete_cents, duration_minutes, is_active",
-    )
+    .select("*")
     .eq("id", input.serviceId)
     .eq("business_id", business.id)
     .maybeSingle();

@@ -67,10 +67,10 @@ export async function getPublicBusiness(
 
   const [{ data: services }, { data: hours }] = await Promise.all([
     admin
+      // "*" é resiliente: se as colunas de preço por porte ainda não existirem
+      // no banco (migração 0010 não rodada), a consulta não quebra.
       .from("services")
-      .select(
-        "id, name, description, price_cents, price_hatch_cents, price_sedan_cents, price_suv_cents, price_caminhonete_cents, duration_minutes",
-      )
+      .select("*")
       .eq("business_id", business.id)
       .eq("is_active", true)
       .order("price_cents", { ascending: true }),
