@@ -10,6 +10,7 @@ import {
   Boxes,
 } from "lucide-react";
 import { getCurrentContext } from "@/features/auth/current";
+import { capabilitiesFor } from "@/features/billing/plan";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
@@ -46,10 +47,22 @@ function Section({
   );
 }
 
+function LockedNote({ children }: { children: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <p className="text-sm text-muted">{children}</p>
+      <Link href="/assinatura" className="shrink-0 text-sm font-medium text-brand hover:underline">
+        Fazer upgrade
+      </Link>
+    </div>
+  );
+}
+
 export default async function ConfiguracoesPage() {
   const ctx = await getCurrentContext();
   if (!ctx) redirect("/login");
   const tz = ctx.business.timezone;
+  const caps = capabilitiesFor(ctx.business);
 
   const supabase = await createClient();
   const {
@@ -86,7 +99,11 @@ export default async function ConfiguracoesPage() {
       </Section>
 
       <Section icon={ImageIcon} title="Logo do estabelecimento">
-        <LogoForm logoUrl={ctx.business.logo_url} />
+        {caps.branding ? (
+          <LogoForm logoUrl={ctx.business.logo_url} />
+        ) : (
+          <LockedNote>Logo na página de agendamento é do plano Premium.</LockedNote>
+        )}
       </Section>
 
       <Section icon={Clock} title="Horários de funcionamento">
@@ -94,7 +111,13 @@ export default async function ConfiguracoesPage() {
       </Section>
 
       <Section icon={Boxes} title="Capacidade (boxes)">
-        <CapacityForm value={ctx.business.capacity} />
+        {caps.boxes ? (
+          <CapacityForm value={ctx.business.capacity} />
+        ) : (
+          <LockedNote>
+            Vários carros ao mesmo tempo é do plano Premium.
+          </LockedNote>
+        )}
       </Section>
 
       <Section icon={Timer} title="Intervalo entre clientes">

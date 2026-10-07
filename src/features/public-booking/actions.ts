@@ -5,7 +5,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizePhone } from "@/lib/phone";
 import { localToUtc } from "@/lib/datetime";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { planState, canCreateAppointment } from "@/features/billing/plan";
+import {
+  planState,
+  canCreateAppointment,
+  capabilitiesFor,
+} from "@/features/billing/plan";
 import { countMonthlyAppointments } from "@/features/billing/usage";
 import { isVehicleType, vehiclePriceCents } from "./vehicle";
 
@@ -113,17 +117,25 @@ export async function createPublicBooking(input: {
   const vehicle = isVehicleType(vTrim) ? vTrim : null;
   const notes = vehicle ? `Veículo: ${vehicle}` : null;
 
-  // Preço final: específico do porte, ou o preço base do serviço.
-  const priceCents = vehiclePriceCents(
-    {
-      price_cents: service.price_cents as number,
-      price_hatch_cents: service.price_hatch_cents as number | null,
-      price_sedan_cents: service.price_sedan_cents as number | null,
-      price_suv_cents: service.price_suv_cents as number | null,
-      price_caminhonete_cents: service.price_caminhonete_cents as number | null,
-    },
-    vehicle,
-  );
+  // Preço por porte só nos planos Premium+; senão, usa o preço base.
+  const caps = capabilitiesFor({
+    plan: business.plan,
+    trial_ends_at: business.trial_ends_at,
+    paid_until: business.paid_until,
+  });
+  const priceCents = caps.vehiclePricing
+    ? vehiclePriceCents(
+        {
+          price_cents: service.price_cents as number,
+          price_hatch_cents: service.price_hatch_cents as number | null,
+          price_sedan_cents: service.price_sedan_cents as number | null,
+          price_suv_cents: service.price_suv_cents as number | null,
+          price_caminhonete_cents:
+            service.price_caminhonete_cents as number | null,
+        },
+        vehicle,
+      )
+    : (service.price_cents as number);
 
   const { data: appt, error } = await admin.rpc("create_appointment", {
     p_business_id: business.id,

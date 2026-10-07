@@ -12,7 +12,7 @@ import { BarChart, type BarDatum } from "@/components/ui/bar-chart";
 import { DonutChart, type DonutSlice } from "@/components/ui/donut-chart";
 import { EntryForm } from "@/features/financials/entry-form";
 import { EntryDeleteButton } from "@/features/financials/entry-delete-button";
-import { hasProAccess } from "@/features/billing/plan";
+import { capabilitiesFor } from "@/features/billing/plan";
 import { formatCents } from "@/lib/money";
 import { localDayString, formatDateBR } from "@/lib/datetime";
 import {
@@ -51,7 +51,9 @@ export default async function FinanceiroPage({
   const ctx = await getCurrentContext();
   if (!ctx) redirect("/login");
   const tz = ctx.business.timezone;
-  const full = hasProAccess(ctx.business);
+  const caps = capabilitiesFor(ctx.business);
+  const full = caps.expenses; // despesas, lucro, lançamentos e gráfico
+  const canExport = caps.exports; // exportação/relatórios (Empresarial)
 
   const { p } = await searchParams;
   const period: Period = p === "30d" || p === "mes" ? (p as Period) : "7d";
@@ -159,7 +161,7 @@ export default async function FinanceiroPage({
             : "Acompanhe seu faturamento."
         }
         action={
-          full ? (
+          canExport ? (
             <a href={`/api/financeiro/export?p=${period}`}>
               <span className="tap inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-slate-50">
                 <Download className="h-4 w-4" />
@@ -274,8 +276,8 @@ export default async function FinanceiroPage({
                 Gestão financeira completa
               </p>
               <p className="text-xs text-muted">
-                Despesas, lucro, lançamentos e exportação em planilha estão no
-                plano Premium.
+                Despesas, lucro e lançamentos estão no plano Premium. Exportação
+                em planilha e relatórios, no Empresarial.
               </p>
             </div>
           </div>

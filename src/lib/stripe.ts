@@ -12,8 +12,10 @@ export function getStripe(): Stripe | null {
 }
 
 /** Mapeia o id do plano para o Price ID configurado no Stripe. */
-export function priceIdForPlan(plan: "basic" | "premium"): string | undefined {
-  return plan === "basic"
-    ? process.env.STRIPE_PRICE_BASIC
-    : process.env.STRIPE_PRICE_PREMIUM;
+export function priceIdForPlan(
+  plan: "basic" | "premium" | "empresarial",
+): string | undefined {
+  if (plan === "empresarial") return process.env.STRIPE_PRICE_EMPRESARIAL;
+  if (plan === "premium") return process.env.STRIPE_PRICE_PREMIUM;
+  return process.env.STRIPE_PRICE_BASIC;
 }

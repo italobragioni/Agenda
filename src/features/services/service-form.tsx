@@ -38,10 +38,12 @@ export function ServiceForm({
   action,
   defaultValues = empty,
   submitLabel = "Salvar serviço",
+  showVehiclePricing = true,
 }: {
   action: (state: ActionState, formData: FormData) => Promise<ActionState>;
   defaultValues?: ServiceFormValues;
   submitLabel?: string;
+  showVehiclePricing?: boolean;
 }) {
   const [state, formAction] = useActionState(action, {} as ActionState);
   const fe = state.fieldErrors ?? {};
@@ -105,7 +107,8 @@ export function ServiceForm({
         </FormField>
       </div>
 
-      {/* Preço por porte de veículo (opcional) */}
+      {/* Preço por porte de veículo (opcional) — Premium+ */}
+      {showVehiclePricing && (
       <div className="rounded-xl border border-border bg-slate-50 p-3">
         <p className="text-sm font-medium text-foreground">
           Preço por porte de veículo{" "}
@@ -154,6 +157,7 @@ export function ServiceForm({
           </FormField>
         </div>
       </div>
+      )}
 
       <label className="flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-3">
         <input

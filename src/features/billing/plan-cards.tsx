@@ -14,7 +14,7 @@ export function PlanCards({ currentPlan }: { currentPlan: string }) {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string>();
 
-  function subscribe(plan: "basic" | "premium") {
+  function subscribe(plan: "basic" | "premium" | "empresarial") {
     setError(undefined);
     setLoadingPlan(plan);
     startTransition(async () => {
@@ -32,8 +32,8 @@ export function PlanCards({ currentPlan }: { currentPlan: string }) {
     <div className="space-y-3">
       {error && <Alert tone="error">{error}</Alert>}
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        {(["basic", "premium"] as const).map((key) => {
+      <div className="grid gap-3 sm:grid-cols-3">
+        {(["basic", "premium", "empresarial"] as const).map((key) => {
           const plan = PLANS[key];
           const isCurrent = currentPlan === key;
           const highlight = key === "premium";

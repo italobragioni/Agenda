@@ -196,7 +196,7 @@ export default function Home() {
             { n: "24h", l: "Agenda aberta" },
             { n: "0", l: "Horário duplicado" },
             { n: "5 min", l: "Para começar" },
-            { n: "R$ 9,90", l: "Por mês" },
+            { n: "R$ 19,90", l: "A partir de/mês" },
           ].map((s) => (
             <div key={s.l} className="text-center">
               <p className="text-2xl font-extrabold text-white sm:text-3xl">
@@ -462,60 +462,75 @@ export default function Home() {
             Menos que uma lavagem simples por mês. Cancele quando quiser.
           </p>
 
-          <div className="mx-auto mt-10 grid max-w-2xl gap-5 sm:grid-cols-2">
-            {/* Básico */}
-            <div className="flex flex-col rounded-3xl border border-border bg-card p-6 text-left shadow-sm">
-              <p className="text-sm font-semibold text-foreground">Básico</p>
-              <p className="mt-2 text-4xl font-extrabold text-foreground">
-                {formatCents(PLANS.basic.priceCents)}
-                <span className="text-sm font-normal text-muted">/mês</span>
-              </p>
-              <ul className="mt-5 flex-1 space-y-2.5 text-sm">
-                {PLANS.basic.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-foreground">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link href={CTA_HREF} className="mt-6">
-                <Button variant="secondary" fullWidth>
-                  Começar grátis
-                </Button>
-              </Link>
-            </div>
-
-            {/* Premium */}
-            <div className="relative flex flex-col rounded-3xl bg-gradient-to-br from-cyan-400 to-brand p-[2px] shadow-lg">
-              <div className="flex flex-1 flex-col rounded-[calc(1.5rem-2px)] bg-card p-6 text-left">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-foreground">
-                    Premium
-                  </p>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-brand px-2.5 py-0.5 text-xs font-medium text-brand-foreground">
-                    <Star className="h-3 w-3" /> Popular
-                  </span>
+          <div className="mx-auto mt-10 grid max-w-4xl items-stretch gap-5 sm:grid-cols-3">
+            {(["basic", "premium", "empresarial"] as const).map((key) => {
+              const plan = PLANS[key];
+              const highlight = key === "premium";
+              return highlight ? (
+                <div
+                  key={key}
+                  className="relative flex flex-col rounded-3xl bg-gradient-to-br from-cyan-400 to-brand p-[2px] shadow-lg"
+                >
+                  <div className="flex flex-1 flex-col rounded-[calc(1.5rem-2px)] bg-card p-6 text-left">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold text-foreground">
+                        {plan.name}
+                      </p>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-brand px-2.5 py-0.5 text-xs font-medium text-brand-foreground">
+                        <Star className="h-3 w-3" /> Popular
+                      </span>
+                    </div>
+                    <p className="mt-2 text-4xl font-extrabold text-foreground">
+                      {formatCents(plan.priceCents)}
+                      <span className="text-sm font-normal text-muted">/mês</span>
+                    </p>
+                    <ul className="mt-5 flex-1 space-y-2.5 text-sm">
+                      {plan.features.map((feat) => (
+                        <li
+                          key={feat}
+                          className="flex items-start gap-2 text-foreground"
+                        >
+                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+                          {feat}
+                        </li>
+                      ))}
+                    </ul>
+                    <Link href={CTA_HREF} className="mt-6">
+                      <Button fullWidth>Testar 7 dias grátis</Button>
+                    </Link>
+                  </div>
                 </div>
-                <p className="mt-2 text-4xl font-extrabold text-foreground">
-                  {formatCents(PLANS.premium.priceCents)}
-                  <span className="text-sm font-normal text-muted">/mês</span>
-                </p>
-                <ul className="mt-5 flex-1 space-y-2.5 text-sm">
-                  {PLANS.premium.features.map((f) => (
-                    <li
-                      key={f}
-                      className="flex items-start gap-2 text-foreground"
-                    >
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link href={CTA_HREF} className="mt-6">
-                  <Button fullWidth>Testar 7 dias grátis</Button>
-                </Link>
-              </div>
-            </div>
+              ) : (
+                <div
+                  key={key}
+                  className="flex flex-col rounded-3xl border border-border bg-card p-6 text-left shadow-sm"
+                >
+                  <p className="text-sm font-semibold text-foreground">
+                    {plan.name}
+                  </p>
+                  <p className="mt-2 text-4xl font-extrabold text-foreground">
+                    {formatCents(plan.priceCents)}
+                    <span className="text-sm font-normal text-muted">/mês</span>
+                  </p>
+                  <ul className="mt-5 flex-1 space-y-2.5 text-sm">
+                    {plan.features.map((feat) => (
+                      <li
+                        key={feat}
+                        className="flex items-start gap-2 text-foreground"
+                      >
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+                        {feat}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href={CTA_HREF} className="mt-6">
+                    <Button variant="secondary" fullWidth>
+                      Começar grátis
+                    </Button>
+                  </Link>
+                </div>
+              );
+            })}
           </div>
           <p className="mt-6 text-xs text-muted">
             Sem cartão no teste • Pagamento por cartão ou Pix depois

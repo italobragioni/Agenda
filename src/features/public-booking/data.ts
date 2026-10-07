@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { offsetDayString, WEEKDAY_LABELS } from "@/lib/datetime";
-import { planState } from "@/features/billing/plan";
+import { planState, capabilitiesFor } from "@/features/billing/plan";
 import type { Business, Service } from "@/types/database";
 
 export interface PublicDay {
@@ -93,16 +93,39 @@ export async function getPublicBusiness(
     days.push({ date, weekday, open: openWeekdays.includes(weekday) });
   }
 
-  const active = planState({
+  const planFields = {
     plan: business.plan,
     trial_ends_at: business.trial_ends_at,
     paid_until: business.paid_until,
-  }).active;
+  };
+  const active = planState(planFields).active;
+  const caps = capabilitiesFor(planFields);
+
+  // Marca (logo/endereço) só nos planos Premium+.
+  const businessOut = {
+    ...business,
+    logo_url: caps.branding ? business.logo_url : null,
+    address: caps.branding ? business.address : null,
+  } as PublicBusinessData["business"];
+
+  // Preço por porte só nos planos Premium+. Sem o recurso, zera os campos
+  // para a página pública mostrar e cobrar sempre o preço base.
+  const servicesOut = (services ?? []).map((s) =>
+    caps.vehiclePricing
+      ? s
+      : {
+          ...s,
+          price_hatch_cents: null,
+          price_sedan_cents: null,
+          price_suv_cents: null,
+          price_caminhonete_cents: null,
+        },
+  ) as PublicBusinessData["services"];
 
   return {
-    business: business as PublicBusinessData["business"],
+    business: businessOut,
     active,
-    services: (services ?? []) as PublicBusinessData["services"],
+    services: servicesOut,
     openWeekdays,
     days,
   };

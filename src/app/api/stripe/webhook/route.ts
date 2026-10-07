@@ -4,10 +4,20 @@ import { getStripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /** Descobre o plano a partir do Price ID ou dos metadados. */
-function planFromSubscription(sub: Stripe.Subscription): "basic" | "premium" {
+function planFromSubscription(
+  sub: Stripe.Subscription,
+): "basic" | "premium" | "empresarial" {
   const metaPlan = sub.metadata?.plan;
-  if (metaPlan === "basic" || metaPlan === "premium") return metaPlan;
+  if (
+    metaPlan === "basic" ||
+    metaPlan === "premium" ||
+    metaPlan === "empresarial"
+  ) {
+    return metaPlan;
+  }
   const priceId = sub.items.data[0]?.price.id;
+  if (priceId && priceId === process.env.STRIPE_PRICE_EMPRESARIAL)
+    return "empresarial";
   if (priceId && priceId === process.env.STRIPE_PRICE_PREMIUM) return "premium";
   return "basic";
 }

@@ -25,13 +25,24 @@ export async function grantPremium(businessId: string) {
   revalidatePath("/admin");
 }
 
-/** Libera Básico de cortesia (sem expiração) para um estabelecimento. */
+/** Libera Essencial de cortesia (sem expiração) para um estabelecimento. */
 export async function grantBasic(businessId: string) {
   await requireAdmin();
   const admin = createAdminClient();
   await admin
     .from("businesses")
     .update({ plan: "basic", paid_until: FAR_FUTURE })
+    .eq("id", businessId);
+  revalidatePath("/admin");
+}
+
+/** Libera Empresarial de cortesia (sem expiração) para um estabelecimento. */
+export async function grantEmpresarial(businessId: string) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  await admin
+    .from("businesses")
+    .update({ plan: "empresarial", paid_until: FAR_FUTURE })
     .eq("id", businessId);
   revalidatePath("/admin");
 }

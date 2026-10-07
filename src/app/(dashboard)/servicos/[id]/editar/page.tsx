@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { ServiceForm } from "@/features/services/service-form";
 import { updateService } from "@/features/services/actions";
+import { capabilitiesFor } from "@/features/billing/plan";
 import type { Service } from "@/types/database";
 
 export const metadata: Metadata = { title: "Editar serviço — Agenda" };
@@ -55,6 +56,7 @@ export default async function EditarServicoPage({
             is_active: service.is_active,
           }}
           submitLabel="Salvar alterações"
+          showVehiclePricing={capabilitiesFor(ctx.business).vehiclePricing}
         />
       </Card>
     </div>

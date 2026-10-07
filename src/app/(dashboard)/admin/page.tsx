@@ -95,9 +95,8 @@ export default async function AdminPage({
     const st = planState(b, now);
     if (!st.active) expirados += 1;
     else if (st.isTrial) emTeste += 1;
-    else {
-      mrrCents +=
-        b.plan === "premium" ? PLANS.premium.priceCents : PLANS.basic.priceCents;
+    else if (b.plan !== "trial") {
+      mrrCents += PLANS[b.plan].priceCents;
     }
     if (isPaidSubscriber(b, now)) assinantes += 1;
   }

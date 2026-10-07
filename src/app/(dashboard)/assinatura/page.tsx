@@ -7,7 +7,12 @@ import { Card } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { PlanCards } from "@/features/billing/plan-cards";
 import { ManageSubscriptionButton } from "@/features/billing/manage-button";
-import { planState, PLANS } from "@/features/billing/plan";
+import {
+  planState,
+  planLabel as planLabelFor,
+  PLANS,
+  type PaidPlan,
+} from "@/features/billing/plan";
 import { formatDateBR } from "@/lib/datetime";
 import { TrackSubscribe } from "@/components/analytics/track-subscribe";
 
@@ -23,16 +28,12 @@ export default async function AssinaturaPage({
   const tz = ctx.business.timezone;
 
   const { sucesso, cancelado, plano } = await searchParams;
-  const subscribedValueCents =
-    plano === "premium" ? PLANS.premium.priceCents : PLANS.basic.priceCents;
+  const subscribedPlan: PaidPlan =
+    plano === "premium" || plano === "empresarial" ? plano : "basic";
+  const subscribedValueCents = PLANS[subscribedPlan].priceCents;
   const state = planState(ctx.business);
 
-  const planLabel =
-    state.kind === "trial"
-      ? "Teste grátis"
-      : state.kind === "basic"
-        ? PLANS.basic.name
-        : PLANS.premium.name;
+  const planLabel = planLabelFor(state.kind);
 
   return (
     <div className="mx-auto max-w-2xl space-y-5">

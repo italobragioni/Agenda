@@ -14,7 +14,7 @@ export type AppointmentStatus =
 
 export type BookingSource = "admin" | "public";
 
-export type Plan = "trial" | "basic" | "premium";
+export type Plan = "trial" | "basic" | "premium" | "empresarial";
 
 export interface Business {
   id: string;

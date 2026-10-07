@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CreditCard, ChevronRight } from "lucide-react";
-import { planState, PLANS, type PlanFields } from "./plan";
+import { planState, planLabel, type PlanFields } from "./plan";
 import { cn } from "@/lib/utils";
 
 function daysLabel(n: number): string {
@@ -33,9 +33,8 @@ export function planStatusText(business: PlanFields): StatusText {
       tone: state.daysLeft <= 3 ? "warn" : "brand",
     };
   }
-  const name = state.kind === "basic" ? PLANS.basic.name : PLANS.premium.name;
   return {
-    title: `Plano ${name}`,
+    title: `Plano ${planLabel(state.kind)}`,
     detail: daysLabel(state.daysLeft),
     tone: state.daysLeft <= 3 ? "warn" : "brand",
   };

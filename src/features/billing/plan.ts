@@ -2,28 +2,99 @@ import type { Plan } from "@/types/database";
 
 export const TRIAL_DAYS = 7;
 
+/** Planos pagos (exclui o teste grátis). */
+export type PaidPlan = "basic" | "premium" | "empresarial";
+
 export interface PlanInfo {
-  id: Exclude<Plan, "trial">;
+  id: PaidPlan;
   name: string;
   priceCents: number;
   monthlyLimit: number | null; // null = ilimitado
   features: string[];
 }
 
-export const PLANS: Record<"basic" | "premium", PlanInfo> = {
+export const PLANS: Record<PaidPlan, PlanInfo> = {
   basic: {
     id: "basic",
-    name: "Básico",
-    priceCents: 990,
+    name: "Essencial",
+    priceCents: 1990,
     monthlyLimit: 50,
-    features: ["Até 50 agendamentos por mês", "Página pública de agendamento", "Clientes e financeiro"],
+    features: [
+      "Até 50 agendamentos por mês",
+      "Página pública de agendamento",
+      "Agenda, clientes e serviços",
+      "Faturamento (total e por serviço)",
+    ],
   },
   premium: {
     id: "premium",
     name: "Premium",
-    priceCents: 2990,
+    priceCents: 4990,
     monthlyLimit: null,
-    features: ["Agendamentos ilimitados", "Página pública de agendamento", "Clientes e financeiro"],
+    features: [
+      "Agendamentos ilimitados",
+      "Vários boxes (carros ao mesmo tempo)",
+      "Preço por porte de veículo",
+      "Logo e endereço na página",
+      "Despesas e lucro",
+    ],
+  },
+  empresarial: {
+    id: "empresarial",
+    name: "Empresarial",
+    priceCents: 9990,
+    monthlyLimit: null,
+    features: [
+      "Tudo do Premium",
+      "Vários usuários (equipe)",
+      "Exportação em planilha e relatórios",
+      "Suporte dedicado",
+    ],
+  },
+};
+
+/** Recursos liberados por plano. */
+export interface Capabilities {
+  /** Vários carros ao mesmo tempo (capacidade > 1). */
+  boxes: boolean;
+  /** Preço por porte de veículo. */
+  vehiclePricing: boolean;
+  /** Logo e endereço/mapa na página pública. */
+  branding: boolean;
+  /** Despesas, lucro, lançamentos e gráfico de entradas × saídas. */
+  expenses: boolean;
+  /** Exportação em planilha e relatórios. */
+  exports: boolean;
+  /** Vários usuários (equipe). */
+  team: boolean;
+}
+
+const NO_CAPS: Capabilities = {
+  boxes: false,
+  vehiclePricing: false,
+  branding: false,
+  expenses: false,
+  exports: false,
+  team: false,
+};
+
+const CAPS: Record<PaidPlan, Capabilities> = {
+  basic: { ...NO_CAPS },
+  premium: {
+    boxes: true,
+    vehiclePricing: true,
+    branding: true,
+    expenses: true,
+    exports: false,
+    team: false,
+  },
+  empresarial: {
+    boxes: true,
+    vehiclePricing: true,
+    branding: true,
+    expenses: true,
+    exports: true,
+    team: true,
   },
 };
 
@@ -53,7 +124,7 @@ export function planState(b: PlanFields, now: Date = new Date()): PlanState {
     return {
       active,
       kind: "trial",
-      // O teste grátis tem a experiência do plano Básico (50/mês), não Premium.
+      // O teste grátis tem a experiência do plano Essencial (50/mês).
       monthlyLimit: PLANS.basic.monthlyLimit,
       until,
       daysLeft: until ? daysBetween(now, until) : 0,
@@ -74,14 +145,24 @@ export function planState(b: PlanFields, now: Date = new Date()): PlanState {
   };
 }
 
+/** Nome amigável de um plano (inclui o teste grátis). */
+export function planLabel(kind: Plan): string {
+  if (kind === "trial") return "Teste grátis";
+  return PLANS[kind].name;
+}
+
 /**
- * Acesso aos recursos avançados (ex.: gestão financeira completa):
- * disponível APENAS no plano Premium ativo. O teste grátis tem a experiência
- * do plano Básico (sem as funções exclusivas do Premium).
+ * Recursos liberados para o estabelecimento agora. Plano expirado = nenhum
+ * recurso avançado. O teste grátis tem as capacidades do plano Essencial.
  */
-export function hasProAccess(b: PlanFields, now: Date = new Date()): boolean {
+export function capabilitiesFor(
+  b: PlanFields,
+  now: Date = new Date(),
+): Capabilities {
   const s = planState(b, now);
-  return s.active && s.kind === "premium";
+  if (!s.active) return NO_CAPS;
+  const key: PaidPlan = s.kind === "trial" ? "basic" : s.kind;
+  return CAPS[key];
 }
 
 function daysBetween(from: Date, to: Date): number {

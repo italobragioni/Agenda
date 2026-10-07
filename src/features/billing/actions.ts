@@ -20,7 +20,7 @@ function siteUrl(): string {
  * Retorna a URL para redirecionar o cliente.
  */
 export async function createCheckoutSession(
-  plan: "basic" | "premium",
+  plan: "basic" | "premium" | "empresarial",
 ): Promise<CheckoutResult> {
   const ctx = await getCurrentContext();
   if (!ctx) redirect("/login");
