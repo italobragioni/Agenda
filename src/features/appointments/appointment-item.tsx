@@ -5,7 +5,7 @@ import { STATUS_INFO } from "./status";
 import { AppointmentActions } from "./appointment-actions";
 import { formatCents } from "@/lib/money";
 import { formatTimeBR } from "@/lib/datetime";
-import { whatsappLink } from "@/lib/phone";
+import { whatsappLink, formatPhone } from "@/lib/phone";
 import { MessageCircle } from "lucide-react";
 import type { Appointment } from "@/types/database";
 
@@ -38,19 +38,22 @@ export function AppointmentItem({
           <p className="truncate text-xs text-muted">
             {a.service_name_snapshot} · {formatCents(a.price_cents)}
           </p>
-          <div className="mt-2 flex items-center gap-2">
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             <Badge className={STATUS_INFO[a.status].badgeClass}>
               {STATUS_INFO[a.status].label}
             </Badge>
-            <a
-              href={whatsappLink(a.customer_phone_snapshot)}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Chamar no WhatsApp"
-              className="text-green-600 hover:text-green-700"
-            >
-              <MessageCircle className="h-4 w-4" />
-            </a>
+            {a.customer_phone_snapshot && (
+              <a
+                href={whatsappLink(a.customer_phone_snapshot)}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Chamar no WhatsApp"
+                className="inline-flex items-center gap-1 text-sm font-medium text-green-600 hover:text-green-700"
+              >
+                <MessageCircle className="h-4 w-4" />
+                {formatPhone(a.customer_phone_snapshot)}
+              </a>
+            )}
           </div>
         </div>
       </div>
