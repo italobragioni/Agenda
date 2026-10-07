@@ -31,8 +31,6 @@ export interface Business {
   plan: Plan;
   trial_ends_at: string | null;
   paid_until: string | null;
-  stripe_customer_id: string | null;
-  stripe_subscription_id: string | null;
   cakto_customer_id: string | null;
   cakto_subscription_id: string | null;
   subscription_status: string | null;
