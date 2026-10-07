@@ -15,14 +15,40 @@ import { formatCents } from "@/lib/money";
 import { formatDateBR } from "@/lib/datetime";
 import { formatPhone, whatsappLink } from "@/lib/phone";
 import { onboardingWhatsappMessage } from "@/lib/support";
+import { cn } from "@/lib/utils";
 import type { Business } from "@/types/database";
 
 export const metadata: Metadata = { title: "Administrador — Carvi" };
 
-export default async function AdminPage() {
+type Filter = "todos" | "assinantes" | "teste" | "expirados";
+
+const FILTERS: { key: Filter; label: string }[] = [
+  { key: "todos", label: "Todos" },
+  { key: "assinantes", label: "Assinantes" },
+  { key: "teste", label: "Em teste" },
+  { key: "expirados", label: "Expirados" },
+];
+
+/** Assinante de verdade: plano pago ativo com assinatura no Stripe. */
+function isPaidSubscriber(b: Business, now: Date): boolean {
+  const st = planState(b, now);
+  return st.active && !st.isTrial && !!b.stripe_subscription_id;
+}
+
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ f?: string }>;
+}) {
   const ctx = await getCurrentContext();
   if (!ctx) redirect("/login");
   if (!isAdminEmail(ctx.email)) notFound(); // esconde de quem não é admin
+
+  const { f } = await searchParams;
+  const filter: Filter =
+    f === "assinantes" || f === "teste" || f === "expirados"
+      ? (f as Filter)
+      : "todos";
 
   const admin = createAdminClient();
   const tz = ctx.business.timezone;
@@ -32,7 +58,7 @@ export default async function AdminPage() {
       admin
         .from("businesses")
         .select(
-          "id, name, slug, phone, whatsapp, plan, trial_ends_at, paid_until, created_at",
+          "id, name, slug, phone, whatsapp, plan, trial_ends_at, paid_until, stripe_subscription_id, created_at, updated_at",
         )
         .order("created_at", { ascending: false }),
       admin.from("profiles").select("id, business_id, full_name"),
@@ -62,27 +88,42 @@ export default async function AdminPage() {
   // Estatísticas.
   const now = new Date();
   let emTeste = 0;
-  let pagantes = 0;
   let expirados = 0;
+  let assinantes = 0;
   let mrrCents = 0;
   for (const b of businesses) {
     const st = planState(b, now);
     if (!st.active) expirados += 1;
     else if (st.isTrial) emTeste += 1;
     else {
-      pagantes += 1;
       mrrCents +=
         b.plan === "premium" ? PLANS.premium.priceCents : PLANS.basic.priceCents;
     }
+    if (isPaidSubscriber(b, now)) assinantes += 1;
   }
 
   const stats = [
     { label: "Cadastros", value: String(businesses.length) },
+    { label: "Assinantes", value: String(assinantes) },
     { label: "Em teste", value: String(emTeste) },
-    { label: "Pagantes", value: String(pagantes) },
     { label: "Expirados", value: String(expirados) },
     { label: "Receita/mês", value: formatCents(mrrCents) },
   ];
+
+  // Lista filtrada pela aba selecionada.
+  let visible = businesses.filter((b) => {
+    const st = planState(b, now);
+    if (filter === "assinantes") return isPaidSubscriber(b, now);
+    if (filter === "teste") return st.active && st.isTrial;
+    if (filter === "expirados") return !st.active;
+    return true;
+  });
+  // Na aba de assinantes, mostra os mais recentes primeiro.
+  if (filter === "assinantes") {
+    visible = [...visible].sort((a, b) =>
+      (b.updated_at ?? "").localeCompare(a.updated_at ?? ""),
+    );
+  }
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -102,14 +143,35 @@ export default async function AdminPage() {
         ))}
       </div>
 
-      {businesses.length === 0 ? (
+      {/* Filtro */}
+      <div className="mb-4 inline-flex flex-wrap rounded-xl border border-border bg-card p-1">
+        {FILTERS.map((tab) => (
+          <Link
+            key={tab.key}
+            href={tab.key === "todos" ? "/admin" : `/admin?f=${tab.key}`}
+            className={cn(
+              "tap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+              filter === tab.key
+                ? "bg-brand text-brand-foreground"
+                : "text-muted hover:text-foreground",
+            )}
+          >
+            {tab.label}
+          </Link>
+        ))}
+      </div>
+
+      {visible.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border bg-card px-4 py-10 text-center text-sm text-muted">
-          Nenhum cadastro ainda.
+          {filter === "assinantes"
+            ? "Nenhum assinante ainda."
+            : "Nenhum estabelecimento nesta categoria."}
         </p>
       ) : (
         <ul className="space-y-2">
-          {businesses.map((b) => {
+          {visible.map((b) => {
             const st = planStatusText(b);
+            const subscriber = isPaidSubscriber(b, now);
             const tel = b.whatsapp || b.phone;
             return (
               <li key={b.id}>
@@ -147,7 +209,12 @@ export default async function AdminPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="text-right">
+                    <div className="flex flex-col items-start gap-1 sm:items-end">
+                      {subscriber && (
+                        <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700">
+                          ✓ Assinante
+                        </Badge>
+                      )}
                       <Badge
                         className={
                           st.tone === "danger"
@@ -159,7 +226,7 @@ export default async function AdminPage() {
                       >
                         {st.title}
                       </Badge>
-                      <p className="mt-1 text-[11px] text-muted">{st.detail}</p>
+                      <p className="text-[11px] text-muted">{st.detail}</p>
                     </div>
                     <AdminRowActions businessId={b.id} />
                   </div>
