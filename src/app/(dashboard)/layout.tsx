@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { BillingBanner } from "@/features/billing/billing-banner";
 import { EstablishmentLogo } from "@/components/brand/logo";
 import { isAdminEmail } from "@/features/admin/config";
+import { capabilitiesFor } from "@/features/billing/plan";
 
 export default async function DashboardLayout({
   children,
@@ -21,6 +22,9 @@ export default async function DashboardLayout({
         businessName={ctx.business.name}
         logoUrl={ctx.business.logo_url}
         isAdmin={isAdminEmail(ctx.email)}
+        showTeam={
+          ctx.profile.role === "owner" && capabilitiesFor(ctx.business).team
+        }
         planFields={{
           plan: ctx.business.plan,
           trial_ends_at: ctx.business.trial_ends_at,

@@ -41,7 +41,7 @@ export interface Profile {
   id: string;
   business_id: string;
   full_name: string;
-  role: "owner";
+  role: "owner" | "staff";
   created_at: string;
 }
 

@@ -6,10 +6,11 @@ import { navItems } from "@/features/navigation/nav-items";
 import { logout } from "@/features/auth/actions";
 import { getCurrentContext } from "@/features/auth/current";
 import { isAdminEmail } from "@/features/admin/config";
+import { capabilitiesFor } from "@/features/billing/plan";
 import { PlanStatusCard } from "@/features/billing/plan-status";
 import { PageHeader } from "@/components/ui/page-header";
 import { SUPPORT_WHATSAPP_URL } from "@/lib/support";
-import { LogOut, ShieldCheck, MessageCircle } from "lucide-react";
+import { LogOut, ShieldCheck, MessageCircle, Users } from "lucide-react";
 
 export const metadata: Metadata = { title: "Menu — Agenda" };
 
@@ -17,11 +18,27 @@ export default async function MenuPage() {
   const ctx = await getCurrentContext();
   if (!ctx) redirect("/login");
 
+  const showTeam =
+    ctx.profile.role === "owner" && capabilitiesFor(ctx.business).team;
+
   return (
     <div className="mx-auto max-w-md">
       <PageHeader title="Menu" />
 
       <PlanStatusCard business={ctx.business} className="mb-4" />
+
+      {showTeam && (
+        <Link
+          href="/equipe"
+          className="mb-4 flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5 hover:bg-slate-50"
+        >
+          <Users className="h-5 w-5 text-brand" aria-hidden />
+          <span className="flex-1 text-sm font-medium text-foreground">
+            Equipe
+          </span>
+          <ChevronRight className="h-4 w-4 text-muted" aria-hidden />
+        </Link>
+      )}
 
       {isAdminEmail(ctx.email) && (
         <Link

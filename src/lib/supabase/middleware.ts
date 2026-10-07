@@ -13,6 +13,7 @@ const PROTECTED_PREFIXES = [
   "/menu",
   "/assinatura",
   "/admin",
+  "/equipe",
   "/link",
 ];
 

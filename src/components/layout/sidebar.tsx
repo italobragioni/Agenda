@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus, ShieldCheck } from "lucide-react";
+import { Plus, ShieldCheck, Users } from "lucide-react";
 import { navItems } from "@/features/navigation/nav-items";
 import { EstablishmentLogo } from "@/components/brand/logo";
 import { PlanStatusChip } from "@/features/billing/plan-status";
@@ -14,11 +14,13 @@ export function Sidebar({
   logoUrl,
   planFields,
   isAdmin,
+  showTeam,
 }: {
   businessName: string;
   logoUrl?: string | null;
   planFields: PlanFields;
   isAdmin?: boolean;
+  showTeam?: boolean;
 }) {
   const pathname = usePathname();
 
@@ -49,6 +51,21 @@ export function Sidebar({
             </Link>
           );
         })}
+
+        {showTeam && (
+          <Link
+            href="/equipe"
+            className={cn(
+              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+              pathname.startsWith("/equipe")
+                ? "bg-brand text-brand-foreground"
+                : "text-muted hover:bg-slate-100 hover:text-foreground",
+            )}
+          >
+            <Users className="h-5 w-5" aria-hidden />
+            Equipe
+          </Link>
+        )}
 
         {isAdmin && (
           <Link
