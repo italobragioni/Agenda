@@ -31,6 +31,8 @@ export interface Business {
   plan: Plan;
   trial_ends_at: string | null;
   paid_until: string | null;
+  current_period_start: string | null;
+  appointment_limit_override: number | null;
   cakto_customer_id: string | null;
   cakto_subscription_id: string | null;
   subscription_status: string | null;

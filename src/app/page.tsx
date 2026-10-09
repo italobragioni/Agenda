@@ -455,7 +455,7 @@ export default function Home() {
         <div className="mx-auto max-w-3xl text-center">
           <Eyebrow>Planos</Eyebrow>
           <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Comece de graça. Depois, escolha seu plano.
+            Escolha o plano ideal para o seu negócio.
           </h2>
           <p className="mt-3 text-muted">
             Menos que uma lavagem simples por mês. Cancele quando quiser.
@@ -476,7 +476,7 @@ export default function Home() {
                         {plan.name}
                       </p>
                       <span className="inline-flex items-center gap-1 rounded-full bg-brand px-2.5 py-0.5 text-xs font-medium text-brand-foreground">
-                        <Star className="h-3 w-3" /> Popular
+                        <Star className="h-3 w-3" /> Recomendado
                       </span>
                     </div>
                     <p className="mt-2 text-4xl font-extrabold text-foreground">

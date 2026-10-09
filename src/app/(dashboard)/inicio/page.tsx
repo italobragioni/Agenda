@@ -3,6 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CalendarPlus, Clock } from "lucide-react";
 import { requireActiveBusiness } from "@/features/billing/guard";
+import { getUsage } from "@/features/billing/usage";
+import { UsageIndicator } from "@/features/billing/usage-indicator";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +47,12 @@ export default async function InicioPage() {
 
   const firstName = ctx.profile.full_name?.split(" ")[0] ?? "";
 
+  // Consumo do ciclo (indicador + aviso 80%) — apenas para o proprietário.
+  const isOwner = ctx.profile.role === "owner";
+  const usage = isOwner
+    ? await getUsage(supabase, ctx.business, tz)
+    : null;
+
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-6 flex items-start justify-between gap-4">
@@ -76,6 +84,12 @@ export default async function InicioPage() {
           </p>
         </Card>
       </div>
+
+      {usage && (
+        <div className="mb-6">
+          <UsageIndicator usage={usage} tz={tz} />
+        </div>
+      )}
 
       {nextAppointment && (
         <Card className="mb-6 flex items-center gap-3 border-brand/30 bg-brand-soft">

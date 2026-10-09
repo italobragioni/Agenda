@@ -10,7 +10,7 @@ import {
   Boxes,
 } from "lucide-react";
 import { requireActiveBusiness } from "@/features/billing/guard";
-import { capabilitiesFor } from "@/features/billing/plan";
+import { capabilitiesFor, maxBoxesFor } from "@/features/billing/plan";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
@@ -111,13 +111,23 @@ export default async function ConfiguracoesPage() {
       </Section>
 
       <Section icon={Boxes} title="Capacidade (boxes)">
-        {caps.boxes ? (
-          <CapacityForm value={ctx.business.capacity} />
-        ) : (
-          <LockedNote>
-            Vários carros ao mesmo tempo é do plano Premium.
-          </LockedNote>
-        )}
+        {(() => {
+          const maxBoxes = maxBoxesFor(ctx.business.plan);
+          // Essencial tem 1 box fixo -> trava e convida ao upgrade.
+          if (maxBoxes !== null && maxBoxes <= 1) {
+            return (
+              <LockedNote>
+                Vários carros ao mesmo tempo é a partir do plano Premium.
+              </LockedNote>
+            );
+          }
+          return (
+            <CapacityForm
+              value={ctx.business.capacity}
+              max={maxBoxes ?? 50}
+            />
+          );
+        })()}
       </Section>
 
       <Section icon={Timer} title="Intervalo entre clientes">

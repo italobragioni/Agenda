@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { offsetDayString, WEEKDAY_LABELS } from "@/lib/datetime";
 import { planState, capabilitiesFor } from "@/features/billing/plan";
+import { getUsage } from "@/features/billing/usage";
 import type { Business, Service } from "@/types/database";
 
 export interface PublicDay {
@@ -26,6 +27,8 @@ export interface PublicBusinessData {
   >;
   /** O estabelecimento pode receber agendamentos (plano ativo)? */
   active: boolean;
+  /** Pode receber NOVOS agendamentos online agora (ativo e dentro da cota)? */
+  canBook: boolean;
   services: Pick<
     Service,
     | "id"
@@ -59,7 +62,7 @@ export async function getPublicBusiness(
   const { data: business } = await admin
     .from("businesses")
     .select(
-      "id, name, slug, timezone, whatsapp, phone, logo_url, address, plan, trial_ends_at, paid_until",
+      "id, name, slug, timezone, whatsapp, phone, logo_url, address, plan, trial_ends_at, paid_until, current_period_start, appointment_limit_override",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -97,9 +100,22 @@ export async function getPublicBusiness(
     plan: business.plan,
     trial_ends_at: business.trial_ends_at,
     paid_until: business.paid_until,
+    current_period_start: business.current_period_start,
+    appointment_limit_override: business.appointment_limit_override,
   };
   const active = planState(planFields).active;
   const caps = capabilitiesFor(planFields);
+
+  // Pode receber novos agendamentos online? Precisa estar ativo e com cota.
+  let canBook = active;
+  if (active) {
+    const usage = await getUsage(
+      admin,
+      { ...planFields, id: business.id as string },
+      tz,
+    );
+    canBook = !usage.reachedLimit;
+  }
 
   // Marca (logo/endereço) só nos planos Premium+.
   const businessOut = {
@@ -125,6 +141,7 @@ export async function getPublicBusiness(
   return {
     business: businessOut,
     active,
+    canBook,
     services: servicesOut,
     openWeekdays,
     days,

@@ -7,21 +7,17 @@ import { getCurrentContext } from "@/features/auth/current";
 import { normalizePhone } from "@/lib/phone";
 import { parseCurrencyToCents } from "@/lib/money";
 import { localToUtc } from "@/lib/datetime";
-import { planState, canCreateAppointment } from "@/features/billing/plan";
-import { countMonthlyAppointments } from "@/features/billing/usage";
 import type { ActionState } from "@/lib/forms";
 import type { AppointmentStatus } from "@/types/database";
-
-function planErrorMessage(code: "PLANO_EXPIRADO" | "LIMITE_ATINGIDO"): string {
-  return code === "LIMITE_ATINGIDO"
-    ? "Você atingiu o limite de 50 agendamentos deste mês (plano Básico). Faça upgrade para o Premium."
-    : "Seu período de teste terminou. Assine um plano para continuar agendando.";
-}
 
 /** Traduz os erros vindos da função do banco para mensagens amigáveis. */
 function mapDbError(message: string): string {
   const key = (message || "").trim();
   const table: Record<string, string> = {
+    LIMITE_ATINGIDO:
+      "Você atingiu o limite de agendamentos do seu plano neste ciclo. Faça upgrade para continuar recebendo novos agendamentos.",
+    PLANO_EXPIRADO:
+      "Sua assinatura não está ativa. Assine um plano para continuar agendando.",
     HORARIO_INDISPONIVEL: "Esse horário acabou de ser ocupado. Escolha outro.",
     FECHADO: "O estabelecimento está fechado nesse dia.",
     FORA_DO_HORARIO: "Esse horário está fora do funcionamento.",
@@ -73,16 +69,9 @@ export async function createAppointmentByOwner(
 
   const supabase = await createClient();
 
-  // Verifica o plano e o limite mensal antes de criar.
-  const state = planState(ctx.business);
-  const monthlyCount = await countMonthlyAppointments(
-    supabase,
-    ctx.business.id,
-    ctx.business.timezone,
-  );
-  const blocked = canCreateAppointment(state, monthlyCount);
-  if (blocked) return { error: planErrorMessage(blocked) };
-
+  // O limite do plano/ciclo e a validade da assinatura são impostos de forma
+  // ATÔMICA dentro da função do banco (create_appointment), sob advisory lock.
+  // Aqui não confiamos em contagem no app: apenas traduzimos o erro retornado.
   const startAt = localToUtc(date, time, ctx.business.timezone).toISOString();
 
   const { error } = await supabase.rpc("create_appointment", {

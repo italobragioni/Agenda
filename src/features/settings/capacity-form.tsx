@@ -8,7 +8,13 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { Alert } from "@/components/ui/alert";
 import type { ActionState } from "@/lib/forms";
 
-export function CapacityForm({ value }: { value: number }) {
+export function CapacityForm({
+  value,
+  max = 50,
+}: {
+  value: number;
+  max?: number;
+}) {
   const [state, action] = useActionState(updateCapacity, {} as ActionState);
 
   return (
@@ -19,14 +25,14 @@ export function CapacityForm({ value }: { value: number }) {
       <FormField
         label="Atendimentos ao mesmo tempo"
         htmlFor="capacity"
-        hint="Quantos carros você consegue atender simultaneamente (ex.: nº de boxes)."
+        hint={`Quantos carros você consegue atender simultaneamente (ex.: nº de boxes). Seu plano permite até ${max}.`}
       >
         <Input
           id="capacity"
           name="capacity"
           type="number"
           min={1}
-          max={50}
+          max={max}
           inputMode="numeric"
           defaultValue={value}
           className="max-w-[120px]"

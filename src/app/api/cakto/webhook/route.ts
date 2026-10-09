@@ -132,10 +132,14 @@ async function applyOrder(admin: Admin, event: string, order: Order) {
       return;
     }
 
-    const paidUntil = new Date(Date.now() + PERIOD_MS).toISOString();
+    const now = new Date();
+    const paidUntil = new Date(now.getTime() + PERIOD_MS).toISOString();
     const update: Record<string, unknown> = {
       plan,
       paid_until: paidUntil,
+      // Início do ciclo = agora. A cota de agendamentos reinicia a cada
+      // pagamento confirmado (primeira compra e renovações).
+      current_period_start: now.toISOString(),
       subscription_status: "active",
     };
     if (order.customer?.id != null) {

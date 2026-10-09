@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentContext } from "@/features/auth/current";
 import { serviceSchema } from "@/validation/service";
 import { zodFieldErrors, type ActionState } from "@/lib/forms";
+import { maxServicesFor, PLANS } from "@/features/billing/plan";
 
 // ---------------------------------------------------------------------
 // Criar serviço
@@ -31,6 +32,23 @@ export async function createService(
   if (!parsed.success) return { fieldErrors: zodFieldErrors(parsed.error) };
 
   const supabase = await createClient();
+
+  // Limite de serviços cadastrados do plano (regra de negócio, no servidor).
+  const maxServices = maxServicesFor(ctx.business.plan);
+  if (maxServices !== null) {
+    const { count } = await supabase
+      .from("services")
+      .select("id", { count: "exact", head: true })
+      .eq("business_id", ctx.business.id);
+    if ((count ?? 0) >= maxServices) {
+      const planName =
+        ctx.business.plan === "basic" ? PLANS.basic.name : PLANS.premium.name;
+      return {
+        error: `Seu plano ${planName} permite até ${maxServices} serviços. Faça upgrade para cadastrar mais.`,
+      };
+    }
+  }
+
   const { error } = await supabase.from("services").insert({
     business_id: ctx.business.id,
     ...parsed.data,

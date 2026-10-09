@@ -48,7 +48,7 @@ export function PlanCards({ currentPlan }: { currentPlan: string }) {
                 </h3>
                 {highlight && (
                   <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs font-medium text-brand">
-                    Mais popular
+                    Recomendado
                   </span>
                 )}
               </div>

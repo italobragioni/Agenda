@@ -9,6 +9,7 @@ import { normalizePhone } from "@/lib/phone";
 import { slugify } from "@/lib/slug";
 import { businessInfoSchema, slugSchema } from "@/validation/settings";
 import { zodFieldErrors, type ActionState } from "@/lib/forms";
+import { maxBoxesFor } from "@/features/billing/plan";
 
 // --- Meu negócio ---
 export async function updateBusinessInfo(
@@ -78,6 +79,14 @@ export async function updateCapacity(
   const capacity = Number(formData.get("capacity"));
   if (!Number.isInteger(capacity) || capacity < 1 || capacity > 50) {
     return { error: "Informe um número entre 1 e 50." };
+  }
+
+  // Teto de boxes do plano (null = ilimitado). Regra de negócio no servidor.
+  const maxBoxes = maxBoxesFor(ctx.business.plan);
+  if (maxBoxes !== null && capacity > maxBoxes) {
+    return {
+      error: `Seu plano permite até ${maxBoxes} ${maxBoxes === 1 ? "box" : "boxes"}. Faça upgrade para ter mais.`,
+    };
   }
 
   const supabase = await createClient();

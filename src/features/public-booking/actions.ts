@@ -5,13 +5,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizePhone } from "@/lib/phone";
 import { localToUtc } from "@/lib/datetime";
 import { checkRateLimit } from "@/lib/rate-limit";
-import {
-  planState,
-  canCreateAppointment,
-  capabilitiesFor,
-} from "@/features/billing/plan";
-import { countMonthlyAppointments } from "@/features/billing/usage";
+import { capabilitiesFor } from "@/features/billing/plan";
 import { isVehicleType, vehiclePriceCents } from "./vehicle";
+
+/** Mensagem neutra para o cliente final (sem expor dados da assinatura). */
+const UNAVAILABLE =
+  "Novos agendamentos online estão temporariamente indisponíveis. Entre em contato com o estabelecimento.";
 
 export interface PublicBookingResult {
   ok: boolean;
@@ -27,6 +26,9 @@ export interface PublicBookingResult {
 
 function mapDbError(message: string): string {
   const table: Record<string, string> = {
+    // Limite do plano / assinatura inativa: mensagem neutra, sem expor nada.
+    LIMITE_ATINGIDO: UNAVAILABLE,
+    PLANO_EXPIRADO: UNAVAILABLE,
     HORARIO_INDISPONIVEL: "Esse horário acabou de ser reservado. Escolha outro.",
     FECHADO: "O estabelecimento está fechado nesse dia.",
     FORA_DO_HORARIO: "Esse horário está fora do funcionamento.",
@@ -76,23 +78,9 @@ export async function createPublicBooking(input: {
     .maybeSingle();
   if (!business) return { ok: false, error: "Estabelecimento não encontrado." };
 
-  // Verifica o plano/limite do estabelecimento.
-  const state = planState({
-    plan: business.plan,
-    trial_ends_at: business.trial_ends_at,
-    paid_until: business.paid_until,
-  });
-  const monthlyCount = await countMonthlyAppointments(
-    admin,
-    business.id as string,
-    business.timezone as string,
-  );
-  if (canCreateAppointment(state, monthlyCount)) {
-    return {
-      ok: false,
-      error: "Agendamentos indisponíveis no momento. Fale com o estabelecimento.",
-    };
-  }
+  // O limite do plano/ciclo e a validade da assinatura são impostos de forma
+  // atômica dentro de create_appointment (RPC). O erro volta como mensagem
+  // neutra para o cliente final (ver mapDbError).
 
   const { data: service } = await admin
     // "*" é resiliente caso a migração 0010 (preço por porte) ainda não tenha
