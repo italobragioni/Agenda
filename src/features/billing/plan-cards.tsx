@@ -36,7 +36,7 @@ export function PlanCards({ currentPlan }: { currentPlan: string }) {
         {(["basic", "premium", "empresarial"] as const).map((key) => {
           const plan = PLANS[key];
           const isCurrent = currentPlan === key;
-          const highlight = key === "premium";
+          const highlight = key === "empresarial";
           return (
             <Card
               key={key}

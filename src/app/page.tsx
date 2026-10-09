@@ -464,7 +464,7 @@ export default function Home() {
           <div className="mx-auto mt-10 grid max-w-4xl items-stretch gap-5 sm:grid-cols-3">
             {(["basic", "premium", "empresarial"] as const).map((key) => {
               const plan = PLANS[key];
-              const highlight = key === "premium";
+              const highlight = key === "empresarial";
               return highlight ? (
                 <div
                   key={key}
