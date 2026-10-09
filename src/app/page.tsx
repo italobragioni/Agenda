@@ -27,11 +27,18 @@ import { SUPPORT_WHATSAPP_URL } from "@/lib/support";
 export const metadata: Metadata = {
   title: "Carvi — Agendamento online para lava-jato e estética automotiva",
   description:
-    "Seus clientes agendam sozinhos, 24h, por um link. Agenda organizada, sem furos e sem WhatsApp lotado. Planos a partir de R$ 19,90/mês.",
+    "Sua agenda enche sozinha enquanto você trabalha. O cliente agenda pelo seu link, 24h, sem WhatsApp lotado e sem furo. Planos a partir de R$ 19,90/mês.",
 };
 
 const CTA_HREF = "/cadastro";
 const YEAR = new Date().getFullYear();
+
+/** Frase de reforço (copy) exibida sob o nome de cada plano. */
+const PLAN_TAGLINES: Record<"basic" | "premium" | "empresarial", string> = {
+  basic: "Pra quem tá começando a organizar a casa.",
+  premium: "Pro lava-jato que tá crescendo de verdade.",
+  empresarial: "O plano de quem joga pra ganhar e quer escalar.",
+};
 
 function Eyebrow({ children }: { children: string }) {
   return (
@@ -154,16 +161,18 @@ export default function Home() {
         />
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:py-20 lg:grid-cols-2">
           <div className="text-center lg:text-left">
-            <Eyebrow>Lava-jato & estética automotiva</Eyebrow>
+            <Eyebrow>Feito pra lava-jato brasileiro</Eyebrow>
             <h1 className="mt-5 text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl">
-              Cada horário perdido no WhatsApp é{" "}
+              Sua agenda{" "}
               <span className="bg-gradient-to-r from-cyan-500 to-brand bg-clip-text text-transparent">
-                dinheiro saindo do seu bolso.
-              </span>
+                enche sozinha
+              </span>{" "}
+              enquanto você tá com a mão no carro.
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-base text-muted sm:text-lg lg:mx-0">
-              A Carvi organiza seus agendamentos e deixa seus clientes marcarem
-              online, 24 horas por dia. Planos a partir de R$ 19,90/mês — cancele quando quiser.
+              Chega de viver preso no WhatsApp respondendo cliente. Com a Carvi,
+              o cliente agenda sozinho pelo seu link — 24 horas por dia, sem você
+              parar de trabalhar.
             </p>
             <div className="mt-8 flex flex-col items-center gap-3 lg:items-start">
               <PrimaryCta>Quero minha agenda cheia</PrimaryCta>
@@ -172,10 +181,10 @@ export default function Home() {
                   <Check className="h-3.5 w-3.5 text-brand" /> Sem fidelidade
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <Check className="h-3.5 w-3.5 text-brand" /> Cartão ou Pix
+                  <Check className="h-3.5 w-3.5 text-brand" /> Pronto em 5 minutos
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <Check className="h-3.5 w-3.5 text-brand" /> Pronto em 5 min
+                  <Check className="h-3.5 w-3.5 text-brand" /> Cartão ou Pix
                 </span>
               </div>
             </div>
@@ -192,10 +201,10 @@ export default function Home() {
       <section className="border-y border-border bg-slate-950">
         <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 px-4 py-8 sm:grid-cols-4">
           {[
-            { n: "24h", l: "Agenda aberta" },
-            { n: "0", l: "Horário duplicado" },
-            { n: "5 min", l: "Para começar" },
-            { n: "R$ 19,90", l: "A partir de/mês" },
+            { n: "24h", l: "Agendando por você" },
+            { n: "0", l: "Furo ou carro em dobro" },
+            { n: "5 min", l: "Pra começar a usar" },
+            { n: "R$ 19,90", l: "Menos que uma lavagem" },
           ].map((s) => (
             <div key={s.l} className="text-center">
               <p className="text-2xl font-extrabold text-white sm:text-3xl">
@@ -212,17 +221,17 @@ export default function Home() {
         <div className="mx-auto max-w-2xl text-center">
           <Eyebrow>O problema</Eyebrow>
           <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Você já passou por isso?
+            Olha quanto dinheiro tá escorrendo pelo ralo todo dia
           </h2>
         </div>
         <ul className="mx-auto mt-8 grid max-w-3xl gap-3 sm:grid-cols-2">
           {[
-            "Perdeu cliente porque demorou pra responder no WhatsApp",
-            "Marcou dois carros no mesmo horário e passou vergonha",
-            "Anotou no caderno e esqueceu o agendamento",
-            "Ficou o dia todo preso no celular em vez de trabalhar",
-            "Chegou no fim do mês sem saber quanto faturou",
-            "Furo na agenda = box parado = prejuízo",
+            "Você demora 20 minutos pra responder e o cliente já marcou no concorrente.",
+            "Marcou dois carros no mesmo horário e passou vergonha na frente do cliente.",
+            "Anotou no caderno, rasurou, esqueceu — e o box ficou parado.",
+            "Passa o dia inteiro com o celular na mão em vez de lavar carro e faturar.",
+            "Chega o fim do mês e você não faz ideia de quanto entrou nem quanto sobrou.",
+            "Furou um horário, o box ficou vazio, e aquele dinheiro não volta nunca mais.",
           ].map((item) => (
             <li
               key={item}
@@ -240,13 +249,14 @@ export default function Home() {
       {/* FUNCIONALIDADES (screenshots reais do app) */}
       <section className="bg-slate-50 px-4 py-16">
         <div className="mx-auto max-w-2xl text-center">
-          <Eyebrow>Por dentro do app</Eyebrow>
+          <Eyebrow>A solução</Eyebrow>
           <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Veja como é simples na prática
+            E se o celular trabalhasse PRA você?
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-muted">
-            Telas reais do aplicativo. Feito pra funcionar no celular, mesmo pra
-            quem não é de tecnologia.
+            A Carvi transforma seu celular de prisão em máquina de agendamento.
+            Você cadastra serviços e horários, ganha um link com a sua marca, e o
+            cliente agenda sozinho. Você só olha a agenda organizada e lava carro.
           </p>
         </div>
 
@@ -254,38 +264,38 @@ export default function Home() {
           <FeatureRow
             src="/app/agendar.png"
             alt="Página pública de agendamento da Carvi"
-            eyebrow="Para seus clientes"
-            title="Seus clientes agendam sozinhos"
-            description="Você compartilha um link com a sua marca. O cliente escolhe o serviço, vê só os horários livres e confirma — 24 horas por dia, sem instalar nada e sem criar conta."
+            eyebrow="Seu link, sua marca"
+            title="O cliente agenda sozinho, você nem precisa responder"
+            description="Um link profissional com a cara do seu negócio, aberto 24h. O cliente escolhe o serviço, vê só o que tá livre e confirma — sem te incomodar."
             points={[
-              "Link próprio com a logo do seu negócio",
-              "Mostra apenas os horários realmente disponíveis",
-              "Confirmação na hora, direto pelo celular",
+              "Funciona de dia e de noite, até quando você tá dormindo",
+              "Cliente não precisa baixar app nem criar conta",
+              "Só aparecem os horários que você tem livre (zero confusão)",
             ]}
           />
           <FeatureRow
             src="/app/agenda.png"
             alt="Tela da agenda do dono no app da Carvi"
-            eyebrow="Sua rotina"
-            title="Toda a sua agenda organizada"
-            description="Veja os atendimentos do dia, de amanhã e da semana numa tela só. Cada carro com horário, serviço, valor e status — e o sistema bloqueia dois agendamentos no mesmo horário sozinho."
+            eyebrow="Tudo num lugar só"
+            title="Pare de adivinhar quem vem e quando"
+            description="Toda a sua agenda limpa e organizada na tela, com o status de cada carro e atalho direto pro WhatsApp do cliente."
             points={[
-              "Hoje, amanhã e semana num toque",
-              "Status de cada atendimento (agendado, em atendimento, finalizado)",
-              "Fale com o cliente no WhatsApp em um clique",
+              "Veja o dia inteiro de bate-pronto, sem caderno rasurado",
+              "Controle seus boxes: quantos carros atende ao mesmo tempo",
+              "Fale com o cliente num toque pelo atalho de WhatsApp",
             ]}
             reverse
           />
           <FeatureRow
             src="/app/financeiro.png"
             alt="Tela do financeiro com gráfico no app da Carvi"
-            eyebrow="Seu dinheiro"
-            title="Saiba exatamente quanto você lucra"
-            description="Faturamento, despesas e lucro na palma da mão, com gráfico de faturamento por serviço. Descubra quais serviços dão mais retorno e exporte tudo em planilha."
+            eyebrow="O jogo da virada"
+            title="Saiba exatamente quanto faturou e quanto sobrou"
+            description="Faturamento, despesas e lucro na palma da mão. Descubra qual serviço te dá mais dinheiro e pare de trabalhar no escuro."
             points={[
-              "Faturamento, despesas e lucro por período",
-              "Gráfico de faturamento por serviço",
-              "Exportação em planilha (Excel)",
+              "Faturamento, despesas e lucro sem conta de cabeça",
+              "Gráfico que mostra qual serviço enche mais seu bolso",
+              "Exporte tudo em planilha quando precisar",
             ]}
           />
         </div>
@@ -300,7 +310,7 @@ export default function Home() {
         <div className="mx-auto max-w-2xl text-center">
           <Eyebrow>Como começar</Eyebrow>
           <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Pronto em 3 passos
+            Do caderno pra agenda cheia em 3 passos
           </h2>
         </div>
         <div className="mx-auto mt-10 grid max-w-3xl gap-4 sm:grid-cols-3">
@@ -308,17 +318,17 @@ export default function Home() {
             {
               icon: Sparkles,
               t: "1. Crie sua conta",
-              d: "Cadastre serviços e horários em minutos.",
-            },
-            {
-              icon: Link2,
-              t: "2. Compartilhe o link",
-              d: "No status, na bio ou no grupo.",
+              d: "Leva 5 minutos. Cartão ou Pix e o acesso libera na hora.",
             },
             {
               icon: CalendarClock,
-              t: "3. Receba agendamentos",
-              d: "Sua agenda enche sozinha, sem furo.",
+              t: "2. Cadastre serviços e horários",
+              d: "Diga o que você faz, por quanto e quando atende. Pronto.",
+            },
+            {
+              icon: Link2,
+              t: "3. Divulgue seu link",
+              d: "Mande no WhatsApp, cole na bio, bote no adesivo.",
             },
           ].map((s) => (
             <div
@@ -340,7 +350,7 @@ export default function Home() {
         <div className="mx-auto max-w-2xl text-center">
           <Eyebrow>A virada de chave</Eyebrow>
           <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            O antes e o depois da Carvi
+            A diferença entre amador e dono de negócio
           </h2>
         </div>
         <div className="mx-auto mt-10 grid max-w-3xl gap-5 sm:grid-cols-2">
@@ -350,10 +360,10 @@ export default function Home() {
             </p>
             <ul className="mt-4 space-y-3 text-sm text-muted">
               {[
-                "Responder cada cliente na mão, um por um",
-                "Agenda no caderno ou na cabeça",
-                "Cliente some porque não teve resposta",
-                "Contas de cabeça, sem saber o lucro",
+                "Celular lotado de “tem horário amanhã?” o dia inteiro",
+                "Carro marcado em dobro e cliente irritado na porta",
+                "Fim do mês sem saber se lucrou ou só rodou",
+                "Box parado porque você esqueceu de anotar",
               ].map((t) => (
                 <li key={t} className="flex items-start gap-2.5">
                   <X className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
@@ -368,10 +378,10 @@ export default function Home() {
             </p>
             <ul className="mt-4 space-y-3 text-sm text-foreground">
               {[
-                "Cliente agenda sozinho pelo seu link",
-                "Agenda organizada e sincronizada",
-                "Atende 24h, até com a loja fechada",
-                "Faturamento e lucro na tela, em tempo real",
+                "Cliente agenda sozinho, você trabalha em paz",
+                "Horário ocupado some da tela — nunca mais dois no mesmo",
+                "Faturamento e lucro na tela, sempre que quiser",
+                "Agenda cheia e organizada, box sempre girando",
               ].map((t) => (
                 <li key={t} className="flex items-start gap-2.5">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
@@ -388,50 +398,50 @@ export default function Home() {
         <div className="mx-auto max-w-3xl text-center">
           <Eyebrow>Benefícios</Eyebrow>
           <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            O que muda no seu dia a dia
+            O que muda na sua vida a partir de hoje
           </h2>
         </div>
         <div className="mx-auto mt-10 grid max-w-4xl gap-4 sm:grid-cols-2">
           {[
             {
-              icon: CalendarClock,
-              t: "Pare de perder cliente",
-              d: "Ele agenda sozinho, 24h, até de madrugada.",
-            },
-            {
               icon: MessageSquareOff,
-              t: "Chega de WhatsApp lotado",
-              d: "O link responde por você.",
+              t: "Mais tempo na mão",
+              d: "Largue o celular e volte a lavar carro.",
             },
             {
               icon: ShieldCheck,
-              t: "Nunca mais horário duplicado",
-              d: "O sistema simplesmente não deixa.",
-            },
-            {
-              icon: CarFront,
-              t: "Controle os boxes",
-              d: "Diga quantos carros lava ao mesmo tempo.",
-            },
-            {
-              icon: TrendingUp,
-              t: "Saiba seu lucro",
-              d: "Faturamento, despesas e lucro na tela.",
-            },
-            {
-              icon: Users,
-              t: "Clientes organizados",
-              d: "Histórico e WhatsApp de cada um.",
+              t: "Fim da vergonha",
+              d: "Nunca mais marque dois carros no mesmo horário.",
             },
             {
               icon: Sparkles,
-              t: "Sua marca na frente",
-              d: "Página de agendamento com a sua logo.",
+              t: "Cara de profissional",
+              d: "Um link com a sua marca que impressiona o cliente.",
+            },
+            {
+              icon: CalendarClock,
+              t: "Cliente que não some",
+              d: "Ele agenda na hora, sem esperar você responder.",
+            },
+            {
+              icon: CarFront,
+              t: "Box sempre girando",
+              d: "Horário livre vira carro marcado, até de madrugada.",
+            },
+            {
+              icon: TrendingUp,
+              t: "Dinheiro no controle",
+              d: "Saiba quanto entra, quanto sai e quanto sobra.",
+            },
+            {
+              icon: Users,
+              t: "Equipe na mesma conta",
+              d: "Coloque seus funcionários pra trabalhar junto.",
             },
             {
               icon: Smartphone,
-              t: "Tudo no celular",
-              d: "Simples até pra quem não é de tecnologia.",
+              t: "Paz de cabeça",
+              d: "Sua agenda trabalha sozinha enquanto você vive.",
             },
           ].map((b) => (
             <div
@@ -455,10 +465,11 @@ export default function Home() {
         <div className="mx-auto max-w-3xl text-center">
           <Eyebrow>Planos</Eyebrow>
           <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Escolha o plano ideal para o seu negócio.
+            Escolha seu plano e comece a lucrar hoje
           </h2>
           <p className="mt-3 text-muted">
-            Menos que uma lavagem simples por mês. Cancele quando quiser.
+            Custa menos que uma lavagem simples por mês. Um único cliente que
+            você deixaria de perder já paga o plano inteiro.
           </p>
 
           <div className="mx-auto mt-10 grid max-w-4xl items-stretch gap-5 sm:grid-cols-3">
@@ -479,6 +490,9 @@ export default function Home() {
                         <Star className="h-3 w-3" /> Recomendado
                       </span>
                     </div>
+                    <p className="mt-1.5 text-xs text-muted">
+                      {PLAN_TAGLINES[key]}
+                    </p>
                     <p className="mt-2 text-4xl font-extrabold text-foreground">
                       {formatCents(plan.priceCents)}
                       <span className="text-sm font-normal text-muted">/mês</span>
@@ -507,6 +521,9 @@ export default function Home() {
                   <p className="text-sm font-semibold text-foreground">
                     {plan.name}
                   </p>
+                  <p className="mt-1.5 text-xs text-muted">
+                    {PLAN_TAGLINES[key]}
+                  </p>
                   <p className="mt-2 text-4xl font-extrabold text-foreground">
                     {formatCents(plan.priceCents)}
                     <span className="text-sm font-normal text-muted">/mês</span>
@@ -532,7 +549,7 @@ export default function Home() {
             })}
           </div>
           <p className="mt-6 text-xs text-muted">
-            Pagamento por cartão ou Pix • Cancele quando quiser
+            Cartão ou Pix • Sem fidelidade • Acesso na hora
           </p>
         </div>
       </section>
@@ -543,12 +560,13 @@ export default function Home() {
           <ShieldCheck className="h-10 w-10 shrink-0 text-brand" aria-hidden />
           <div>
             <h2 className="text-lg font-bold text-foreground sm:text-xl">
-              Sem fidelidade e sem complicação
+              Sem pegadinha, sem contrato, sem risco
             </h2>
             <p className="mt-1.5 text-sm text-muted">
-              Você assina por mês e cancela a renovação quando quiser. Pagamento
-              seguro por cartão ou Pix, e o acesso é liberado na hora após a
-              confirmação.
+              Aqui ninguém te prende. Sem fidelidade, sem multa, sem letra miúda.
+              Você assina, o acesso libera na hora e já sai usando em 5 minutos.
+              Quiser parar, cancela quando bem entender. O único risco de verdade
+              é continuar perdendo cliente mais um mês no caderno.
             </p>
           </div>
         </div>
@@ -566,32 +584,24 @@ export default function Home() {
           <div className="mt-8 space-y-2.5">
             {[
               {
-                q: "Preciso instalar algum aplicativo?",
-                a: "Não. Funciona no navegador, no celular ou no computador.",
+                q: "Preciso saber de tecnologia pra usar?",
+                a: "Não. Se você manda mensagem no WhatsApp, você usa a Carvi. Foi feita pra dono de lava-jato, não pra programador.",
               },
               {
-                q: "Meus clientes precisam criar conta?",
-                a: "Não. Eles só abrem seu link, escolhem o horário e confirmam.",
+                q: "E se eu quiser cancelar?",
+                a: "Cancela quando quiser, na hora. Sem fidelidade, sem multa, sem enrolação.",
+              },
+              {
+                q: "O cliente precisa baixar algum app?",
+                a: "Nada. Ele só abre o seu link, escolhe o horário e confirma. Não baixa nada e não cria conta.",
+              },
+              {
+                q: "Funciona no meu celular?",
+                a: "Funciona. A Carvi foi feita pra celular. Você gerencia tudo da palma da mão, onde estiver.",
               },
               {
                 q: "Quanto tempo pra começar a usar?",
-                a: "Cerca de 5 minutos: cadastra os serviços, define os horários e pronto.",
-              },
-              {
-                q: "Serve pra estética e detalhamento também?",
-                a: "Sim. Lava-jato, estética automotiva e detalhamento.",
-              },
-              {
-                q: "Preciso pagar para usar?",
-                a: "Sim. Você cria a conta e escolhe um plano (a partir de R$ 19,90/mês). O acesso é liberado assim que o pagamento é confirmado.",
-              },
-              {
-                q: "Quais as formas de pagamento?",
-                a: "Cartão ou Pix, pela Cakto. A assinatura é mensal e você cancela a renovação quando quiser.",
-              },
-              {
-                q: "Posso colocar a logo do meu negócio?",
-                a: "Pode. Sua página de agendamento fica com a sua marca.",
+                a: "Mais ou menos 5 minutos. Cria a conta, cadastra seus serviços e horários, e seu link já tá no ar.",
               },
             ].map((item) => (
               <details
@@ -619,20 +629,26 @@ export default function Home() {
         />
         <div className="relative mx-auto max-w-2xl">
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-            Sua agenda pode trabalhar por você a partir de hoje.
+            Cada dia no caderno é mais um cliente que você perde
           </h2>
           <p className="mt-3 text-slate-300">
-            Menos WhatsApp. Menos furo. Mais carro no box.
+            Enquanto você pensa, o concorrente já tá com a agenda enchendo
+            sozinha. Vira a chave agora — leva 5 minutos e o acesso libera na hora.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3">
             <Link href={CTA_HREF}>
               <Button size="lg">
-                Criar minha conta
+                Criar minha conta agora
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Button>
             </Link>
             <p className="text-xs text-slate-400">
               Cartão ou Pix • Pronto em 5 minutos • Cancele quando quiser
+            </p>
+            <p className="mx-auto mt-2 max-w-md text-xs text-slate-400">
+              PS: quanto você já perdeu esse mês de horário furado e cliente que
+              sumiu? A Carvi custa menos que uma lavagem simples. Deixar pra
+              depois é escolher perder de novo.
             </p>
             <a
               href={SUPPORT_WHATSAPP_URL}
