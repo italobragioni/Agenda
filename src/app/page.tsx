@@ -683,10 +683,15 @@ export default function Home() {
         href={SUPPORT_WHATSAPP_URL}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Falar no WhatsApp"
-        className="wa-pulse tap fixed bottom-6 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 sm:right-6"
+        aria-label="Dúvidas? Fale no WhatsApp"
+        className="tap fixed bottom-6 right-4 z-40 flex flex-col items-center gap-1.5 sm:right-6"
       >
-        <MessageCircle className="h-7 w-7" />
+        <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-foreground shadow-md ring-1 ring-black/5">
+          Dúvidas?
+        </span>
+        <span className="wa-pulse flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700">
+          <MessageCircle className="h-7 w-7" />
+        </span>
       </a>
     </div>
   );
