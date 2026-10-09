@@ -687,16 +687,6 @@ export default function Home() {
         </Link>
       </div>
 
-      {/* BOTÃO FLUTUANTE DO WHATSAPP */}
-      <a
-        href={SUPPORT_WHATSAPP_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Falar no WhatsApp"
-        className="wa-pulse tap fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 sm:bottom-6 sm:right-6"
-      >
-        <MessageCircle className="h-7 w-7" />
-      </a>
     </div>
   );
 }
