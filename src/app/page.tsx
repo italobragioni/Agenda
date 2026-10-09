@@ -678,15 +678,16 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* CTA FIXO NO CELULAR */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-white/95 p-3 backdrop-blur sm:hidden">
-        <Link href={CTA_HREF}>
-          <Button fullWidth size="lg">
-            Criar minha conta
-          </Button>
-        </Link>
-      </div>
-
+      {/* BOTÃO FLUTUANTE DO WHATSAPP */}
+      <a
+        href={SUPPORT_WHATSAPP_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Falar no WhatsApp"
+        className="wa-pulse tap fixed bottom-6 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 sm:right-6"
+      >
+        <MessageCircle className="h-7 w-7" />
+      </a>
     </div>
   );
 }
