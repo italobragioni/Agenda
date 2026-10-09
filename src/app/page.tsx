@@ -207,10 +207,8 @@ export default function Home() {
                   className="pointer-events-none absolute -inset-5 -z-10 rounded-[2.5rem] bg-gradient-to-br from-cyan-400/30 to-brand/30 blur-2xl"
                   aria-hidden
                 />
-                <div className="overflow-hidden rounded-[1.9rem] bg-slate-900 p-1.5 shadow-soft-brand ring-1 ring-black/5">
-                  <div className="overflow-hidden rounded-[1.5rem]">
-                    <WistiaVsl mediaId="l1fxyqud2x" />
-                  </div>
+                <div className="overflow-hidden rounded-[1.6rem] shadow-soft-brand ring-1 ring-black/5">
+                  <WistiaVsl mediaId="l1fxyqud2x" />
                 </div>
               </div>
             </div>
