@@ -14,7 +14,10 @@ import { planState, PLANS } from "@/features/billing/plan";
 import { formatCents } from "@/lib/money";
 import { formatDateBR } from "@/lib/datetime";
 import { formatPhone, whatsappLink } from "@/lib/phone";
-import { onboardingWhatsappMessage } from "@/lib/support";
+import {
+  onboardingWhatsappMessage,
+  conversionWhatsappMessage,
+} from "@/lib/support";
 import { cn } from "@/lib/utils";
 import type { Business } from "@/types/database";
 
@@ -168,6 +171,11 @@ export default async function AdminPage({
             const st = planStatusText(b);
             const subscriber = isPaidSubscriber(b, now);
             const tel = b.whatsapp || b.phone;
+            // Sem plano ativo = criou a conta mas não assinou -> mensagem de
+            // conversão. Com acesso ativo -> mensagem de acompanhamento.
+            const waMessage = planState(b, now).active
+              ? onboardingWhatsappMessage(bizOwnerName.get(b.id))
+              : conversionWhatsappMessage(bizOwnerName.get(b.id));
             return (
               <li key={b.id}>
                 <Card className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
@@ -185,10 +193,7 @@ export default async function AdminPage({
                     <p className="mt-0.5 text-xs text-muted">
                       {tel ? (
                         <a
-                          href={whatsappLink(
-                            tel,
-                            onboardingWhatsappMessage(bizOwnerName.get(b.id)),
-                          )}
+                          href={whatsappLink(tel, waMessage)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="font-medium text-brand hover:underline"

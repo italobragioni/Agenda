@@ -19,10 +19,14 @@ import { Badge } from "@/components/ui/badge";
 import { DonutChart, type DonutSlice } from "@/components/ui/donut-chart";
 import { AdminRowActions } from "@/features/admin/row-actions";
 import { planStatusText } from "@/features/billing/plan-status";
+import { planState } from "@/features/billing/plan";
 import { formatCents } from "@/lib/money";
 import { formatDateBR } from "@/lib/datetime";
 import { formatPhone, whatsappLink } from "@/lib/phone";
-import { onboardingWhatsappMessage } from "@/lib/support";
+import {
+  onboardingWhatsappMessage,
+  conversionWhatsappMessage,
+} from "@/lib/support";
 import type { Business, Service, Appointment } from "@/types/database";
 
 export const metadata: Metadata = { title: "Detalhes — Carvi" };
@@ -103,6 +107,10 @@ export default async function AdminBusinessDetailPage({
 
   const tel = business.whatsapp || business.phone;
   const st = planStatusText(business);
+  // Sem plano ativo = criou a conta mas não assinou -> mensagem de conversão.
+  const waMessage = planState(business).active
+    ? onboardingWhatsappMessage(profileData?.full_name)
+    : conversionWhatsappMessage(profileData?.full_name);
 
   const stats = [
     { icon: TrendingUp, label: "Faturamento", value: formatCents(faturamento) },
@@ -151,10 +159,7 @@ export default async function AdminBusinessDetailPage({
           <Users className="h-4 w-4 shrink-0 text-muted" />
           {tel ? (
             <a
-              href={whatsappLink(
-                tel,
-                onboardingWhatsappMessage(profileData?.full_name),
-              )}
+              href={whatsappLink(tel, waMessage)}
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-brand hover:underline"
