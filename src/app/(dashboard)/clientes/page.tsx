@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Users, ChevronRight, MessageCircle } from "lucide-react";
+import { Users, ChevronRight, MessageCircle, UserPlus } from "lucide-react";
 import { requireActiveBusiness } from "@/features/billing/guard";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { formatCents } from "@/lib/money";
 import { formatPhone, onlyDigits, whatsappLink } from "@/lib/phone";
@@ -61,6 +62,15 @@ export default async function ClientesPage({
       <PageHeader
         title="Clientes"
         description="Histórico e contato dos seus clientes."
+        action={
+          <Link href="/clientes/novo">
+            <Button>
+              <UserPlus className="h-4 w-4" aria-hidden />
+              <span className="hidden sm:inline">Adicionar cliente</span>
+              <span className="sm:hidden">Adicionar</span>
+            </Button>
+          </Link>
+        }
       />
 
       <SearchInput
@@ -76,7 +86,14 @@ export default async function ClientesPage({
           description={
             query
               ? "Tente outro nome ou telefone."
-              : "Os clientes aparecem aqui automaticamente quando você cria agendamentos."
+              : "Adicione um cliente ou deixe que apareçam sozinhos quando você criar agendamentos."
+          }
+          action={
+            query ? undefined : (
+              <Link href="/clientes/novo">
+                <Button>Adicionar cliente</Button>
+              </Link>
+            )
           }
         />
       ) : (
@@ -96,6 +113,7 @@ export default async function ClientesPage({
                       </p>
                       <p className="truncate text-xs text-muted">
                         {formatPhone(c.phone)}
+                        {c.vehicle ? ` · ${c.vehicle}` : ""}
                       </p>
                       <p className="mt-1 text-xs text-muted">
                         {s.completedCount}{" "}

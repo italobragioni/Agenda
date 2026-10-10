@@ -53,6 +53,8 @@ export interface Customer {
   business_id: string;
   name: string;
   phone: string;
+  /** Carro do cliente (texto livre, opcional). Ex.: "Gol prata". */
+  vehicle: string | null;
   created_at: string;
   updated_at: string;
 }

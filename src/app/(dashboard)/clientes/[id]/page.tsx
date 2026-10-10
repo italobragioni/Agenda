@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Phone, CalendarClock } from "lucide-react";
+import { ArrowLeft, Phone, CalendarClock, Car } from "lucide-react";
 import { requireActiveBusiness } from "@/features/billing/guard";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
@@ -67,6 +67,12 @@ export default async function ClienteDetailPage({
           <Phone className="h-4 w-4" aria-hidden />
           {formatPhone(customer.phone)}
         </p>
+        {customer.vehicle && (
+          <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
+            <Car className="h-4 w-4" aria-hidden />
+            {customer.vehicle}
+          </p>
+        )}
         <div className="mt-4">
           <WhatsAppButton phone={customer.phone} label="Chamar no WhatsApp" />
         </div>
