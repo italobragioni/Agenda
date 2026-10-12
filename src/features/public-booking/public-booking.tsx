@@ -330,8 +330,13 @@ export function PublicBooking({
           {/* Resumo */}
           <div className="rounded-xl bg-slate-50 p-3 text-sm">
             <p className="font-medium text-foreground">{service.name}</p>
-            {vehicle && <p className="text-muted">Veículo: {vehicle}</p>}
-            <p className="text-muted">
+            {service.description && (
+              <p className="mt-0.5 whitespace-pre-line text-muted">
+                {service.description}
+              </p>
+            )}
+            {vehicle && <p className="mt-0.5 text-muted">Veículo: {vehicle}</p>}
+            <p className="mt-0.5 text-muted">
               {formatDateBR(`${date}T12:00:00Z`, "UTC")} às {time} ·{" "}
               {formatCents(vehiclePriceCents(service, vehicle))}
             </p>
