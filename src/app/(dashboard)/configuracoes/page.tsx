@@ -8,6 +8,7 @@ import {
   UserCircle,
   Image as ImageIcon,
   Boxes,
+  Coffee,
 } from "lucide-react";
 import { requireActiveBusiness } from "@/features/billing/guard";
 import { capabilitiesFor, maxBoxesFor } from "@/features/billing/plan";
@@ -19,6 +20,7 @@ import { LogoForm } from "@/features/settings/logo-form";
 import { HoursForm } from "@/features/settings/hours-form";
 import { IntervalForm } from "@/features/settings/interval-form";
 import { CapacityForm } from "@/features/settings/capacity-form";
+import { LunchForm } from "@/features/settings/lunch-form";
 import { BlockedTimesManager } from "@/features/settings/blocked-times-manager";
 import { LogoutButton } from "@/features/auth/logout-button";
 import { localDayString } from "@/lib/datetime";
@@ -108,6 +110,13 @@ export default async function ConfiguracoesPage() {
 
       <Section icon={Clock} title="Horários de funcionamento">
         <HoursForm hours={hours} />
+      </Section>
+
+      <Section icon={Coffee} title="Horário de almoço">
+        <LunchForm
+          lunchStart={ctx.business.lunch_start}
+          lunchEnd={ctx.business.lunch_end}
+        />
       </Section>
 
       <Section icon={Boxes} title="Capacidade (boxes)">

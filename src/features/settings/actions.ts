@@ -100,6 +100,47 @@ export async function updateCapacity(
   return { success: "Capacidade atualizada." };
 }
 
+// --- Horário de almoço (permanente, recorrente todo dia) ---
+export async function updateLunch(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const ctx = await getCurrentContext();
+  if (!ctx) redirect("/login");
+
+  const hasLunch = formData.get("has_lunch") === "on";
+  const start = String(formData.get("lunch_start") ?? "");
+  const end = String(formData.get("lunch_end") ?? "");
+
+  let lunchStart: string | null = null;
+  let lunchEnd: string | null = null;
+
+  if (hasLunch) {
+    if (!/^\d{2}:\d{2}$/.test(start) || !/^\d{2}:\d{2}$/.test(end)) {
+      return { error: "Preencha o início e o fim do almoço." };
+    }
+    if (start >= end) {
+      return { error: "O fim do almoço deve ser depois do início." };
+    }
+    lunchStart = start;
+    lunchEnd = end;
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("businesses")
+    .update({ lunch_start: lunchStart, lunch_end: lunchEnd })
+    .eq("id", ctx.business.id);
+  if (error) return { error: "Não foi possível salvar o horário de almoço." };
+
+  revalidatePath("/configuracoes");
+  return {
+    success: hasLunch
+      ? "Horário de almoço salvo."
+      : "Horário de almoço removido.",
+  };
+}
+
 // --- Horários de funcionamento ---
 export async function updateHours(
   _prev: ActionState,

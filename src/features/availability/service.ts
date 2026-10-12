@@ -23,7 +23,9 @@ export async function getAvailableSlots(params: {
 
   const { data: business } = await admin
     .from("businesses")
-    .select("timezone, appointment_interval_minutes, capacity")
+    .select(
+      "timezone, appointment_interval_minutes, capacity, lunch_start, lunch_end",
+    )
     .eq("id", businessId)
     .maybeSingle();
   if (!business) return [];
@@ -86,6 +88,16 @@ export async function getAvailableSlots(params: {
     start: new Date(b.start_at as string),
     end: new Date(b.end_at as string),
   }));
+
+  // Horário de almoço permanente: trata como um bloqueio do dia inteiro.
+  const lunchStart = business.lunch_start as string | null;
+  const lunchEnd = business.lunch_end as string | null;
+  if (lunchStart && lunchEnd) {
+    blocked.push({
+      start: localToUtc(dayStr, lunchStart.slice(0, 5), tz),
+      end: localToUtc(dayStr, lunchEnd.slice(0, 5), tz),
+    });
+  }
 
   const slots = computeAvailableSlots({
     openUtc,

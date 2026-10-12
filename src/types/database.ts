@@ -27,6 +27,9 @@ export interface Business {
   timezone: string;
   appointment_interval_minutes: number;
   capacity: number;
+  /** Horário de almoço permanente (HH:MM:SS). null = sem almoço. */
+  lunch_start: string | null;
+  lunch_end: string | null;
   onboarding_completed: boolean;
   plan: Plan;
   trial_ends_at: string | null;

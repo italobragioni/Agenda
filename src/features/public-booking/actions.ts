@@ -30,6 +30,7 @@ function mapDbError(message: string): string {
     LIMITE_ATINGIDO: UNAVAILABLE,
     PLANO_EXPIRADO: UNAVAILABLE,
     HORARIO_INDISPONIVEL: "Esse horário acabou de ser reservado. Escolha outro.",
+    ALMOCO: "Esse horário é o intervalo de almoço do estabelecimento.",
     FECHADO: "O estabelecimento está fechado nesse dia.",
     FORA_DO_HORARIO: "Esse horário está fora do funcionamento.",
     BLOQUEADO: "Esse período não está disponível.",
