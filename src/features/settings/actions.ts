@@ -100,6 +100,49 @@ export async function updateCapacity(
   return { success: "Capacidade atualizada." };
 }
 
+// --- Horários fixos de marcação (ex.: só 08:00 e 13:00) ---
+export async function updateFixedSlots(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const ctx = await getCurrentContext();
+  if (!ctx) redirect("/login");
+
+  const enabled = formData.get("fixed_enabled") === "on";
+
+  let value: string[] | null = null;
+  if (enabled) {
+    // Coleta, valida (HH:MM), remove duplicados e ordena.
+    const raw = formData.getAll("fixed_time").map((t) => String(t).trim());
+    const seen = new Set<string>();
+    for (const t of raw) {
+      if (t === "") continue;
+      if (!/^\d{2}:\d{2}$/.test(t)) {
+        return { error: "Horário inválido. Use o formato HH:MM." };
+      }
+      seen.add(t);
+    }
+    if (seen.size === 0) {
+      return { error: "Adicione pelo menos um horário, ou desligue a opção." };
+    }
+    value = Array.from(seen).sort();
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("businesses")
+    .update({ fixed_slot_times: value })
+    .eq("id", ctx.business.id);
+  if (error) return { error: "Não foi possível salvar os horários." };
+
+  revalidatePath("/configuracoes");
+  return {
+    success: enabled
+      ? "Horários de marcação salvos."
+      : "Voltou a aceitar qualquer horário.",
+  };
+}
+
 // --- Horário de almoço (permanente, recorrente todo dia) ---
 export async function updateLunch(
   _prev: ActionState,

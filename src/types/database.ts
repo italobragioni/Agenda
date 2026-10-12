@@ -30,6 +30,11 @@ export interface Business {
   /** Horário de almoço permanente (HH:MM:SS). null = sem almoço. */
   lunch_start: string | null;
   lunch_end: string | null;
+  /**
+   * Horários fixos de marcação (ex.: ["08:00:00","13:00:00"]).
+   * null/vazio = qualquer horário (de 30 em 30 minutos).
+   */
+  fixed_slot_times: string[] | null;
   onboarding_completed: boolean;
   plan: Plan;
   trial_ends_at: string | null;

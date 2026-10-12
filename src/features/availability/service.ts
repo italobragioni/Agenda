@@ -24,7 +24,7 @@ export async function getAvailableSlots(params: {
   const { data: business } = await admin
     .from("businesses")
     .select(
-      "timezone, appointment_interval_minutes, capacity, lunch_start, lunch_end",
+      "timezone, appointment_interval_minutes, capacity, lunch_start, lunch_end, fixed_slot_times",
     )
     .eq("id", businessId)
     .maybeSingle();
@@ -99,6 +99,13 @@ export async function getAvailableSlots(params: {
     });
   }
 
+  // Horários fixos de marcação (ex.: só 08:00 e 13:00). Vazio = de 30 em 30.
+  const fixedTimes = (business.fixed_slot_times as string[] | null) ?? [];
+  const fixedStartsUtc =
+    fixedTimes.length > 0
+      ? fixedTimes.map((t) => localToUtc(dayStr, t.slice(0, 5), tz))
+      : undefined;
+
   const slots = computeAvailableSlots({
     openUtc,
     closeUtc,
@@ -109,6 +116,7 @@ export async function getAvailableSlots(params: {
     blocked,
     now: new Date(),
     capacity,
+    fixedStartsUtc,
   });
 
   return slots.map((d) => formatInTimeZone(d, tz, "HH:mm"));

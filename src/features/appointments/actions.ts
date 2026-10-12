@@ -20,6 +20,7 @@ function mapDbError(message: string): string {
       "Sua assinatura não está ativa. Assine um plano para continuar agendando.",
     HORARIO_INDISPONIVEL: "Esse horário acabou de ser ocupado. Escolha outro.",
     ALMOCO: "Esse horário é o seu intervalo de almoço.",
+    HORARIO_FIXO: "Esse horário não é um dos horários de marcação permitidos.",
     FECHADO: "O estabelecimento está fechado nesse dia.",
     FORA_DO_HORARIO: "Esse horário está fora do funcionamento.",
     BLOQUEADO: "Esse período está bloqueado na agenda.",

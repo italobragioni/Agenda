@@ -42,6 +42,12 @@ export function computeAvailableSlots(opts: {
   now: Date;
   /** Quantos atendimentos simultâneos o estabelecimento suporta (boxes). */
   capacity?: number;
+  /**
+   * Horários fixos de marcação (em UTC). Quando informado (não vazio), só esses
+   * horários de início são oferecidos (ex.: 08:00 e 13:00). Vazio/ausente =
+   * oferece de `stepMin` em `stepMin` (comportamento padrão).
+   */
+  fixedStartsUtc?: Date[];
 }): Date[] {
   const {
     openUtc,
@@ -52,22 +58,38 @@ export function computeAvailableSlots(opts: {
     existing,
     blocked,
     now,
+    fixedStartsUtc,
   } = opts;
   const capacity = Math.max(1, opts.capacity ?? 1);
 
   if (!openUtc || !closeUtc || durationMin <= 0 || stepMin <= 0) return [];
 
-  const slots: Date[] = [];
+  const open = openUtc.getTime();
   const close = closeUtc.getTime();
   const nowMs = now.getTime();
 
-  for (let t = openUtc.getTime(); ; t += stepMin * MIN) {
-    const start = t;
-    const end = t + durationMin * MIN;
-    if (end > close) break; // ultrapassaria o fechamento
+  // Monta a lista de horários candidatos de início.
+  let candidates: number[];
+  if (fixedStartsUtc && fixedStartsUtc.length > 0) {
+    // Só os horários fixos que começam dentro do funcionamento.
+    candidates = fixedStartsUtc
+      .map((d) => d.getTime())
+      .filter((t) => t >= open)
+      .sort((a, b) => a - b);
+  } else {
+    candidates = [];
+    for (let t = open; t + durationMin * MIN <= close; t += stepMin * MIN) {
+      candidates.push(t);
+    }
+  }
+
+  const slots: Date[] = [];
+  for (const start of candidates) {
+    const end = start + durationMin * MIN;
+    if (end > close) continue; // o serviço ultrapassaria o fechamento
     if (start <= nowMs) continue; // no passado
 
-    // Bloqueios: ocupam todo o estabelecimento.
+    // Bloqueios (inclui almoço): ocupam todo o estabelecimento.
     if (blocked.some((b) => overlaps(start, end, b, 0))) continue;
 
     // Conta quantos agendamentos já ocupam esse período (com intervalo).
