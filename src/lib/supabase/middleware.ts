@@ -50,8 +50,12 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
-  const isAuthPage = AUTH_PAGES.some((p) => pathname.startsWith(p));
+  // Casa o prefixo só no limite de segmento: "/agenda" e "/agenda/..." contam,
+  // mas "/agendar/..." (página pública de agendamento) NÃO é protegida.
+  const matchesPrefix = (p: string) =>
+    pathname === p || pathname.startsWith(`${p}/`);
+  const isProtected = PROTECTED_PREFIXES.some(matchesPrefix);
+  const isAuthPage = AUTH_PAGES.some(matchesPrefix);
 
   // Não logado tentando acessar área administrativa -> vai para o login.
   if (!user && isProtected) {
