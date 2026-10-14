@@ -152,3 +152,22 @@ export async function setServiceActive(id: string, isActive: boolean) {
   await supabase.from("services").update({ is_active: isActive }).eq("id", id);
   revalidatePath("/servicos");
 }
+
+// ---------------------------------------------------------------------
+// Excluir serviço (o histórico de agendamentos é preservado, pois cada
+// agendamento guarda o nome do serviço; o service_id vira nulo).
+// ---------------------------------------------------------------------
+export async function deleteService(id: string): Promise<ActionState> {
+  const ctx = await getCurrentContext();
+  if (!ctx) redirect("/login");
+
+  const supabase = await createClient();
+  // O RLS garante que só é possível excluir serviços do próprio negócio.
+  const { error } = await supabase.from("services").delete().eq("id", id);
+  if (error) {
+    console.error("deleteService error:", error);
+    return { error: "Não foi possível excluir o serviço." };
+  }
+  revalidatePath("/servicos");
+  return { success: "Serviço excluído." };
+}

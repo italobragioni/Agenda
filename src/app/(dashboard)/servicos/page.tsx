@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ActiveToggle } from "@/features/services/active-toggle";
+import { DeleteServiceButton } from "@/features/services/delete-service-button";
 import { formatCents } from "@/lib/money";
 import type { Service } from "@/types/database";
 
@@ -95,6 +96,8 @@ export default async function ServicosPage() {
                 >
                   <Pencil className="h-4 w-4" aria-hidden />
                 </Link>
+
+                <DeleteServiceButton id={s.id} name={s.name} />
               </Card>
             </li>
           ))}
