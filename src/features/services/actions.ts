@@ -8,6 +8,31 @@ import { serviceSchema } from "@/validation/service";
 import { zodFieldErrors, type ActionState } from "@/lib/forms";
 import { maxServicesFor, PLANS } from "@/features/billing/plan";
 
+/** Colunas opcionais de preço por porte (migração 0010). */
+const VEHICLE_FIELDS = [
+  "price_hatch_cents",
+  "price_sedan_cents",
+  "price_suv_cents",
+  "price_caminhonete_cents",
+] as const;
+
+/** Erro de coluna de preço por porte inexistente (migração 0010 não aplicada). */
+function isMissingVehicleColumn(err: {
+  code?: string;
+  message?: string;
+}): boolean {
+  if (err.code === "PGRST204" || err.code === "42703") return true;
+  const msg = (err.message ?? "").toLowerCase();
+  return VEHICLE_FIELDS.some((f) => msg.includes(f));
+}
+
+/** Remove os campos de preço por porte (fallback quando a coluna não existe). */
+function withoutVehicleFields<T extends Record<string, unknown>>(data: T) {
+  const out: Record<string, unknown> = { ...data };
+  for (const f of VEHICLE_FIELDS) delete out[f];
+  return out;
+}
+
 // ---------------------------------------------------------------------
 // Criar serviço
 // ---------------------------------------------------------------------
@@ -49,11 +74,19 @@ export async function createService(
     }
   }
 
-  const { error } = await supabase.from("services").insert({
-    business_id: ctx.business.id,
-    ...parsed.data,
-  });
-  if (error) return { error: "Não foi possível salvar o serviço." };
+  const row = { business_id: ctx.business.id, ...parsed.data };
+  let { error } = await supabase.from("services").insert(row);
+  // Se as colunas de preço por porte ainda não existirem no banco (migração
+  // 0010 não aplicada), salva sem elas para não bloquear o cadastro.
+  if (error && isMissingVehicleColumn(error)) {
+    ({ error } = await supabase
+      .from("services")
+      .insert(withoutVehicleFields(row)));
+  }
+  if (error) {
+    console.error("createService insert error:", error);
+    return { error: "Não foi possível salvar o serviço. Tente novamente." };
+  }
 
   revalidatePath("/servicos");
   redirect("/servicos");
@@ -85,11 +118,20 @@ export async function updateService(
 
   const supabase = await createClient();
   // O RLS garante que só é possível atualizar serviços do próprio negócio.
-  const { error } = await supabase
+  let { error } = await supabase
     .from("services")
     .update(parsed.data)
     .eq("id", id);
-  if (error) return { error: "Não foi possível atualizar o serviço." };
+  if (error && isMissingVehicleColumn(error)) {
+    ({ error } = await supabase
+      .from("services")
+      .update(withoutVehicleFields(parsed.data))
+      .eq("id", id));
+  }
+  if (error) {
+    console.error("updateService error:", error);
+    return { error: "Não foi possível atualizar o serviço." };
+  }
 
   revalidatePath("/servicos");
   redirect("/servicos");
