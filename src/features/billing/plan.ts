@@ -119,7 +119,8 @@ const NO_CAPS: Capabilities = {
 };
 
 const CAPS: Record<PaidPlan, Capabilities> = {
-  basic: { ...NO_CAPS },
+  // Preço por porte de veículo liberado em todos os planos.
+  basic: { ...NO_CAPS, vehiclePricing: true },
   premium: {
     boxes: true,
     vehiclePricing: true,
