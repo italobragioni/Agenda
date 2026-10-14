@@ -85,7 +85,11 @@ export async function createService(
   }
   if (error) {
     console.error("createService insert error:", error);
-    return { error: "Não foi possível salvar o serviço. Tente novamente." };
+    const e = error as { message?: string; code?: string };
+    // Mostra o motivo técnico (tela do dono) para facilitar o diagnóstico.
+    return {
+      error: `Não foi possível salvar. Detalhe: ${e.message ?? e.code ?? "erro desconhecido"}`,
+    };
   }
 
   revalidatePath("/servicos");
