@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -47,9 +47,18 @@ export function ServiceForm({
 }) {
   const [state, formAction] = useActionState(action, {} as ActionState);
   const fe = state.fieldErrors ?? {};
+  const errorRef = useRef<HTMLDivElement>(null);
+
+  // Rola até o aviso quando há erro, para não ficar escondido (celular).
+  useEffect(() => {
+    if (state.error || Object.keys(state.fieldErrors ?? {}).length > 0) {
+      errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [state]);
 
   return (
     <form action={formAction} className="space-y-4" noValidate>
+      <div ref={errorRef} />
       {state.error && <Alert tone="error">{state.error}</Alert>}
 
       <FormField label="Nome do serviço" htmlFor="name" error={fe.name}>

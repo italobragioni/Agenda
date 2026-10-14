@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Wrench, Plus, Clock, Pencil } from "lucide-react";
 import { requireActiveBusiness } from "@/features/billing/guard";
+import { maxServicesFor } from "@/features/billing/plan";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -27,11 +28,17 @@ export default async function ServicosPage() {
 
   const services = (data ?? []) as Service[];
 
+  const maxServices = maxServicesFor(ctx.business.plan);
+  const servicesDescription =
+    maxServices !== null
+      ? `${services.length} de ${maxServices} serviços do seu plano.`
+      : "Adicione os serviços que você oferece.";
+
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader
         title="Serviços"
-        description="Adicione os serviços que você oferece."
+        description={servicesDescription}
         action={
           <Link href="/servicos/novo">
             <Button>
