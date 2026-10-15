@@ -37,12 +37,13 @@ export default async function StatusPage() {
         <p className="mt-2 text-sm text-muted">
           Seu plano {planLabel(state.kind)} está ativo. Bom trabalho!
         </p>
-        <Link href="/inicio" className="mt-6 inline-block">
+        {/* Navegação completa (recarrega): entra no app com o estado real. */}
+        <a href="/inicio" className="mt-6 inline-block">
           <Button size="lg">
             Ir para o painel
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Button>
-        </Link>
+        </a>
       </div>
     );
   }

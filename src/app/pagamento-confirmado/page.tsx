@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { CheckCircle2, ArrowRight, LogIn } from "lucide-react";
 import { CarviLogo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
@@ -33,12 +32,13 @@ export default function PagamentoConfirmadoPage() {
         </p>
 
         <div className="mt-8">
-          <Link href="/inicio">
+          {/* Navegação completa (recarrega): garante o app com o estado real. */}
+          <a href="/inicio">
             <Button size="lg" fullWidth>
               Entrar no meu app
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Button>
-          </Link>
+          </a>
         </div>
 
         <div className="mt-5 rounded-2xl border border-border bg-card p-4 text-left">
