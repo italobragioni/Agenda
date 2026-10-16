@@ -6,7 +6,6 @@ import { AppointmentActions } from "./appointment-actions";
 import { formatCents } from "@/lib/money";
 import { formatTimeBR } from "@/lib/datetime";
 import { whatsappLink, formatPhone } from "@/lib/phone";
-import { receiptMessage } from "@/lib/receipt";
 import { MessageCircle, Receipt, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Appointment } from "@/types/database";
@@ -15,11 +14,9 @@ import type { Appointment } from "@/types/database";
 export function AppointmentItem({
   appointment: a,
   tz,
-  businessName,
 }: {
   appointment: Appointment;
   tz: string;
-  businessName: string;
 }) {
   const dimmed = a.status === "cancelled" || a.status === "no_show";
   const phone = a.customer_phone_snapshot;
@@ -79,28 +76,13 @@ export function AppointmentItem({
       {/* Ações (ocultas em cancelado/não compareceu) */}
       {!dimmed && (
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          {phone && (
-            <a
-              href={whatsappLink(
-                phone,
-                receiptMessage({
-                  businessName,
-                  customerName: a.customer_name_snapshot,
-                  serviceName: a.service_name_snapshot,
-                  notes: a.notes,
-                  startAtIso: a.start_at,
-                  tz,
-                  priceCents: a.price_cents,
-                }),
-              )}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-slate-50"
-            >
-              <Receipt className="h-3.5 w-3.5" aria-hidden />
-              Recibo
-            </a>
-          )}
+          <Link
+            href={`/recibo/${a.id}`}
+            className="inline-flex items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-slate-50"
+          >
+            <Receipt className="h-3.5 w-3.5" aria-hidden />
+            Recibo
+          </Link>
           <AppointmentActions id={a.id} status={a.status} />
         </div>
       )}
