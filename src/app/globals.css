@@ -221,24 +221,3 @@ wistia-player[media-id="l1fxyqud2x"]:not(:defined) {
   background-clip: text;
   color: transparent;
 }
-
-/* -----------------------------------------------------------------
-   Impressão do recibo (salvar como PDF)
-   -----------------------------------------------------------------
-   Em @media print mostramos apenas o recibo (.recibo-area) e
-   escondemos botões e qualquer outro conteúdo (.no-print). */
-@media print {
-  @page {
-    size: A4;
-    margin: 16mm;
-  }
-  .no-print {
-    display: none !important;
-  }
-  .recibo-area {
-    box-shadow: none !important;
-    border: none !important;
-    margin: 0 !important;
-    max-width: 100% !important;
-  }
-}

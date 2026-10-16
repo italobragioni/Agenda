@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentContext } from "@/features/auth/current";
 import { ReceiptDocument } from "@/features/appointments/receipt-document";
 import { ReceiptActions } from "@/features/appointments/receipt-actions";
-import { receiptMessage } from "@/lib/receipt";
 import { whatsappLink } from "@/lib/phone";
 import type { Appointment } from "@/types/database";
 
@@ -39,18 +38,17 @@ export default async function ReceiptPage({
   const tz = ctx.business.timezone;
   const issuedAtIso = new Date().toISOString();
 
-  const whatsappHref = appointment.customer_phone_snapshot
+  const numero = id.replace(/-/g, "").slice(0, 8).toUpperCase();
+  const pdfUrl = `/recibo/${id}/pdf`;
+  const fileName = `recibo-${numero}.pdf`;
+  const shareText = `Recibo - ${ctx.business.name}`;
+
+  // Plano B de envio (quando o navegador não anexa arquivo): abre o WhatsApp
+  // do cliente com um texto curto; o PDF baixado é anexado manualmente.
+  const whatsappFallbackHref = appointment.customer_phone_snapshot
     ? whatsappLink(
         appointment.customer_phone_snapshot,
-        receiptMessage({
-          businessName: ctx.business.name,
-          customerName: appointment.customer_name_snapshot,
-          serviceName: appointment.service_name_snapshot,
-          notes: appointment.notes,
-          startAtIso: appointment.start_at,
-          tz,
-          priceCents: appointment.price_cents,
-        }),
+        `${shareText}\nSegue o recibo do seu atendimento em anexo.`,
       )
     : null;
 
@@ -62,7 +60,12 @@ export default async function ReceiptPage({
         tz={tz}
         issuedAtIso={issuedAtIso}
       />
-      <ReceiptActions whatsappHref={whatsappHref} />
+      <ReceiptActions
+        pdfUrl={pdfUrl}
+        fileName={fileName}
+        shareText={shareText}
+        whatsappFallbackHref={whatsappFallbackHref}
+      />
     </main>
   );
 }

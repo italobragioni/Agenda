@@ -30,7 +30,7 @@ export function ReceiptDocument({
   linhas.push({ label: "Data do serviço", value: formatDateTimeBR(a.start_at, tz) });
 
   return (
-    <div className="recibo-area mx-auto w-full max-w-[460px] rounded-2xl border border-border bg-white p-7 shadow-soft">
+    <div className="mx-auto w-full max-w-[460px] rounded-2xl border border-border bg-white p-7 shadow-soft">
       {/* Cabeçalho: marca do estabelecimento */}
       <div className="flex flex-col items-center text-center">
         <EstablishmentLogo logoUrl={business.logo_url} className="h-12" />
