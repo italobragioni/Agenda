@@ -6,16 +6,19 @@ import { AppointmentActions } from "./appointment-actions";
 import { formatCents } from "@/lib/money";
 import { formatTimeBR } from "@/lib/datetime";
 import { whatsappLink, formatPhone } from "@/lib/phone";
-import { MessageCircle } from "lucide-react";
+import { receiptMessage } from "@/lib/receipt";
+import { MessageCircle, Receipt } from "lucide-react";
 import type { Appointment } from "@/types/database";
 
 /** Item de agendamento usado na Agenda (com ações de status). */
 export function AppointmentItem({
   appointment: a,
   tz,
+  businessName,
 }: {
   appointment: Appointment;
   tz: string;
+  businessName: string;
 }) {
   const dimmed = a.status === "cancelled" || a.status === "no_show";
 
@@ -62,12 +65,36 @@ export function AppointmentItem({
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-2">
-        <Link
-          href={`/clientes/${a.customer_id ?? ""}`}
-          className="text-xs text-muted hover:text-foreground"
-        >
-          Ver cliente
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href={`/clientes/${a.customer_id ?? ""}`}
+            className="text-xs text-muted hover:text-foreground"
+          >
+            Ver cliente
+          </Link>
+          {a.customer_phone_snapshot && (
+            <a
+              href={whatsappLink(
+                a.customer_phone_snapshot,
+                receiptMessage({
+                  businessName,
+                  customerName: a.customer_name_snapshot,
+                  serviceName: a.service_name_snapshot,
+                  notes: a.notes,
+                  startAtIso: a.start_at,
+                  tz,
+                  priceCents: a.price_cents,
+                }),
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline"
+            >
+              <Receipt className="h-3.5 w-3.5" aria-hidden />
+              Recibo
+            </a>
+          )}
+        </div>
         <AppointmentActions id={a.id} status={a.status} />
       </div>
     </Card>

@@ -135,7 +135,7 @@ export default async function AgendaPage({
                 </h2>
                 <div className="space-y-2">
                   {items.map((a) => (
-                    <AppointmentItem key={a.id} appointment={a} tz={tz} />
+                    <AppointmentItem key={a.id} appointment={a} tz={tz} businessName={ctx.business.name} />
                   ))}
                 </div>
               </div>
@@ -145,7 +145,7 @@ export default async function AgendaPage({
       ) : (
         <div className="space-y-2">
           {appointments.map((a) => (
-            <AppointmentItem key={a.id} appointment={a} tz={tz} />
+            <AppointmentItem key={a.id} appointment={a} tz={tz} businessName={ctx.business.name} />
           ))}
         </div>
       )}
