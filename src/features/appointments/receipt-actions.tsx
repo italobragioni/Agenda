@@ -15,12 +15,10 @@ import { Button } from "@/components/ui/button";
 export function ReceiptActions({
   pdfUrl,
   fileName,
-  shareText,
   whatsappFallbackHref,
 }: {
   pdfUrl: string;
   fileName: string;
-  shareText: string;
   whatsappFallbackHref: string | null;
 }) {
   const router = useRouter();
@@ -79,11 +77,9 @@ export function ReceiptActions({
 
     if (canShareFile && file) {
       try {
-        await nav.share({
-          files: [file],
-          title: "Recibo",
-          text: shareText,
-        });
+        // Compartilha SOMENTE o arquivo (sem texto/título): o WhatsApp falha
+        // ao enviar quando vem texto junto com o anexo.
+        await nav.share({ files: [file] });
         setSharing(false);
         return;
       } catch (err) {

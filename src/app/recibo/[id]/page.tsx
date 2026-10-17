@@ -41,14 +41,13 @@ export default async function ReceiptPage({
   const numero = id.replace(/-/g, "").slice(0, 8).toUpperCase();
   const pdfUrl = `/recibo/${id}/pdf`;
   const fileName = `recibo-${numero}.pdf`;
-  const shareText = `Recibo - ${ctx.business.name}`;
 
   // Plano B de envio (quando o navegador não anexa arquivo): abre o WhatsApp
   // do cliente com um texto curto; o PDF baixado é anexado manualmente.
   const whatsappFallbackHref = appointment.customer_phone_snapshot
     ? whatsappLink(
         appointment.customer_phone_snapshot,
-        `${shareText}\nSegue o recibo do seu atendimento em anexo.`,
+        `Recibo - ${ctx.business.name}\nSegue o recibo do seu atendimento em anexo.`,
       )
     : null;
 
@@ -63,7 +62,6 @@ export default async function ReceiptPage({
       <ReceiptActions
         pdfUrl={pdfUrl}
         fileName={fileName}
-        shareText={shareText}
         whatsappFallbackHref={whatsappFallbackHref}
       />
     </main>
