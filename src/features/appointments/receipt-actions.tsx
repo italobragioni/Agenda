@@ -1,111 +1,104 @@
 "use client";
 
 import { useState } from "react";
-import { Download, MessageCircle, ArrowLeft, Loader2 } from "lucide-react";
+import { Download, MessageCircle, ArrowLeft, Loader2, Share } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
+/** Detecta iPhone/iPad (inclui iPadOS que se identifica como Mac com toque). */
+function isIOS(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  const iDevice = /iPad|iPhone|iPod/.test(ua);
+  const iPadOS = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  return iDevice || iPadOS;
+}
+
 /**
  * Ações da página de recibo.
- * - Baixar PDF: baixa o arquivo .pdf direto.
- * - Enviar no WhatsApp: compartilha o ARQUIVO PDF (Web Share API). Se o
- *   navegador não suportar anexar arquivo, baixa o PDF e abre o WhatsApp
- *   para anexar manualmente.
+ * - Baixar PDF: baixa o arquivo .pdf.
+ * - Enviar no WhatsApp:
+ *   • Android (com suporte): compartilha o ARQUIVO PDF direto (1 toque).
+ *   • iPhone / navegadores sem suporte: abre o PDF; o usuário usa o
+ *     compartilhamento nativo do aparelho para anexar o arquivo real
+ *     (o envio direto pelo navegador manda um link "blob:" que o
+ *     WhatsApp recusa).
  */
 export function ReceiptActions({
   pdfUrl,
   fileName,
-  whatsappFallbackHref,
 }: {
   pdfUrl: string;
   fileName: string;
-  whatsappFallbackHref: string | null;
 }) {
   const router = useRouter();
-  const [downloading, setDownloading] = useState(false);
   const [sharing, setSharing] = useState(false);
-  const [manualHint, setManualHint] = useState(false);
+  const [iosHint, setIosHint] = useState(false);
 
-  async function fetchPdfBlob(): Promise<Blob | null> {
-    try {
-      const res = await fetch(pdfUrl);
-      if (!res.ok) return null;
-      return await res.blob();
-    } catch {
-      return null;
-    }
-  }
+  const downloadUrl = `${pdfUrl}?download=1`;
 
-  function saveBlob(blob: Blob) {
-    const url = URL.createObjectURL(blob);
+  /** Dispara o download via link direto (sem blob, que o iOS trata mal). */
+  function handleDownload() {
     const a = document.createElement("a");
-    a.href = url;
+    a.href = downloadUrl;
     a.download = fileName;
     document.body.appendChild(a);
     a.click();
     a.remove();
-    URL.revokeObjectURL(url);
   }
 
-  async function handleDownload() {
-    setDownloading(true);
-    const blob = await fetchPdfBlob();
-    if (blob) {
-      saveBlob(blob);
-    } else {
-      // Plano B: abre a rota direta (com Content-Disposition: attachment).
-      window.location.href = pdfUrl;
-    }
-    setDownloading(false);
+  /** Abre o PDF numa nova aba para o usuário compartilhar pelo aparelho. */
+  function openForNativeShare() {
+    window.open(pdfUrl, "_blank");
+    setIosHint(true);
   }
 
   async function handleShare() {
+    // No iPhone, o envio direto de arquivo pelo navegador é instável:
+    // abre o PDF para o usuário compartilhar pelo próprio iOS.
+    if (isIOS()) {
+      openForNativeShare();
+      return;
+    }
+
     setSharing(true);
-    const blob = await fetchPdfBlob();
-    const file = blob
-      ? new File([blob], fileName, { type: "application/pdf" })
-      : null;
+    try {
+      const res = await fetch(pdfUrl);
+      const blob = res.ok ? await res.blob() : null;
+      const file = blob
+        ? new File([blob], fileName, { type: "application/pdf" })
+        : null;
 
-    const nav = navigator as Navigator & {
-      canShare?: (data?: ShareData) => boolean;
-    };
-    const canShareFile =
-      !!file &&
-      typeof nav.share === "function" &&
-      typeof nav.canShare === "function" &&
-      nav.canShare({ files: [file] });
+      const nav = navigator as Navigator & {
+        canShare?: (data?: ShareData) => boolean;
+      };
+      const canShareFile =
+        !!file &&
+        typeof nav.share === "function" &&
+        typeof nav.canShare === "function" &&
+        nav.canShare({ files: [file] });
 
-    if (canShareFile && file) {
-      try {
-        // Compartilha SOMENTE o arquivo (sem texto/título): o WhatsApp falha
-        // ao enviar quando vem texto junto com o anexo.
+      if (canShareFile && file) {
         await nav.share({ files: [file] });
         setSharing(false);
         return;
-      } catch (err) {
-        // Usuário cancelou o compartilhamento: não faz o plano B.
-        if ((err as { name?: string })?.name === "AbortError") {
-          setSharing(false);
-          return;
-        }
+      }
+    } catch (err) {
+      if ((err as { name?: string })?.name === "AbortError") {
+        setSharing(false);
+        return;
       }
     }
 
-    // Plano B: baixa o PDF e abre o WhatsApp para anexar manualmente.
-    if (blob) saveBlob(blob);
-    if (whatsappFallbackHref) window.open(whatsappFallbackHref, "_blank");
-    setManualHint(true);
+    // Sem suporte a compartilhar arquivo: abre o PDF para compartilhar.
     setSharing(false);
+    openForNativeShare();
   }
 
   return (
     <div className="mx-auto mt-6 w-full max-w-[460px] space-y-2">
-      <Button fullWidth size="lg" onClick={handleDownload} disabled={downloading}>
-        {downloading ? (
-          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-        ) : (
-          <Download className="h-4 w-4" aria-hidden />
-        )}
+      <Button fullWidth size="lg" onClick={handleDownload}>
+        <Download className="h-4 w-4" aria-hidden />
         Baixar PDF
       </Button>
 
@@ -124,11 +117,16 @@ export function ReceiptActions({
         Enviar no WhatsApp
       </Button>
 
-      {manualHint && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-center text-xs text-amber-700">
-          Baixamos o PDF e abrimos o WhatsApp. É só tocar no clipe (anexar) e
-          escolher o recibo que acabou de baixar.
-        </p>
+      {iosHint && (
+        <div className="rounded-lg bg-brand/5 px-3 py-3 text-sm text-foreground">
+          <p className="font-medium">Abrimos o recibo numa nova aba.</p>
+          <p className="mt-1 flex items-center gap-1 text-muted">
+            Toque no ícone de compartilhar
+            <Share className="inline h-4 w-4" aria-hidden />
+            e escolha <strong className="text-foreground">WhatsApp</strong> — o
+            PDF vai anexado.
+          </p>
+        </div>
       )}
 
       <button

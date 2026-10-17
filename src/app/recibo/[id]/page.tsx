@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentContext } from "@/features/auth/current";
 import { ReceiptDocument } from "@/features/appointments/receipt-document";
 import { ReceiptActions } from "@/features/appointments/receipt-actions";
-import { whatsappLink } from "@/lib/phone";
 import type { Appointment } from "@/types/database";
 
 export const metadata: Metadata = { title: "Recibo — Carvi" };
@@ -42,15 +41,6 @@ export default async function ReceiptPage({
   const pdfUrl = `/recibo/${id}/pdf`;
   const fileName = `recibo-${numero}.pdf`;
 
-  // Plano B de envio (quando o navegador não anexa arquivo): abre o WhatsApp
-  // do cliente com um texto curto; o PDF baixado é anexado manualmente.
-  const whatsappFallbackHref = appointment.customer_phone_snapshot
-    ? whatsappLink(
-        appointment.customer_phone_snapshot,
-        `Recibo - ${ctx.business.name}\nSegue o recibo do seu atendimento em anexo.`,
-      )
-    : null;
-
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-8">
       <ReceiptDocument
@@ -59,11 +49,7 @@ export default async function ReceiptPage({
         tz={tz}
         issuedAtIso={issuedAtIso}
       />
-      <ReceiptActions
-        pdfUrl={pdfUrl}
-        fileName={fileName}
-        whatsappFallbackHref={whatsappFallbackHref}
-      />
+      <ReceiptActions pdfUrl={pdfUrl} fileName={fileName} />
     </main>
   );
 }

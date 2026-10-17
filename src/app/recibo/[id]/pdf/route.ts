@@ -78,12 +78,15 @@ export async function GET(
   });
 
   const fileName = `recibo-${receiptNumber(appointment.id)}.pdf`;
+  // ?download=1 força o download; sem o parâmetro, abre na tela (inline),
+  // o que permite usar o compartilhamento nativo do iPhone.
+  const asDownload = new URL(request.url).searchParams.get("download") === "1";
 
   return new Response(Buffer.from(pdf), {
     status: 200,
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${fileName}"`,
+      "Content-Disposition": `${asDownload ? "attachment" : "inline"}; filename="${fileName}"`,
       "Cache-Control": "private, no-store",
     },
   });
