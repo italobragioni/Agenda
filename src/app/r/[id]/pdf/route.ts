@@ -1,7 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
-import { getCurrentContext } from "@/features/auth/current";
 import { buildReceiptPdf, receiptNumber } from "@/lib/receipt-pdf";
-import type { Appointment } from "@/types/database";
+import { loadReceiptById } from "@/features/appointments/receipt-data";
 
 export const runtime = "nodejs";
 
@@ -37,49 +35,33 @@ async function tryFetchImage(
   }
 }
 
-/** GET /recibo/[id]/pdf — devolve o recibo do agendamento em PDF. */
+/** GET /r/[id]/pdf — recibo público em PDF (link compartilhável). */
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
 
-  const ctx = await getCurrentContext();
-  if (!ctx) {
-    return new Response("Não autorizado", { status: 401 });
-  }
-
-  const supabase = await createClient();
-  // RLS garante que só retorna agendamento do próprio estabelecimento.
-  const { data } = await supabase
-    .from("appointments")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
-
-  if (!data) {
+  const loaded = await loadReceiptById(id);
+  if (!loaded) {
     return new Response("Recibo não encontrado", { status: 404 });
   }
-  const appointment = data as Appointment;
+  const { appointment, business } = loaded;
 
-  // Logo: a do estabelecimento (se enviada) ou a da Carvi como padrão.
   const origin = new URL(request.url).origin;
   const logo =
-    (ctx.business.logo_url
-      ? await tryFetchImage(ctx.business.logo_url)
-      : null) ?? (await tryFetchImage(`${origin}/logo.jpg`));
+    (business.logo_url ? await tryFetchImage(business.logo_url) : null) ??
+    (await tryFetchImage(`${origin}/logo.jpg`));
 
   const pdf = await buildReceiptPdf({
-    business: ctx.business,
+    business,
     appointment,
-    tz: ctx.business.timezone,
+    tz: business.timezone,
     issuedAtIso: new Date().toISOString(),
     logo,
   });
 
   const fileName = `recibo-${receiptNumber(appointment.id)}.pdf`;
-  // ?download=1 força o download; sem o parâmetro, abre na tela (inline),
-  // o que permite usar o compartilhamento nativo do iPhone.
   const asDownload = new URL(request.url).searchParams.get("download") === "1";
 
   return new Response(Buffer.from(pdf), {
