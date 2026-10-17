@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Download, MessageCircle, ArrowLeft } from "lucide-react";
+import { Download, Eye, MessageCircle, ArrowLeft } from "lucide-react";
 
 const PRIMARY =
   "tap flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 text-base font-medium text-brand-foreground transition-colors hover:bg-brand-hover";
@@ -14,18 +14,32 @@ const SECONDARY =
  *   pronta e o link do recibo. O cliente abre o link e baixa o PDF.
  */
 export function ReceiptActions({
+  viewUrl,
   downloadUrl,
   whatsappHref,
 }: {
+  viewUrl: string;
   downloadUrl: string;
   whatsappHref: string | null;
 }) {
   return (
     <div className="mx-auto mt-6 w-full max-w-[460px] space-y-2">
-      <a href={downloadUrl} className={PRIMARY}>
-        <Download className="h-4 w-4" aria-hidden />
-        Baixar PDF
-      </a>
+      {/* Ver ou baixar o recibo */}
+      <div className="flex gap-2">
+        <a
+          href={viewUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={SECONDARY}
+        >
+          <Eye className="h-4 w-4" aria-hidden />
+          Ver recibo
+        </a>
+        <a href={downloadUrl} className={PRIMARY}>
+          <Download className="h-4 w-4" aria-hidden />
+          Baixar PDF
+        </a>
+      </div>
 
       {whatsappHref ? (
         <a

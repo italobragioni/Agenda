@@ -43,6 +43,7 @@ export default async function ReceiptPage({
   const proto = h.get("x-forwarded-proto") ?? "https";
   const publicUrl = `${proto}://${host}/r/${id}`;
 
+  const viewUrl = `/r/${id}/pdf`;
   const downloadUrl = `/r/${id}/pdf?download=1`;
 
   const phone = appointment.customer_phone_snapshot;
@@ -62,7 +63,11 @@ export default async function ReceiptPage({
         tz={tz}
         issuedAtIso={new Date().toISOString()}
       />
-      <ReceiptActions downloadUrl={downloadUrl} whatsappHref={whatsappHref} />
+      <ReceiptActions
+        viewUrl={viewUrl}
+        downloadUrl={downloadUrl}
+        whatsappHref={whatsappHref}
+      />
     </main>
   );
 }
