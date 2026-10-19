@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { CheckCircle2, Clock, MessageCircle } from "lucide-react";
 import { getCurrentContext } from "@/features/auth/current";
@@ -99,7 +100,27 @@ export default async function AssinaturaPage({
         </div>
       </Card>
 
-      <PlanCards currentPlan={state.active ? state.kind : ""} />
+      {/* Banner de conversão (só para quem ainda não assinou) */}
+      {!state.active && (
+        <a
+          href="#planos"
+          aria-label="Ver planos e assinar"
+          className="block overflow-hidden rounded-2xl shadow-soft ring-1 ring-black/5 transition-transform hover:scale-[1.01]"
+        >
+          <Image
+            src="/banner-assinatura.jpg"
+            alt="Sua agenda cheia e seu faturamento maior começam hoje — quero assinar"
+            width={1000}
+            height={1319}
+            priority
+            className="h-auto w-full"
+          />
+        </a>
+      )}
+
+      <div id="planos" className="scroll-mt-4">
+        <PlanCards currentPlan={state.active ? state.kind : ""} />
+      </div>
 
       <p className="text-center text-xs text-muted">
         Pagamento processado pela Cakto (cartão ou Pix). O acesso é liberado
