@@ -69,6 +69,24 @@ export default async function AssinaturaPage({
 
       <PageHeader title="Assinatura" description="Escolha o plano ideal." />
 
+      {/* Banner de conversão (só para quem ainda não assinou) */}
+      {!state.active && (
+        <a
+          href="#planos"
+          aria-label="Ver planos e assinar"
+          className="block overflow-hidden rounded-2xl shadow-soft ring-1 ring-black/5 transition-transform hover:scale-[1.01]"
+        >
+          <Image
+            src="/banner-assinatura.jpg"
+            alt="Sua agenda cheia e seu faturamento maior começam hoje — quero assinar"
+            width={1000}
+            height={1319}
+            priority
+            className="h-auto w-full"
+          />
+        </a>
+      )}
+
       {/* Status atual */}
       <Card
         className={
@@ -99,24 +117,6 @@ export default async function AssinaturaPage({
           <p className="text-xs text-muted">{detail}</p>
         </div>
       </Card>
-
-      {/* Banner de conversão (só para quem ainda não assinou) */}
-      {!state.active && (
-        <a
-          href="#planos"
-          aria-label="Ver planos e assinar"
-          className="block overflow-hidden rounded-2xl shadow-soft ring-1 ring-black/5 transition-transform hover:scale-[1.01]"
-        >
-          <Image
-            src="/banner-assinatura.jpg"
-            alt="Sua agenda cheia e seu faturamento maior começam hoje — quero assinar"
-            width={1000}
-            height={1319}
-            priority
-            className="h-auto w-full"
-          />
-        </a>
-      )}
 
       <div id="planos" className="scroll-mt-4">
         <PlanCards currentPlan={state.active ? state.kind : ""} />
