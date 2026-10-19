@@ -14,7 +14,8 @@ export interface ServiceFormValues {
   name: string;
   description: string;
   price: string; // ex.: "80,00"
-  priceMoto: string;
+  priceMotoPequena: string;
+  priceMotoGrande: string;
   priceHatch: string;
   priceSedan: string;
   priceSuv: string;
@@ -27,7 +28,8 @@ const empty: ServiceFormValues = {
   name: "",
   description: "",
   price: "",
-  priceMoto: "",
+  priceMotoPequena: "",
+  priceMotoGrande: "",
   priceHatch: "",
   priceSedan: "",
   priceSuv: "",
@@ -130,12 +132,21 @@ export function ServiceForm({
           acima ({defaultValues.price ? `R$ ${defaultValues.price}` : "base"}).
         </p>
         <div className="grid grid-cols-2 gap-3">
-          <FormField label="Moto (R$)" htmlFor="price_moto_cents" error={fe.price_moto_cents}>
+          <FormField label="Moto pequena (R$)" htmlFor="price_moto_pequena_cents" error={fe.price_moto_pequena_cents}>
             <Input
-              id="price_moto_cents"
-              name="price_moto_cents"
+              id="price_moto_pequena_cents"
+              name="price_moto_pequena_cents"
               inputMode="decimal"
-              defaultValue={defaultValues.priceMoto}
+              defaultValue={defaultValues.priceMotoPequena}
+              placeholder="opcional"
+            />
+          </FormField>
+          <FormField label="Moto grande (R$)" htmlFor="price_moto_grande_cents" error={fe.price_moto_grande_cents}>
+            <Input
+              id="price_moto_grande_cents"
+              name="price_moto_grande_cents"
+              inputMode="decimal"
+              defaultValue={defaultValues.priceMotoGrande}
               placeholder="opcional"
             />
           </FormField>

@@ -29,7 +29,8 @@ interface Service {
   name: string;
   description: string | null;
   price_cents: number;
-  price_moto_cents?: number | null;
+  price_moto_pequena_cents?: number | null;
+  price_moto_grande_cents?: number | null;
   price_hatch_cents?: number | null;
   price_sedan_cents?: number | null;
   price_suv_cents?: number | null;
@@ -45,7 +46,8 @@ interface Day {
 type Step = "service" | "vehicle" | "date" | "time" | "details" | "success";
 
 const VEHICLES: { label: string; icon: typeof Car }[] = [
-  { label: "Moto", icon: Bike },
+  { label: "Moto Pequena", icon: Bike },
+  { label: "Moto Grande", icon: Bike },
   { label: "Hatch", icon: Car },
   { label: "Sedan", icon: Car },
   { label: "SUV", icon: Car },
