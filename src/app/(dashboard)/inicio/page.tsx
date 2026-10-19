@@ -5,6 +5,7 @@ import { CalendarPlus, Clock } from "lucide-react";
 import { requireActiveBusiness } from "@/features/billing/guard";
 import { getUsage } from "@/features/billing/usage";
 import { UsageIndicator } from "@/features/billing/usage-indicator";
+import { BonusDownload } from "@/features/billing/bonus-download";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -90,6 +91,8 @@ export default async function InicioPage() {
           <UsageIndicator usage={usage} tz={tz} />
         </div>
       )}
+
+      {isOwner && <BonusDownload className="mb-6" />}
 
       {nextAppointment && (
         <Card className="mb-6 flex items-center gap-3 border-brand/30 bg-brand-soft">

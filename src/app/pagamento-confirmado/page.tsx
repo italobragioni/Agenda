@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { CheckCircle2, ArrowRight, LogIn } from "lucide-react";
 import { CarviLogo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
+import { BonusDownload } from "@/features/billing/bonus-download";
 
 export const metadata: Metadata = {
   title: "Pagamento confirmado — Carvi",
@@ -40,6 +41,8 @@ export default function PagamentoConfirmadoPage() {
             </Button>
           </a>
         </div>
+
+        <BonusDownload className="mt-5" />
 
         <div className="mt-5 rounded-2xl border border-border bg-card p-4 text-left">
           <p className="flex items-start gap-2 text-sm text-foreground">

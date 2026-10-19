@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { planState, planLabel, PLANS } from "@/features/billing/plan";
 import { StatusAutoRefresh } from "@/features/billing/status-auto-refresh";
+import { BonusDownload } from "@/features/billing/bonus-download";
 import { TrackSubscribe } from "@/components/analytics/track-subscribe";
 
 export const metadata: Metadata = { title: "Status do pagamento — Carvi" };
@@ -44,6 +45,8 @@ export default async function StatusPage() {
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Button>
         </a>
+
+        <BonusDownload className="mt-6" />
       </div>
     );
   }
