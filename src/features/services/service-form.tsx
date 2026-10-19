@@ -14,6 +14,7 @@ export interface ServiceFormValues {
   name: string;
   description: string;
   price: string; // ex.: "80,00"
+  priceMoto: string;
   priceHatch: string;
   priceSedan: string;
   priceSuv: string;
@@ -26,6 +27,7 @@ const empty: ServiceFormValues = {
   name: "",
   description: "",
   price: "",
+  priceMoto: "",
   priceHatch: "",
   priceSedan: "",
   priceSuv: "",
@@ -128,6 +130,15 @@ export function ServiceForm({
           acima ({defaultValues.price ? `R$ ${defaultValues.price}` : "base"}).
         </p>
         <div className="grid grid-cols-2 gap-3">
+          <FormField label="Moto (R$)" htmlFor="price_moto_cents" error={fe.price_moto_cents}>
+            <Input
+              id="price_moto_cents"
+              name="price_moto_cents"
+              inputMode="decimal"
+              defaultValue={defaultValues.priceMoto}
+              placeholder="opcional"
+            />
+          </FormField>
           <FormField label="Hatch (R$)" htmlFor="price_hatch_cents" error={fe.price_hatch_cents}>
             <Input
               id="price_hatch_cents"

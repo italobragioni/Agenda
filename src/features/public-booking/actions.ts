@@ -117,6 +117,7 @@ export async function createPublicBooking(input: {
     ? vehiclePriceCents(
         {
           price_cents: service.price_cents as number,
+          price_moto_cents: service.price_moto_cents as number | null,
           price_hatch_cents: service.price_hatch_cents as number | null,
           price_sedan_cents: service.price_sedan_cents as number | null,
           price_suv_cents: service.price_suv_cents as number | null,

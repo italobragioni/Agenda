@@ -48,6 +48,7 @@ export default async function EditarServicoPage({
             name: service.name,
             description: service.description ?? "",
             price: centsToStr(service.price_cents),
+            priceMoto: centsToStr(service.price_moto_cents),
             priceHatch: centsToStr(service.price_hatch_cents),
             priceSedan: centsToStr(service.price_sedan_cents),
             priceSuv: centsToStr(service.price_suv_cents),

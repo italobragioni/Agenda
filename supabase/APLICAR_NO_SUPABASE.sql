@@ -8,6 +8,7 @@
 
 -- (0010) Preço por porte de veículo nos serviços
 alter table public.services
+  add column if not exists price_moto_cents        integer check (price_moto_cents is null or price_moto_cents >= 0),
   add column if not exists price_hatch_cents       integer check (price_hatch_cents is null or price_hatch_cents >= 0),
   add column if not exists price_sedan_cents       integer check (price_sedan_cents is null or price_sedan_cents >= 0),
   add column if not exists price_suv_cents         integer check (price_suv_cents is null or price_suv_cents >= 0),

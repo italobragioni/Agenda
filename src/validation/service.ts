@@ -27,6 +27,7 @@ export const serviceSchema = z.object({
     .string()
     .transform((v) => parseCurrencyToCents(v))
     .refine((v): v is number => v !== null && v >= 0, "Preço inválido"),
+  price_moto_cents: optionalPrice,
   price_hatch_cents: optionalPrice,
   price_sedan_cents: optionalPrice,
   price_suv_cents: optionalPrice,

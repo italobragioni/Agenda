@@ -35,6 +35,7 @@ export interface PublicBusinessData {
     | "name"
     | "description"
     | "price_cents"
+    | "price_moto_cents"
     | "price_hatch_cents"
     | "price_sedan_cents"
     | "price_suv_cents"
@@ -131,6 +132,7 @@ export async function getPublicBusiness(
       ? s
       : {
           ...s,
+          price_moto_cents: null,
           price_hatch_cents: null,
           price_sedan_cents: null,
           price_suv_cents: null,

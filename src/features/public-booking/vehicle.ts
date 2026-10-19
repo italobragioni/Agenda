@@ -1,5 +1,5 @@
 /** Tipos de veículo oferecidos no agendamento público. */
-export const VEHICLE_TYPES = ["Hatch", "Sedan", "SUV", "Caminhonete"] as const;
+export const VEHICLE_TYPES = ["Moto", "Hatch", "Sedan", "SUV", "Caminhonete"] as const;
 export type VehicleType = (typeof VEHICLE_TYPES)[number];
 
 export function isVehicleType(v: string): v is VehicleType {
@@ -9,6 +9,7 @@ export function isVehicleType(v: string): v is VehicleType {
 /** Campos de preço por porte que um serviço pode ter. */
 export interface VehiclePricing {
   price_cents: number;
+  price_moto_cents?: number | null;
   price_hatch_cents?: number | null;
   price_sedan_cents?: number | null;
   price_suv_cents?: number | null;
@@ -24,6 +25,7 @@ export function vehiclePriceCents(
   vehicle?: string | null,
 ): number {
   const map: Record<VehicleType, number | null | undefined> = {
+    Moto: service.price_moto_cents,
     Hatch: service.price_hatch_cents,
     Sedan: service.price_sedan_cents,
     SUV: service.price_suv_cents,
@@ -37,6 +39,7 @@ export function vehiclePriceCents(
 export function fromPriceCents(service: VehiclePricing): number {
   const prices = [
     service.price_cents,
+    service.price_moto_cents,
     service.price_hatch_cents,
     service.price_sedan_cents,
     service.price_suv_cents,
@@ -48,6 +51,7 @@ export function fromPriceCents(service: VehiclePricing): number {
 /** Indica se o serviço tem algum preço de porte diferente do base. */
 export function hasVehicleVariation(service: VehiclePricing): boolean {
   return [
+    service.price_moto_cents,
     service.price_hatch_cents,
     service.price_sedan_cents,
     service.price_suv_cents,

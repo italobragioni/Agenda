@@ -10,6 +10,7 @@ import { maxServicesFor, PLANS } from "@/features/billing/plan";
 
 /** Colunas opcionais de preço por porte (migração 0010). */
 const VEHICLE_FIELDS = [
+  "price_moto_cents",
   "price_hatch_cents",
   "price_sedan_cents",
   "price_suv_cents",
@@ -47,6 +48,7 @@ export async function createService(
     name: formData.get("name"),
     description: formData.get("description"),
     price_cents: formData.get("price_cents"),
+    price_moto_cents: formData.get("price_moto_cents"),
     price_hatch_cents: formData.get("price_hatch_cents"),
     price_sedan_cents: formData.get("price_sedan_cents"),
     price_suv_cents: formData.get("price_suv_cents"),
@@ -107,6 +109,7 @@ export async function updateService(
     name: formData.get("name"),
     description: formData.get("description"),
     price_cents: formData.get("price_cents"),
+    price_moto_cents: formData.get("price_moto_cents"),
     price_hatch_cents: formData.get("price_hatch_cents"),
     price_sedan_cents: formData.get("price_sedan_cents"),
     price_suv_cents: formData.get("price_suv_cents"),
