@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { updateHours } from "./actions";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Alert } from "@/components/ui/alert";
@@ -13,6 +14,7 @@ import type { BusinessHours } from "@/types/database";
 const ORDER = [1, 2, 3, 4, 5, 6, 0];
 
 export function HoursForm({ hours }: { hours: BusinessHours[] }) {
+  const router = useRouter();
   const [state, action] = useActionState(updateHours, {} as ActionState);
 
   const byWeekday = new Map(hours.map((h) => [h.weekday, h]));
@@ -21,6 +23,24 @@ export function HoursForm({ hours }: { hours: BusinessHours[] }) {
     for (let d = 0; d <= 6; d++) init[d] = byWeekday.get(d)?.is_open ?? false;
     return init;
   });
+
+  // Assinatura dos dias abertos vindos do servidor. Quando muda (após salvar
+  // e recarregar), re-sincroniza os checkboxes com o que está salvo.
+  const openSignature = [0, 1, 2, 3, 4, 5, 6]
+    .map((d) => (byWeekday.get(d)?.is_open ? "1" : "0"))
+    .join("");
+  useEffect(() => {
+    const synced: Record<number, boolean> = {};
+    for (let d = 0; d <= 6; d++) synced[d] = byWeekday.get(d)?.is_open ?? false;
+    setOpen(synced);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openSignature]);
+
+  // Após salvar com sucesso, busca os dados novos do servidor (sem precisar
+  // atualizar o navegador na mão).
+  useEffect(() => {
+    if (state.success) router.refresh();
+  }, [state, router]);
 
   return (
     <form action={action} className="space-y-4">
