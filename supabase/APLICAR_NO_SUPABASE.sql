@@ -31,6 +31,10 @@ alter table public.businesses
   add column if not exists appointment_limit_override integer
     check (appointment_limit_override is null or appointment_limit_override >= 0);
 
+-- (0020) Cortesia de marca (logo liberada mesmo sem o recurso no plano)
+alter table public.businesses
+  add column if not exists branding_override boolean not null default false;
+
 -- (0016) Carro do cliente
 alter table public.customers
   add column if not exists vehicle text;

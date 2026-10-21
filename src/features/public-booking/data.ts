@@ -64,7 +64,7 @@ export async function getPublicBusiness(
   const { data: business } = await admin
     .from("businesses")
     .select(
-      "id, name, slug, timezone, whatsapp, phone, logo_url, address, plan, trial_ends_at, paid_until, current_period_start, appointment_limit_override",
+      "id, name, slug, timezone, whatsapp, phone, logo_url, address, plan, trial_ends_at, paid_until, current_period_start, appointment_limit_override, branding_override",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -104,6 +104,7 @@ export async function getPublicBusiness(
     paid_until: business.paid_until,
     current_period_start: business.current_period_start,
     appointment_limit_override: business.appointment_limit_override,
+    branding_override: business.branding_override,
   };
   const active = planState(planFields).active;
   const caps = capabilitiesFor(planFields);

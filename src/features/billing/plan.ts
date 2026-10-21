@@ -147,6 +147,8 @@ export interface PlanFields {
   current_period_start?: string | null;
   /** Limite de agendamentos contratado (grandfathering de assinantes antigos). */
   appointment_limit_override?: number | null;
+  /** Libera a marca (logo) como cortesia, mesmo em planos sem o recurso. */
+  branding_override?: boolean | null;
 }
 
 export interface PlanState {
@@ -212,8 +214,12 @@ export function capabilitiesFor(
   now: Date = new Date(),
 ): Capabilities {
   const s = planState(b, now);
-  if (!s.active || s.kind === "trial") return NO_CAPS;
-  return CAPS[s.kind];
+  const base = !s.active || s.kind === "trial" ? NO_CAPS : CAPS[s.kind];
+  // Cortesia: libera a marca (logo) para contas ativas com o override ligado.
+  if (s.active && b.branding_override === true) {
+    return { ...base, branding: true };
+  }
+  return base;
 }
 
 function daysBetween(from: Date, to: Date): number {
