@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { offsetDayString, WEEKDAY_LABELS } from "@/lib/datetime";
-import { planState, capabilitiesFor } from "@/features/billing/plan";
+import { planState, capabilitiesFor, type PlanFields } from "@/features/billing/plan";
 import { getUsage } from "@/features/billing/usage";
 import type { Business, Service } from "@/types/database";
 
@@ -61,13 +61,45 @@ export async function getPublicBusiness(
 ): Promise<PublicBusinessData | null> {
   const admin = createAdminClient();
 
-  const { data: business } = await admin
+  // Colunas sempre presentes. branding_override é tentado à parte porque pode
+  // ainda não existir no banco (migração 0020 não aplicada) — sem ela, a busca
+  // não pode quebrar, senão o link de agendamento para de abrir.
+  const BASE_COLS =
+    "id, name, slug, timezone, whatsapp, phone, logo_url, address, plan, trial_ends_at, paid_until, current_period_start, appointment_limit_override";
+
+  type BizRow = {
+    id: string;
+    name: string;
+    slug: string;
+    timezone: string;
+    whatsapp: string | null;
+    phone: string | null;
+    logo_url: string | null;
+    address: string | null;
+    plan: PlanFields["plan"];
+    trial_ends_at: string | null;
+    paid_until: string | null;
+    current_period_start: string | null;
+    appointment_limit_override: number | null;
+    branding_override?: boolean | null;
+  };
+
+  const withOverride = await admin
     .from("businesses")
-    .select(
-      "id, name, slug, timezone, whatsapp, phone, logo_url, address, plan, trial_ends_at, paid_until, current_period_start, appointment_limit_override, branding_override",
-    )
+    .select(`${BASE_COLS}, branding_override`)
     .eq("slug", slug)
     .maybeSingle();
+
+  let business: BizRow | null = (withOverride.data as BizRow | null) ?? null;
+  if (withOverride.error) {
+    // Provável coluna branding_override ausente: refaz sem ela.
+    const fallback = await admin
+      .from("businesses")
+      .select(BASE_COLS)
+      .eq("slug", slug)
+      .maybeSingle();
+    business = (fallback.data as BizRow | null) ?? null;
+  }
   if (!business) return null;
 
   const [{ data: services }, { data: hours }] = await Promise.all([
@@ -99,12 +131,15 @@ export async function getPublicBusiness(
   }
 
   const planFields = {
-    plan: business.plan,
-    trial_ends_at: business.trial_ends_at,
-    paid_until: business.paid_until,
-    current_period_start: business.current_period_start,
-    appointment_limit_override: business.appointment_limit_override,
-    branding_override: business.branding_override,
+    plan: business.plan as PlanFields["plan"],
+    trial_ends_at: business.trial_ends_at as string | null,
+    paid_until: business.paid_until as string | null,
+    current_period_start: business.current_period_start as string | null,
+    appointment_limit_override: business.appointment_limit_override as
+      | number
+      | null,
+    branding_override:
+      (business.branding_override as boolean | null | undefined) ?? false,
   };
   const active = planState(planFields).active;
   const caps = capabilitiesFor(planFields);
