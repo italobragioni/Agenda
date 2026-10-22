@@ -187,8 +187,7 @@ export default function Home() {
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-x-12 lg:gap-y-6 lg:items-center">
             {/* Texto principal */}
             <div className="order-1 flex flex-col items-center text-center lg:col-start-1 lg:row-start-1 lg:items-start lg:text-left">
-              <Eyebrow>Feito pra lava-jato brasileiro</Eyebrow>
-              <h1 className="mt-5 text-4xl font-extrabold leading-[1.08] tracking-tight text-foreground sm:text-5xl lg:text-[3.25rem]">
+              <h1 className="text-4xl font-extrabold leading-[1.08] tracking-tight text-foreground sm:text-5xl lg:text-[3.25rem]">
                 Sua agenda{" "}
                 <span className="text-gradient-brand">enche sozinha</span>{" "}
                 enquanto você tá com a mão no carro.
