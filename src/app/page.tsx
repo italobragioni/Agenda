@@ -208,7 +208,10 @@ export default function Home() {
                   aria-hidden
                 />
                 <div className="overflow-hidden rounded-[1.6rem] shadow-soft-brand ring-1 ring-black/5">
-                  <WistiaVsl mediaId="l1fxyqud2x" />
+                  <WistiaVsl
+                    mediaId="w1hyhgjfka"
+                    aspect="0.46153846153846156"
+                  />
                 </div>
               </div>
             </div>

@@ -38,12 +38,12 @@ body {
 }
 
 /* Placeholder do player Wistia (VSL) enquanto o script carrega */
-wistia-player[media-id="l1fxyqud2x"]:not(:defined) {
+wistia-player[media-id="w1hyhgjfka"]:not(:defined) {
   background: center / contain no-repeat
-    url("https://fast.wistia.com/embed/medias/l1fxyqud2x/swatch");
+    url("https://fast.wistia.com/embed/medias/w1hyhgjfka/swatch");
   display: block;
   filter: blur(5px);
-  padding-top: 177.78%;
+  padding-top: 216.67%;
 }
 
 /* Feedback ao toque (sempre ativo: é um retorno funcional ao clique) */
