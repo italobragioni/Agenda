@@ -187,50 +187,40 @@ export default async function AdminPage({
               : conversionWhatsappMessage(bizOwnerName.get(b.id));
             return (
               <li key={b.id}>
-                <Card className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
-                  <div className="min-w-0 flex-1">
-                    <Link
-                      href={`/admin/${b.id}`}
-                      className="tap inline-flex max-w-full items-center gap-1 truncate text-sm font-semibold text-foreground hover:text-brand"
-                    >
-                      <span className="truncate">{b.name}</span>
-                      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted" />
-                    </Link>
-                    <p className="truncate text-xs text-muted">
-                      {bizEmail.get(b.id) ?? "—"} · /{b.slug}
-                    </p>
-                    <p className="mt-0.5 text-xs text-muted">
-                      {tel ? (
-                        <a
-                          href={whatsappLink(tel, waMessage)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-medium text-brand hover:underline"
-                        >
-                          {formatPhone(tel)}
-                        </a>
-                      ) : (
-                        "Sem telefone"
-                      )}
-                    </p>
-                    <p className="mt-0.5 text-xs text-muted">
-                      Cadastro: {formatDateBR(b.created_at, tz)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {!active && tel && (
-                      <a
-                        href={whatsappLink(tel, waMessage)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`Enviar WhatsApp para ${b.name}`}
-                        className="tap inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-700"
+                <Card className="space-y-3 p-4">
+                  {/* Cabeçalho: dados do estabelecimento + status */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        href={`/admin/${b.id}`}
+                        className="tap inline-flex max-w-full items-center gap-1 text-sm font-semibold text-foreground hover:text-brand"
                       >
-                        <MessageCircle className="h-4 w-4" aria-hidden />
-                        Enviar
-                      </a>
-                    )}
-                    <div className="flex flex-col items-start gap-1 sm:items-end">
+                        <span className="truncate">{b.name}</span>
+                        <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted" />
+                      </Link>
+                      <p className="truncate text-xs text-muted">
+                        {bizEmail.get(b.id) ?? "—"} · /{b.slug}
+                      </p>
+                      <p className="mt-0.5 text-xs">
+                        {tel ? (
+                          <a
+                            href={whatsappLink(tel, waMessage)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-brand hover:underline"
+                          >
+                            {formatPhone(tel)}
+                          </a>
+                        ) : (
+                          <span className="text-muted">Sem telefone</span>
+                        )}
+                      </p>
+                      <p className="mt-0.5 text-xs text-muted">
+                        Cadastro: {formatDateBR(b.created_at, tz)}
+                      </p>
+                    </div>
+
+                    <div className="flex shrink-0 flex-col items-end gap-1 text-right">
                       {subscriber && (
                         <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700">
                           ✓ Assinante
@@ -239,16 +229,32 @@ export default async function AdminPage({
                       <Badge
                         className={
                           st.tone === "danger"
-                            ? "bg-red-50 text-red-700 border-red-200"
+                            ? "border-red-200 bg-red-50 text-red-700"
                             : st.tone === "warn"
-                              ? "bg-amber-50 text-amber-700 border-amber-200"
-                              : "bg-brand-soft text-brand border-brand/30"
+                              ? "border-amber-200 bg-amber-50 text-amber-700"
+                              : "border-brand/30 bg-brand-soft text-brand"
                         }
                       >
                         {st.title}
                       </Badge>
                       <p className="text-[11px] text-muted">{st.detail}</p>
                     </div>
+                  </div>
+
+                  {/* Ações */}
+                  <div className="flex flex-wrap items-center gap-1.5 border-t border-border pt-3">
+                    {!active && tel && (
+                      <a
+                        href={whatsappLink(tel, waMessage)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Enviar WhatsApp para ${b.name}`}
+                        className="tap inline-flex items-center gap-1 rounded-lg bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-green-700"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5" aria-hidden />
+                        Enviar
+                      </a>
+                    )}
                     <AdminRowActions businessId={b.id} />
                   </div>
                 </Card>
