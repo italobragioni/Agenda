@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, MessageCircle } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentContext } from "@/features/auth/current";
 import { isAdminEmail } from "@/features/admin/config";
@@ -28,7 +28,7 @@ type Filter = "todos" | "assinantes" | "expirados";
 const FILTERS: { key: Filter; label: string }[] = [
   { key: "todos", label: "Todos" },
   { key: "assinantes", label: "Assinantes" },
-  { key: "expirados", label: "Sem acesso" },
+  { key: "expirados", label: "Não assinou" },
 ];
 
 /** Assinante de verdade: plano pago ativo com assinatura confirmada (Cakto). */
@@ -159,6 +159,14 @@ export default async function AdminPage({
         ))}
       </div>
 
+      {filter === "expirados" && visible.length > 0 && (
+        <p className="mb-3 rounded-lg bg-brand-soft px-3 py-2 text-xs text-foreground">
+          <strong>{visible.length}</strong> cadastraram e ainda não assinaram.
+          Toque em <strong>Enviar</strong> para mandar a mensagem de conversão
+          no WhatsApp (a mensagem já vem pronta).
+        </p>
+      )}
+
       {visible.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border bg-card px-4 py-10 text-center text-sm text-muted">
           {filter === "assinantes"
@@ -171,9 +179,10 @@ export default async function AdminPage({
             const st = planStatusText(b);
             const subscriber = isPaidSubscriber(b, now);
             const tel = b.whatsapp || b.phone;
+            const active = planState(b, now).active;
             // Sem plano ativo = criou a conta mas não assinou -> mensagem de
             // conversão. Com acesso ativo -> mensagem de acompanhamento.
-            const waMessage = planState(b, now).active
+            const waMessage = active
               ? onboardingWhatsappMessage(bizOwnerName.get(b.id))
               : conversionWhatsappMessage(bizOwnerName.get(b.id));
             return (
@@ -209,6 +218,18 @@ export default async function AdminPage({
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
+                    {!active && tel && (
+                      <a
+                        href={whatsappLink(tel, waMessage)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Enviar WhatsApp para ${b.name}`}
+                        className="tap inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-700"
+                      >
+                        <MessageCircle className="h-4 w-4" aria-hidden />
+                        Enviar
+                      </a>
+                    )}
                     <div className="flex flex-col items-start gap-1 sm:items-end">
                       {subscriber && (
                         <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700">
