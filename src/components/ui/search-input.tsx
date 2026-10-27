@@ -6,14 +6,21 @@ export function SearchInput({
   defaultValue = "",
   placeholder = "Buscar...",
   action,
+  hidden,
 }: {
   name?: string;
   defaultValue?: string;
   placeholder?: string;
   action?: string;
+  /** Campos ocultos enviados junto (ex.: manter o filtro atual). */
+  hidden?: Record<string, string>;
 }) {
   return (
     <form action={action} className="relative mb-4">
+      {hidden &&
+        Object.entries(hidden).map(([k, v]) => (
+          <input key={k} type="hidden" name={k} value={v} />
+        ))}
       <Search
         className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
         aria-hidden

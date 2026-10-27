@@ -8,6 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { SearchInput } from "@/components/ui/search-input";
 import { AdminRowActions } from "@/features/admin/row-actions";
 import { planStatusText } from "@/features/billing/plan-status";
 import { planState, PLANS } from "@/features/billing/plan";
@@ -43,15 +44,17 @@ function isPaidSubscriber(b: Business, now: Date): boolean {
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: Promise<{ f?: string }>;
+  searchParams: Promise<{ f?: string; q?: string }>;
 }) {
   const ctx = await getCurrentContext();
   if (!ctx) redirect("/login");
   if (!isAdminEmail(ctx.email)) notFound(); // esconde de quem não é admin
 
-  const { f } = await searchParams;
+  const { f, q } = await searchParams;
   const filter: Filter =
     f === "assinantes" || f === "expirados" ? (f as Filter) : "todos";
+  const query = (q ?? "").trim();
+  const queryDigits = query.replace(/\D/g, "");
 
   const admin = createAdminClient();
   const tz = ctx.business.timezone;
@@ -123,6 +126,26 @@ export default async function AdminPage({
     );
   }
 
+  // Busca por nome, e-mail ou celular.
+  if (query) {
+    const qLower = query.toLowerCase();
+    visible = visible.filter((b) => {
+      const name = (b.name ?? "").toLowerCase();
+      const email = (bizEmail.get(b.id) ?? "").toLowerCase();
+      const owner = (bizOwnerName.get(b.id) ?? "").toLowerCase();
+      const phoneDigits = `${b.whatsapp ?? ""}${b.phone ?? ""}`.replace(
+        /\D/g,
+        "",
+      );
+      const byText =
+        name.includes(qLower) ||
+        email.includes(qLower) ||
+        owner.includes(qLower);
+      const byPhone = queryDigits.length >= 3 && phoneDigits.includes(queryDigits);
+      return byText || byPhone;
+    });
+  }
+
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader
@@ -141,23 +164,50 @@ export default async function AdminPage({
         ))}
       </div>
 
+      {/* Busca por nome, e-mail ou celular */}
+      <SearchInput
+        action="/admin"
+        defaultValue={query}
+        placeholder="Buscar por nome, e-mail ou celular"
+        hidden={filter !== "todos" ? { f: filter } : undefined}
+      />
+
       {/* Filtro */}
       <div className="mb-4 inline-flex flex-wrap rounded-xl border border-border bg-card p-1">
-        {FILTERS.map((tab) => (
-          <Link
-            key={tab.key}
-            href={tab.key === "todos" ? "/admin" : `/admin?f=${tab.key}`}
-            className={cn(
-              "tap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-              filter === tab.key
-                ? "bg-brand text-brand-foreground"
-                : "text-muted hover:text-foreground",
-            )}
-          >
-            {tab.label}
-          </Link>
-        ))}
+        {FILTERS.map((tab) => {
+          const params = new URLSearchParams();
+          if (tab.key !== "todos") params.set("f", tab.key);
+          if (query) params.set("q", query);
+          const href = params.toString() ? `/admin?${params}` : "/admin";
+          return (
+            <Link
+              key={tab.key}
+              href={href}
+              className={cn(
+                "tap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                filter === tab.key
+                  ? "bg-brand text-brand-foreground"
+                  : "text-muted hover:text-foreground",
+              )}
+            >
+              {tab.label}
+            </Link>
+          );
+        })}
       </div>
+
+      {query && (
+        <p className="mb-3 text-xs text-muted">
+          {visible.length} resultado{visible.length === 1 ? "" : "s"} para “
+          {query}”.{" "}
+          <Link
+            href={filter === "todos" ? "/admin" : `/admin?f=${filter}`}
+            className="font-medium text-brand hover:underline"
+          >
+            Limpar busca
+          </Link>
+        </p>
+      )}
 
       {filter === "expirados" && visible.length > 0 && (
         <p className="mb-3 rounded-lg bg-brand-soft px-3 py-2 text-xs text-foreground">
@@ -169,9 +219,11 @@ export default async function AdminPage({
 
       {visible.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border bg-card px-4 py-10 text-center text-sm text-muted">
-          {filter === "assinantes"
-            ? "Nenhum assinante ainda."
-            : "Nenhum estabelecimento nesta categoria."}
+          {query
+            ? `Nenhum cadastro encontrado para “${query}”.`
+            : filter === "assinantes"
+              ? "Nenhum assinante ainda."
+              : "Nenhum estabelecimento nesta categoria."}
         </p>
       ) : (
         <ul className="space-y-2">
