@@ -6,7 +6,7 @@ import { AppointmentActions } from "./appointment-actions";
 import { formatCents } from "@/lib/money";
 import { formatTimeBR } from "@/lib/datetime";
 import { whatsappLink, formatPhone } from "@/lib/phone";
-import { MessageCircle, Receipt, User, Camera } from "lucide-react";
+import { MessageCircle, Receipt, User, Camera, ClipboardCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Appointment } from "@/types/database";
 
@@ -89,6 +89,13 @@ export function AppointmentItem({
           >
             <Camera className="h-3.5 w-3.5" aria-hidden />
             Fotos
+          </Link>
+          <Link
+            href={`/agenda/${a.id}/checklist`}
+            className="inline-flex items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-slate-50"
+          >
+            <ClipboardCheck className="h-3.5 w-3.5" aria-hidden />
+            Checklist
           </Link>
           <AppointmentActions id={a.id} status={a.status} />
         </div>
