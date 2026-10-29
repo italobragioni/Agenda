@@ -8,6 +8,7 @@ import { getCurrentContext } from "@/features/auth/current";
 import { isAdminEmail } from "@/features/admin/config";
 import { capabilitiesFor } from "@/features/billing/plan";
 import { PlanStatusCard } from "@/features/billing/plan-status";
+import { InstallButton } from "@/components/pwa/pwa";
 import { PageHeader } from "@/components/ui/page-header";
 import { SUPPORT_WHATSAPP_URL } from "@/lib/support";
 import { LogOut, ShieldCheck, MessageCircle, Users } from "lucide-react";
@@ -26,6 +27,9 @@ export default async function MenuPage() {
       <PageHeader title="Menu" />
 
       <PlanStatusCard business={ctx.business} className="mb-4" />
+
+      {/* Instalar o app (some sozinho quando já está instalado) */}
+      <InstallButton variant="row" className="mb-4" />
 
       {showTeam && (
         <Link

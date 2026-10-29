@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, Share, Plus, X } from "lucide-react";
+import { Download, Share, Plus, X, ChevronRight } from "lucide-react";
 
 // ---------------------------------------------------------------------
 // Captura global do evento de instalação (Android/Chrome/Edge).
@@ -61,7 +61,14 @@ export function PwaBootstrap() {
  * - Android/Chrome: abre a caixa nativa de instalação (1 toque).
  * - iOS/Safari: abre um passo a passo (a Apple não permite instalar por botão).
  */
-export function InstallButton() {
+export function InstallButton({
+  variant = "button",
+  className,
+}: {
+  /** "button": botão com descrição (Configurações). "row": linha de menu. */
+  variant?: "button" | "row";
+  className?: string;
+}) {
   const [mounted, setMounted] = useState(false);
   const [installed, setInstalled] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -104,20 +111,36 @@ export function InstallButton() {
   }
 
   return (
-    <div>
-      <button
-        type="button"
-        onClick={handleClick}
-        className="tap inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand px-5 text-sm font-medium text-brand-foreground hover:bg-brand-hover"
-      >
-        <Download className="h-4 w-4" aria-hidden />
-        Instalar aplicativo
-      </button>
+    <div className={className}>
+      {variant === "row" ? (
+        <button
+          type="button"
+          onClick={handleClick}
+          className="tap flex w-full items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5 text-left hover:bg-slate-50"
+        >
+          <Download className="h-5 w-5 text-brand" aria-hidden />
+          <span className="flex-1 text-sm font-medium text-foreground">
+            Instalar aplicativo
+          </span>
+          <ChevronRight className="h-4 w-4 text-muted" aria-hidden />
+        </button>
+      ) : (
+        <>
+          <button
+            type="button"
+            onClick={handleClick}
+            className="tap inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand px-5 text-sm font-medium text-brand-foreground hover:bg-brand-hover"
+          >
+            <Download className="h-4 w-4" aria-hidden />
+            Instalar aplicativo
+          </button>
 
-      <p className="mt-2 text-xs text-muted">
-        Adiciona o ícone da Carvi na tela inicial do seu celular, abrindo em tela
-        cheia como um aplicativo.
-      </p>
+          <p className="mt-2 text-xs text-muted">
+            Adiciona o ícone da Carvi na tela inicial do seu celular, abrindo em
+            tela cheia como um aplicativo.
+          </p>
+        </>
+      )}
 
       {showHelp && (
         <div
