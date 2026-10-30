@@ -6,7 +6,9 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentContext } from "@/features/auth/current";
 import { normalizePhone } from "@/lib/phone";
 import { parseCurrencyToCents } from "@/lib/money";
-import { localToUtc } from "@/lib/datetime";
+import { localToUtc, localDayString } from "@/lib/datetime";
+import { planState } from "@/features/billing/plan";
+import { getUsage } from "@/features/billing/usage";
 import type { ActionState } from "@/lib/forms";
 import type { AppointmentStatus } from "@/types/database";
 
@@ -50,11 +52,17 @@ export async function createAppointmentByOwner(
   const priceRaw = String(formData.get("price") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim() || null;
   const idempotencyKey = String(formData.get("idempotencyKey") ?? "") || null;
+  // Atendimento avulso: cliente que chegou sem agendar. Sem horário fixo,
+  // só lança na agenda (e, se marcado, já conta no faturamento).
+  const avulso = String(formData.get("avulso") ?? "") === "1";
+  const finalizado = String(formData.get("finalizado") ?? "") === "1";
 
   const fieldErrors: Record<string, string> = {};
   if (!serviceId) fieldErrors.serviceId = "Selecione um serviço";
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) fieldErrors.date = "Escolha a data";
-  if (!/^\d{2}:\d{2}$/.test(time)) fieldErrors.time = "Escolha o horário";
+  // No avulso não há horário a escolher.
+  if (!avulso && !/^\d{2}:\d{2}$/.test(time))
+    fieldErrors.time = "Escolha o horário";
   if (customerName.length < 2) fieldErrors.customerName = "Informe o nome";
 
   const phone = normalizePhone(customerPhoneRaw);
@@ -70,6 +78,83 @@ export async function createAppointmentByOwner(
   if (Object.keys(fieldErrors).length > 0) return { fieldErrors };
 
   const supabase = await createClient();
+
+  // -------------------------------------------------------------------
+  // Atendimento avulso (sem horário): lança direto na agenda.
+  // Mantém as regras de negócio importantes (assinatura ativa + limite do
+  // ciclo), mas ignora as checagens de horário (almoço, horário fixo,
+  // sobreposição), que não fazem sentido para quem chega sem marcar.
+  // -------------------------------------------------------------------
+  if (avulso) {
+    const tz = ctx.business.timezone;
+
+    if (!planState(ctx.business).active) {
+      return { error: mapDbError("PLANO_EXPIRADO") };
+    }
+    const usage = await getUsage(supabase, ctx.business, tz);
+    if (usage.reachedLimit) {
+      return { error: mapDbError("LIMITE_ATINGIDO") };
+    }
+
+    const { data: svc } = await supabase
+      .from("services")
+      .select("name, price_cents, duration_minutes")
+      .eq("id", serviceId)
+      .eq("is_active", true)
+      .maybeSingle();
+    if (!svc) return { fieldErrors: { serviceId: "Serviço inválido" } };
+
+    // Hoje -> agora; outra data -> meio-dia daquela data.
+    const start =
+      date === localDayString(tz)
+        ? new Date()
+        : localToUtc(date, "12:00", tz);
+    const end = new Date(start.getTime() + svc.duration_minutes * 60_000);
+
+    // Vincula (ou cria) o cliente para aparecer na aba Clientes.
+    let customerId: string | null = null;
+    const { data: existing } = await supabase
+      .from("customers")
+      .select("id")
+      .eq("phone", phone)
+      .maybeSingle();
+    if (existing) {
+      customerId = existing.id as string;
+    } else {
+      const { data: created } = await supabase
+        .from("customers")
+        .insert({ business_id: ctx.business.id, name: customerName, phone })
+        .select("id")
+        .maybeSingle();
+      customerId = (created?.id as string) ?? null;
+    }
+
+    const { error: insErr } = await supabase.from("appointments").insert({
+      business_id: ctx.business.id,
+      customer_id: customerId,
+      service_id: serviceId,
+      customer_name_snapshot: customerName,
+      customer_phone_snapshot: phone,
+      service_name_snapshot: svc.name,
+      price_cents: priceCents ?? svc.price_cents,
+      duration_minutes: svc.duration_minutes,
+      start_at: start.toISOString(),
+      end_at: end.toISOString(),
+      status: finalizado ? "completed" : "scheduled",
+      booking_source: "admin",
+      notes,
+      idempotency_key: idempotencyKey,
+    });
+    if (insErr) {
+      return { error: "Não foi possível lançar o atendimento. Tente novamente." };
+    }
+
+    revalidatePath("/agenda");
+    revalidatePath("/inicio");
+    revalidatePath("/financeiro");
+    revalidatePath("/clientes");
+    redirect("/agenda");
+  }
 
   // O limite do plano/ciclo e a validade da assinatura são impostos de forma
   // ATÔMICA dentro da função do banco (create_appointment), sob advisory lock.

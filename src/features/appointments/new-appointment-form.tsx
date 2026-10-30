@@ -52,6 +52,9 @@ export function NewAppointmentForm({
   const [date, setDate] = useState(today);
   const [price, setPrice] = useState("");
   const [time, setTime] = useState("");
+  // Atendimento avulso (cliente que chega sem marcar).
+  const [avulso, setAvulso] = useState(false);
+  const [finalizado, setFinalizado] = useState(true);
   const [slots, setSlots] = useState<string[] | null>(null);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
@@ -76,7 +79,7 @@ export function NewAppointmentForm({
 
   // Busca horários disponíveis quando serviço + data estão definidos.
   useEffect(() => {
-    if (!serviceId || !date) {
+    if (!serviceId || !date || avulso) {
       setSlots(null);
       return;
     }
@@ -99,7 +102,7 @@ export function NewAppointmentForm({
     return () => {
       cancelled = true;
     };
-  }, [serviceId, date]);
+  }, [serviceId, date, avulso]);
 
   // Autocompletar cliente pelo nome digitado.
   useEffect(() => {
@@ -150,6 +153,8 @@ export function NewAppointmentForm({
       <input type="hidden" name="serviceId" value={serviceId} />
       <input type="hidden" name="time" value={time} />
       <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
+      <input type="hidden" name="avulso" value={avulso ? "1" : ""} />
+      <input type="hidden" name="finalizado" value={finalizado ? "1" : ""} />
 
       <FormField label="Serviço" htmlFor="service" error={fe.serviceId}>
         <select
@@ -168,13 +173,39 @@ export function NewAppointmentForm({
         </select>
       </FormField>
 
-      <FormField label="Data" htmlFor="date" error={fe.date}>
+      {/* Atendimento avulso (cliente que chega sem marcar) */}
+      <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-slate-50 px-3 py-3">
+        <input
+          type="checkbox"
+          checked={avulso}
+          onChange={(e) => {
+            setAvulso(e.target.checked);
+            if (e.target.checked) setTime("");
+          }}
+          className="mt-0.5 h-5 w-5 rounded border-border accent-[var(--brand)]"
+        />
+        <span className="text-sm">
+          <span className="font-medium text-foreground">
+            Atendimento avulso (sem horário)
+          </span>
+          <span className="block text-xs text-muted">
+            Para o cliente que chega sem agendar. Só lança na agenda, sem
+            escolher horário.
+          </span>
+        </span>
+      </label>
+
+      <FormField
+        label={avulso ? "Data do atendimento" : "Data"}
+        htmlFor="date"
+        error={fe.date}
+      >
         <Input
           id="date"
           name="date"
           type="date"
           value={date}
-          min={today}
+          min={avulso ? undefined : today}
           onChange={(e) => {
             setDate(e.target.value);
             setTime("");
@@ -183,37 +214,57 @@ export function NewAppointmentForm({
         />
       </FormField>
 
-      <FormField label="Horário" htmlFor="time-group" error={fe.time}>
-        {!serviceId ? (
-          <p className="text-sm text-muted">Selecione um serviço primeiro.</p>
-        ) : loadingSlots ? (
-          <p className="flex items-center gap-2 text-sm text-muted">
-            <Loader2 className="h-4 w-4 animate-spin" /> Buscando horários...
-          </p>
-        ) : slots && slots.length > 0 ? (
-          <div id="time-group" className="grid grid-cols-4 gap-2">
-            {slots.map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setTime(s)}
-                className={cn(
-                  "h-10 rounded-lg border text-sm font-medium transition-colors",
-                  time === s
-                    ? "border-brand bg-brand text-brand-foreground"
-                    : "border-border bg-card text-foreground hover:border-brand",
-                )}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-muted">
-            Nenhum horário disponível nesse dia.
-          </p>
-        )}
-      </FormField>
+      {avulso ? (
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-card px-3 py-3">
+          <input
+            type="checkbox"
+            checked={finalizado}
+            onChange={(e) => setFinalizado(e.target.checked)}
+            className="mt-0.5 h-5 w-5 rounded border-border accent-[var(--brand)]"
+          />
+          <span className="text-sm">
+            <span className="font-medium text-foreground">
+              Já finalizado (conta no faturamento)
+            </span>
+            <span className="block text-xs text-muted">
+              Marque se o serviço já foi feito/pago. Desmarcado, fica como
+              “Agendado” para você finalizar depois.
+            </span>
+          </span>
+        </label>
+      ) : (
+        <FormField label="Horário" htmlFor="time-group" error={fe.time}>
+          {!serviceId ? (
+            <p className="text-sm text-muted">Selecione um serviço primeiro.</p>
+          ) : loadingSlots ? (
+            <p className="flex items-center gap-2 text-sm text-muted">
+              <Loader2 className="h-4 w-4 animate-spin" /> Buscando horários...
+            </p>
+          ) : slots && slots.length > 0 ? (
+            <div id="time-group" className="grid grid-cols-4 gap-2">
+              {slots.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setTime(s)}
+                  className={cn(
+                    "h-10 rounded-lg border text-sm font-medium transition-colors",
+                    time === s
+                      ? "border-brand bg-brand text-brand-foreground"
+                      : "border-border bg-card text-foreground hover:border-brand",
+                  )}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted">
+              Nenhum horário disponível nesse dia.
+            </p>
+          )}
+        </FormField>
+      )}
 
       <div className="relative">
         <FormField label="Cliente" htmlFor="customerName" error={fe.customerName}>
@@ -297,7 +348,7 @@ export function NewAppointmentForm({
           </Button>
         </Link>
         <SubmitButton fullWidth className="flex-1" pendingText="Salvando...">
-          Salvar agendamento
+          {avulso ? "Lançar atendimento" : "Salvar agendamento"}
         </SubmitButton>
       </div>
     </form>
