@@ -62,3 +62,54 @@ export async function createCustomer(
   revalidatePath("/clientes");
   redirect("/clientes");
 }
+
+// ---------------------------------------------------------------------
+// Editar cliente (nome, celular e carro)
+// ---------------------------------------------------------------------
+export async function updateCustomer(
+  id: string,
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const ctx = await getCurrentContext();
+  if (!ctx) redirect("/login");
+
+  const name = String(formData.get("name") ?? "").trim();
+  const phoneRaw = String(formData.get("phone") ?? "");
+  const vehicle = String(formData.get("vehicle") ?? "").trim() || null;
+
+  const fieldErrors: Record<string, string> = {};
+  if (name.length < 2) fieldErrors.name = "Informe o nome";
+  const phone = normalizePhone(phoneRaw);
+  if (!phone) fieldErrors.phone = "Celular inválido";
+  if (Object.keys(fieldErrors).length > 0) return { fieldErrors };
+
+  const supabase = await createClient();
+  const base = { name, phone: phone as string };
+
+  // O RLS garante que só é possível editar clientes do próprio negócio.
+  let error = (
+    await supabase
+      .from("customers")
+      .update({ ...base, vehicle })
+      .eq("id", id)
+  ).error;
+
+  // Se a coluna do carro ainda não existir (migração 0016), salva sem ela.
+  if (error && isUnknownVehicleColumn(error)) {
+    error = (
+      await supabase.from("customers").update(base).eq("id", id)
+    ).error;
+  }
+
+  if (error) {
+    if ((error as { code?: string }).code === "23505") {
+      return { fieldErrors: { phone: "Já existe um cliente com esse celular." } };
+    }
+    return { error: "Não foi possível salvar as alterações. Tente novamente." };
+  }
+
+  revalidatePath("/clientes");
+  revalidatePath(`/clientes/${id}`);
+  redirect(`/clientes/${id}`);
+}

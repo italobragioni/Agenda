@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Phone, CalendarClock, Car } from "lucide-react";
+import { ArrowLeft, Phone, CalendarClock, Car, Pencil } from "lucide-react";
 import { requireActiveBusiness } from "@/features/billing/guard";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
@@ -60,9 +60,18 @@ export default async function ClienteDetailPage({
       </Link>
 
       <Card className="mb-4">
-        <h1 className="text-xl font-semibold text-foreground">
-          {customer.name}
-        </h1>
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="text-xl font-semibold text-foreground">
+            {customer.name}
+          </h1>
+          <Link
+            href={`/clientes/${id}/editar`}
+            className="tap inline-flex shrink-0 items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-slate-50"
+          >
+            <Pencil className="h-3.5 w-3.5" aria-hidden />
+            Editar
+          </Link>
+        </div>
         <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
           <Phone className="h-4 w-4" aria-hidden />
           {formatPhone(customer.phone)}
