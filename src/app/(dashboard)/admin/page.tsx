@@ -18,17 +18,19 @@ import { formatPhone, whatsappLink } from "@/lib/phone";
 import {
   onboardingWhatsappMessage,
   conversionWhatsappMessage,
+  renewalWhatsappMessage,
 } from "@/lib/support";
 import { cn } from "@/lib/utils";
 import type { Business } from "@/types/database";
 
 export const metadata: Metadata = { title: "Administrador — Carvi" };
 
-type Filter = "todos" | "assinantes" | "expirados";
+type Filter = "todos" | "assinantes" | "renovar" | "expirados";
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: "todos", label: "Todos" },
   { key: "assinantes", label: "Assinantes" },
+  { key: "renovar", label: "Expiradas" },
   { key: "expirados", label: "Não assinou" },
 ];
 
@@ -38,6 +40,24 @@ function isPaidSubscriber(b: Business, now: Date): boolean {
   return (
     st.active &&
     (!!b.cakto_subscription_id || b.subscription_status === "active")
+  );
+}
+
+/** Estados de assinatura que indicam que a pessoa JÁ foi assinante. */
+const PAID_HISTORY = new Set([
+  "active",
+  "late",
+  "canceled",
+  "refunded",
+  "chargeback",
+  "payment_failed",
+]);
+
+/** Já teve assinatura em algum momento (passou pela Cakto). */
+function wasSubscriber(b: Business): boolean {
+  return (
+    !!b.cakto_subscription_id ||
+    (b.subscription_status != null && PAID_HISTORY.has(b.subscription_status))
   );
 }
 
@@ -52,7 +72,9 @@ export default async function AdminPage({
 
   const { f, q } = await searchParams;
   const filter: Filter =
-    f === "assinantes" || f === "expirados" ? (f as Filter) : "todos";
+    f === "assinantes" || f === "expirados" || f === "renovar"
+      ? (f as Filter)
+      : "todos";
   const query = (q ?? "").trim();
   const queryDigits = query.replace(/\D/g, "");
 
@@ -116,7 +138,10 @@ export default async function AdminPage({
   let visible = businesses.filter((b) => {
     const st = planState(b, now);
     if (filter === "assinantes") return isPaidSubscriber(b, now);
-    if (filter === "expirados") return !st.active;
+    // Expiradas: já foi assinante e perdeu o acesso (alvo de renovação).
+    if (filter === "renovar") return !st.active && wasSubscriber(b);
+    // Não assinou: nunca assinou e sem acesso (alvo de conversão).
+    if (filter === "expirados") return !st.active && !wasSubscriber(b);
     return true;
   });
   // Na aba de assinantes, mostra os mais recentes primeiro.
@@ -217,13 +242,23 @@ export default async function AdminPage({
         </p>
       )}
 
+      {filter === "renovar" && visible.length > 0 && (
+        <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          <strong>{visible.length}</strong> assinatura(s) expirada(s). Toque em{" "}
+          <strong>Enviar</strong> para mandar o lembrete de renovação no
+          WhatsApp (a mensagem já vem pronta).
+        </p>
+      )}
+
       {visible.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border bg-card px-4 py-10 text-center text-sm text-muted">
           {query
             ? `Nenhum cadastro encontrado para “${query}”.`
             : filter === "assinantes"
               ? "Nenhum assinante ainda."
-              : "Nenhum estabelecimento nesta categoria."}
+              : filter === "renovar"
+                ? "Nenhuma assinatura expirada no momento."
+                : "Nenhum estabelecimento nesta categoria."}
         </p>
       ) : (
         <ul className="space-y-2">
@@ -232,11 +267,14 @@ export default async function AdminPage({
             const subscriber = isPaidSubscriber(b, now);
             const tel = b.whatsapp || b.phone;
             const active = planState(b, now).active;
-            // Sem plano ativo = criou a conta mas não assinou -> mensagem de
-            // conversão. Com acesso ativo -> mensagem de acompanhamento.
+            const ownerName = bizOwnerName.get(b.id);
+            // Ativo -> acompanhamento. Expirou (já foi assinante) -> renovação.
+            // Nunca assinou -> conversão.
             const waMessage = active
-              ? onboardingWhatsappMessage(bizOwnerName.get(b.id))
-              : conversionWhatsappMessage(bizOwnerName.get(b.id));
+              ? onboardingWhatsappMessage(ownerName)
+              : wasSubscriber(b)
+                ? renewalWhatsappMessage(ownerName)
+                : conversionWhatsappMessage(ownerName);
             return (
               <li key={b.id}>
                 <Card className="space-y-3 p-4">

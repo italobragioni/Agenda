@@ -17,6 +17,22 @@ export function onboardingWhatsappMessage(fullName?: string | null): string {
 }
 
 /**
+ * Mensagem de RENOVAÇÃO para quem já foi assinante e a assinatura expirou.
+ * Objetivo: lembrar com leveza e levar a pessoa a renovar para não perder a
+ * agenda e os clientes.
+ */
+export function renewalWhatsappMessage(fullName?: string | null): string {
+  const firstName = (fullName ?? "").trim().split(/\s+/)[0] || "";
+  const saudacao = firstName ? `Oi, ${firstName}! Tudo bem?` : "Oi! Tudo bem?";
+  return (
+    `${saudacao} Aqui é o Ítalo, da Carvi.\n\n` +
+    "Passando pra avisar que a sua assinatura da Carvi expirou, então o seu link de agendamento e o painel estão pausados por enquanto.\n\n" +
+    "A boa notícia é que a sua agenda, seus clientes e seus serviços continuam salvos — ao renovar, tudo volta na hora, do jeitinho que estava.\n\n" +
+    "Quer reativar agora? É rápido, no cartão ou Pix, e o acesso libera na hora. Se preferir, eu te ajudo no passo a passo por aqui mesmo. É só me responder."
+  );
+}
+
+/**
  * Mensagem de CONVERSÃO para quem criou a conta mas ainda não assinou um plano.
  * Objetivo: mostrar valor, remover risco e levar a pessoa a assinar hoje.
  */
