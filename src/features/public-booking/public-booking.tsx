@@ -17,6 +17,7 @@ import {
   vehiclePriceCents,
   fromPriceCents,
   hasVehicleVariation,
+  vehicleTypesWithPrice,
 } from "./vehicle";
 import { formatCents } from "@/lib/money";
 import { formatDateBR, formatTimeBR, WEEKDAY_LABELS } from "@/lib/datetime";
@@ -91,6 +92,14 @@ export function PublicBooking({
       : String(Date.now()),
   );
 
+  // Portes com preço preenchido no serviço escolhido (os demais não aparecem).
+  const vehicleLabels: string[] = service
+    ? vehicleTypesWithPrice(service)
+    : [];
+  const vehicleOptions = VEHICLES.filter((v) =>
+    vehicleLabels.includes(v.label),
+  );
+
   // Busca horários ao entrar no passo de horário.
   useEffect(() => {
     if (step !== "time" || !service || !date) return;
@@ -157,7 +166,8 @@ export function PublicBooking({
   const canGoBack = step !== "service" && step !== "success";
   function goBack() {
     if (step === "vehicle") setStep("service");
-    else if (step === "date") setStep("vehicle");
+    else if (step === "date")
+      setStep(vehicleLabels.length > 0 ? "vehicle" : "service");
     else if (step === "time") setStep("date");
     else if (step === "details") setStep("time");
   }
@@ -210,7 +220,11 @@ export function PublicBooking({
               type="button"
               onClick={() => {
                 setService(s);
-                setStep("vehicle");
+                setVehicle("");
+                // Só mostra o passo de veículo se houver porte com preço.
+                setStep(
+                  vehicleTypesWithPrice(s).length > 0 ? "vehicle" : "date",
+                );
               }}
               className="tap flex w-full items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left hover:border-brand"
             >
@@ -244,7 +258,7 @@ export function PublicBooking({
             Qual o tipo do veículo?
           </h2>
           <div className="grid grid-cols-2 gap-2">
-            {VEHICLES.map((v) => (
+            {vehicleOptions.map((v) => (
               <button
                 key={v.label}
                 type="button"

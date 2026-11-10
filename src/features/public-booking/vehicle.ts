@@ -44,6 +44,19 @@ export function vehiclePriceCents(
   return typeof v === "number" ? v : service.price_cents;
 }
 
+/** Portes que têm preço próprio definido (para mostrar só esses no público). */
+export function vehicleTypesWithPrice(service: VehiclePricing): VehicleType[] {
+  const map: Record<VehicleType, number | null | undefined> = {
+    "Moto Pequena": service.price_moto_pequena_cents,
+    "Moto Grande": service.price_moto_grande_cents,
+    Hatch: service.price_hatch_cents,
+    Sedan: service.price_sedan_cents,
+    SUV: service.price_suv_cents,
+    Caminhonete: service.price_caminhonete_cents,
+  };
+  return VEHICLE_TYPES.filter((t) => typeof map[t] === "number");
+}
+
 /** Menor preço entre base e portes definidos (para "a partir de"). */
 export function fromPriceCents(service: VehiclePricing): number {
   const prices = [
