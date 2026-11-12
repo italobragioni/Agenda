@@ -46,6 +46,7 @@ export async function createPublicBooking(input: {
   slug: string;
   serviceId: string;
   vehicle?: string;
+  car?: string;
   date: string;
   time: string;
   customerName: string;
@@ -64,9 +65,11 @@ export async function createPublicBooking(input: {
 
   const name = (input.customerName || "").trim();
   const phone = normalizePhone(input.customerPhone || "");
+  const car = (input.car || "").trim();
 
   if (name.length < 2) return { ok: false, error: "Informe seu nome." };
   if (!phone) return { ok: false, error: "Informe um WhatsApp válido." };
+  if (car.length < 2) return { ok: false, error: "Informe o seu carro." };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date) || !/^\d{2}:\d{2}$/.test(input.time)) {
     return { ok: false, error: "Data ou horário inválidos." };
   }
@@ -102,10 +105,13 @@ export async function createPublicBooking(input: {
     business.timezone as string,
   );
 
-  // Tipo de veículo (validado) é guardado como observação do agendamento.
+  // Carro (texto do cliente) + tipo/porte (validado) viram observação.
   const vTrim = (input.vehicle || "").trim();
   const vehicle = isVehicleType(vTrim) ? vTrim : null;
-  const notes = vehicle ? `Veículo: ${vehicle}` : null;
+  const noteParts: string[] = [];
+  if (car) noteParts.push(`Carro: ${car}`);
+  if (vehicle) noteParts.push(`Porte: ${vehicle}`);
+  const notes = noteParts.length ? noteParts.join(" · ") : null;
 
   // Preço por porte só nos planos Premium+; senão, usa o preço base.
   const caps = capabilitiesFor({
@@ -145,6 +151,16 @@ export async function createPublicBooking(input: {
   });
 
   if (error) return { ok: false, error: mapDbError(error.message) };
+
+  // Guarda o carro no cadastro do cliente (melhor esforço; ignora se a coluna
+  // "vehicle" ainda não existir no banco).
+  if (car) {
+    await admin
+      .from("customers")
+      .update({ vehicle: car })
+      .eq("business_id", business.id)
+      .eq("phone", phone);
+  }
 
   return {
     ok: true,

@@ -82,6 +82,7 @@ export function PublicBooking({
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [car, setCar] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string>();
   const [result, setResult] = useState<PublicBookingResult["booking"]>();
@@ -139,6 +140,7 @@ export function PublicBooking({
       slug,
       serviceId: service.id,
       vehicle,
+      car,
       date,
       time,
       customerName: name,
@@ -398,6 +400,22 @@ export function PublicBooking({
               onChange={(e) => setPhone(e.target.value)}
               className="h-11 w-full rounded-xl border border-border bg-card px-3 focus:border-brand focus:outline-2 focus:outline-brand"
               placeholder="(31) 99999-9999"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="pb-car"
+              className="mb-1.5 block text-sm font-medium text-foreground"
+            >
+              Carro
+            </label>
+            <input
+              id="pb-car"
+              value={car}
+              onChange={(e) => setCar(e.target.value)}
+              className="h-11 w-full rounded-xl border border-border bg-card px-3 focus:border-brand focus:outline-2 focus:outline-brand"
+              placeholder="Ex.: Gol prata, placa ABC-1234"
             />
           </div>
 
