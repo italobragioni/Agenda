@@ -130,8 +130,15 @@ export default async function AgendaPage({
             const weekday = new Date(`${key}T00:00:00Z`).getUTCDay();
             return (
               <div key={key}>
-                <h2 className="mb-2 text-sm font-semibold text-foreground">
-                  {WEEKDAY_LABELS[weekday]} · {formatDateBR(items[0].start_at, tz)}
+                <h2 className="mb-2 flex flex-wrap items-center gap-x-2 text-sm font-semibold text-foreground">
+                  <span>
+                    {WEEKDAY_LABELS[weekday]} ·{" "}
+                    {formatDateBR(items[0].start_at, tz)}
+                  </span>
+                  <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs font-medium text-brand">
+                    {items.length}{" "}
+                    {items.length === 1 ? "agendamento" : "agendamentos"}
+                  </span>
                 </h2>
                 <div className="space-y-2">
                   {items.map((a) => (
@@ -144,6 +151,14 @@ export default async function AgendaPage({
         </div>
       ) : (
         <div className="space-y-2">
+          <p className="mb-1 text-sm font-medium text-foreground">
+            {appointments.length}{" "}
+            {appointments.length === 1 ? "agendamento" : "agendamentos"}
+            <span className="font-normal text-muted">
+              {" "}
+              {view === "hoje" ? "hoje" : "amanhã"}
+            </span>
+          </p>
           {appointments.map((a) => (
             <AppointmentItem key={a.id} appointment={a} tz={tz} />
           ))}
