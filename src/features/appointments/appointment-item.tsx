@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { STATUS_INFO } from "./status";
 import { AppointmentActions } from "./appointment-actions";
+import { EditPriceButton } from "./edit-price-button";
 import { formatCents } from "@/lib/money";
 import { formatTimeBR } from "@/lib/datetime";
 import { whatsappLink, formatPhone } from "@/lib/phone";
@@ -97,6 +98,7 @@ export function AppointmentItem({
             <ClipboardCheck className="h-3.5 w-3.5" aria-hidden />
             Checklist
           </Link>
+          <EditPriceButton id={a.id} priceCents={a.price_cents} />
           <AppointmentActions id={a.id} status={a.status} />
         </div>
       )}

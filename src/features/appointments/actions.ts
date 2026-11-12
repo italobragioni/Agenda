@@ -201,3 +201,35 @@ export async function setAppointmentStatus(
   revalidatePath("/clientes");
   revalidatePath("/financeiro");
 }
+
+// ---------------------------------------------------------------------
+// Editar o preço de um atendimento (desconto ou acréscimo)
+// ---------------------------------------------------------------------
+export async function updateAppointmentPrice(
+  id: string,
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const ctx = await getCurrentContext();
+  if (!ctx) redirect("/login");
+
+  const priceRaw = String(formData.get("price") ?? "").trim();
+  const cents = parseCurrencyToCents(priceRaw);
+  if (cents === null || cents < 0) {
+    return { fieldErrors: { price: "Preço inválido" } };
+  }
+
+  const supabase = await createClient();
+  // O RLS garante que só é possível alterar agendamentos do próprio negócio.
+  const { error } = await supabase
+    .from("appointments")
+    .update({ price_cents: cents })
+    .eq("id", id);
+  if (error) return { error: "Não foi possível atualizar o preço." };
+
+  revalidatePath("/agenda");
+  revalidatePath("/inicio");
+  revalidatePath("/clientes");
+  revalidatePath("/financeiro");
+  return { success: "Preço atualizado." };
+}
