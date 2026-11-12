@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { AppointmentItem } from "@/features/appointments/appointment-item";
+import { NotificationBell } from "@/features/notifications/notification-bell";
 import {
   localDayString,
   offsetDayString,
@@ -66,6 +67,17 @@ export default async function AgendaPage({
 
   const appointments = (data ?? []) as Appointment[];
 
+  // Agendamentos online recentes (para o sininho de notificações).
+  const { data: onlineData } = await supabase
+    .from("appointments")
+    .select("created_at")
+    .eq("booking_source", "public")
+    .order("created_at", { ascending: false })
+    .limit(30);
+  const onlineTimestamps = (onlineData ?? []).map(
+    (r) => r.created_at as string,
+  );
+
   // Agrupa por dia local (útil na visão semana).
   const groups = new Map<string, Appointment[]>();
   for (const a of appointments) {
@@ -81,12 +93,15 @@ export default async function AgendaPage({
       <PageHeader
         title="Agenda"
         action={
-          <Link href="/agenda/novo">
-            <Button>
-              <Plus className="h-4 w-4" aria-hidden />
-              <span className="hidden sm:inline">Novo</span>
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <NotificationBell timestamps={onlineTimestamps} />
+            <Link href="/agenda/novo">
+              <Button>
+                <Plus className="h-4 w-4" aria-hidden />
+                <span className="hidden sm:inline">Novo</span>
+              </Button>
+            </Link>
+          </div>
         }
       />
 

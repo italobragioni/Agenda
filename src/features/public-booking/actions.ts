@@ -3,8 +3,9 @@
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizePhone } from "@/lib/phone";
-import { localToUtc } from "@/lib/datetime";
+import { localToUtc, formatDateBR, formatTimeBR } from "@/lib/datetime";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { sendPushToBusiness } from "@/lib/push";
 import { capabilitiesFor } from "@/features/billing/plan";
 import { isVehicleType, vehiclePriceCents } from "./vehicle";
 
@@ -160,6 +161,22 @@ export async function createPublicBooking(input: {
       .update({ vehicle: car })
       .eq("business_id", business.id)
       .eq("phone", phone);
+  }
+
+  // Notificação push para o dono (silencioso se não houver aparelhos/chaves).
+  try {
+    const tzName = business.timezone as string;
+    await sendPushToBusiness(business.id as string, {
+      title: "Novo agendamento!",
+      body: `${name} — ${service.name} — ${formatDateBR(
+        startAt,
+        tzName,
+      )} às ${formatTimeBR(startAt, tzName)}`,
+      url: "/agenda",
+      tag: `appt-${(appt?.id as string) ?? input.idempotencyKey}`,
+    });
+  } catch {
+    // Nunca quebra o agendamento por causa da notificação.
   }
 
   return {

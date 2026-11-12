@@ -11,7 +11,7 @@ import { PlanStatusCard } from "@/features/billing/plan-status";
 import { InstallButton } from "@/components/pwa/pwa";
 import { PageHeader } from "@/components/ui/page-header";
 import { SUPPORT_WHATSAPP_URL } from "@/lib/support";
-import { LogOut, ShieldCheck, MessageCircle, Users } from "lucide-react";
+import { LogOut, ShieldCheck, MessageCircle, Users, Bell } from "lucide-react";
 
 export const metadata: Metadata = { title: "Menu — Agenda" };
 
@@ -30,6 +30,17 @@ export default async function MenuPage() {
 
       {/* Instalar o app (some sozinho quando já está instalado) */}
       <InstallButton variant="row" className="mb-4" />
+
+      <Link
+        href="/notificacoes"
+        className="mb-4 flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3.5 hover:bg-slate-50"
+      >
+        <Bell className="h-5 w-5 text-brand" aria-hidden />
+        <span className="flex-1 text-sm font-medium text-foreground">
+          Notificações
+        </span>
+        <ChevronRight className="h-4 w-4 text-muted" aria-hidden />
+      </Link>
 
       {showTeam && (
         <Link
