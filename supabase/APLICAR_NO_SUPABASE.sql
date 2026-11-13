@@ -49,6 +49,11 @@ alter table public.businesses
   add column if not exists fixed_slot_times time[];
 
 -- Função de agendamento (versão final: cota do ciclo + almoço + horários fixos)
+-- Remove a versão anterior (10 parâmetros) para não deixar duas versões da
+-- função (o que causaria ambiguidade ao agendar).
+drop function if exists public.create_appointment(
+  uuid, uuid, text, text, timestamptz, text, integer, integer, text, text
+);
 create or replace function public.create_appointment(
   p_business_id      uuid,
   p_service_id       uuid,

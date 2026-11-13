@@ -4,6 +4,10 @@
 -- Acrescenta o parâmetro p_service_name a create_appointment.
 -- =====================================================================
 
+-- Remove a versão anterior (10 parâmetros) para evitar ambiguidade.
+drop function if exists public.create_appointment(
+  uuid, uuid, text, text, timestamptz, text, integer, integer, text, text
+);
 create or replace function public.create_appointment(
   p_business_id      uuid,
   p_service_id       uuid,
