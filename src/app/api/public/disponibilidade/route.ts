@@ -11,6 +11,7 @@ export async function GET(request: Request) {
   const slug = searchParams.get("slug");
   const serviceId = searchParams.get("serviceId");
   const date = searchParams.get("date");
+  const minutes = Number(searchParams.get("minutes") ?? "");
 
   if (!slug || !serviceId || !date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return NextResponse.json({ error: "parâmetros inválidos" }, { status: 400 });
@@ -30,6 +31,7 @@ export async function GET(request: Request) {
     businessId: business.id as string,
     serviceId,
     dayStr: date,
+    durationOverride: Number.isFinite(minutes) && minutes > 0 ? minutes : undefined,
   });
 
   return NextResponse.json({ slots });

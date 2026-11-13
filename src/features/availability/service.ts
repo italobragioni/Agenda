@@ -17,8 +17,11 @@ export async function getAvailableSlots(params: {
   serviceId: string;
   dayStr: string; // "yyyy-MM-dd" no fuso do estabelecimento
   excludeAppointmentId?: string;
+  /** Duração total (sobrepõe a do serviço) — usada em multi-serviço. */
+  durationOverride?: number;
 }): Promise<string[]> {
-  const { businessId, serviceId, dayStr, excludeAppointmentId } = params;
+  const { businessId, serviceId, dayStr, excludeAppointmentId, durationOverride } =
+    params;
   const admin = createAdminClient();
 
   const { data: business } = await admin
@@ -40,7 +43,10 @@ export async function getAvailableSlots(params: {
     .eq("business_id", businessId)
     .maybeSingle();
   if (!service || !service.is_active) return [];
-  const durationMin = service.duration_minutes as number;
+  const durationMin =
+    durationOverride && durationOverride > 0
+      ? durationOverride
+      : (service.duration_minutes as number);
 
   // Dia da semana da data (0 = domingo), independente de fuso.
   const weekday = new Date(`${dayStr}T00:00:00Z`).getUTCDay();

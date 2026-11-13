@@ -6,6 +6,7 @@ import {
   Clock,
   Loader2,
   CheckCircle2,
+  Check,
   CalendarPlus,
   MessageCircle,
   Car,
@@ -73,7 +74,7 @@ export function PublicBooking({
   tz: string;
 }) {
   const [step, setStep] = useState<Step>("service");
-  const [service, setService] = useState<Service | null>(null);
+  const [selected, setSelected] = useState<Service[]>([]);
   const [vehicle, setVehicle] = useState<string>("");
   const [date, setDate] = useState<string>("");
   const [time, setTime] = useState<string>("");
@@ -93,22 +94,30 @@ export function PublicBooking({
       : String(Date.now()),
   );
 
-  // Portes com preço preenchido no serviço escolhido (os demais não aparecem).
-  const vehicleLabels: string[] = service
-    ? vehicleTypesWithPrice(service)
-    : [];
+  // Totais dos serviços escolhidos.
+  const totalDuration = selected.reduce((s, x) => s + x.duration_minutes, 0);
+  const combinedName = selected.map((s) => s.name).join(" + ");
+  const totalPrice = selected.reduce(
+    (sum, x) => sum + vehiclePriceCents(x, vehicle),
+    0,
+  );
+
+  // Portes com preço preenchido (união dos serviços escolhidos).
+  const vehicleLabels: string[] = Array.from(
+    new Set(selected.flatMap((s) => vehicleTypesWithPrice(s))),
+  );
   const vehicleOptions = VEHICLES.filter((v) =>
     vehicleLabels.includes(v.label),
   );
 
   // Busca horários ao entrar no passo de horário.
   useEffect(() => {
-    if (step !== "time" || !service || !date) return;
+    if (step !== "time" || selected.length === 0 || !date) return;
     let cancelled = false;
     setLoadingSlots(true);
     setSlots(null);
     fetch(
-      `/api/public/disponibilidade?slug=${encodeURIComponent(slug)}&serviceId=${service.id}&date=${date}`,
+      `/api/public/disponibilidade?slug=${encodeURIComponent(slug)}&serviceId=${selected[0].id}&date=${date}&minutes=${totalDuration}`,
     )
       .then((r) => r.json())
       .then((d) => {
@@ -123,7 +132,7 @@ export function PublicBooking({
     return () => {
       cancelled = true;
     };
-  }, [step, service, date, slug]);
+  }, [step, selected, totalDuration, date, slug]);
 
   const availableDays = days.filter((d) => d.open);
 
@@ -133,12 +142,12 @@ export function PublicBooking({
   }
 
   async function confirm() {
-    if (!service) return;
+    if (selected.length === 0) return;
     setSubmitting(true);
     setError(undefined);
     const res = await createPublicBooking({
       slug,
-      serviceId: service.id,
+      serviceIds: selected.map((s) => s.id),
       vehicle,
       car,
       date,
@@ -209,47 +218,83 @@ export function PublicBooking({
       {step === "service" && (
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-foreground">
-            Escolha o serviço
+            Escolha os serviços
           </h2>
+          <p className="-mt-2 text-xs text-muted">
+            Você pode marcar mais de um.
+          </p>
           {services.length === 0 && (
             <p className="rounded-xl border border-dashed border-border bg-card px-4 py-8 text-center text-sm text-muted">
               Nenhum serviço disponível no momento.
             </p>
           )}
-          {services.map((s) => (
+          {services.map((s) => {
+            const checked = selected.some((x) => x.id === s.id);
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() =>
+                  setSelected((cur) =>
+                    checked
+                      ? cur.filter((x) => x.id !== s.id)
+                      : [...cur, s],
+                  )
+                }
+                className={`tap flex w-full items-center justify-between gap-3 rounded-2xl border bg-card p-4 text-left ${
+                  checked
+                    ? "border-brand ring-1 ring-brand"
+                    : "border-border hover:border-brand"
+                }`}
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <span
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
+                      checked
+                        ? "border-brand bg-brand text-brand-foreground"
+                        : "border-border"
+                    }`}
+                  >
+                    {checked && <Check className="h-3.5 w-3.5" aria-hidden />}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-foreground">
+                      {s.name}
+                    </p>
+                    <p className="mt-0.5 flex items-center gap-1 text-xs text-muted">
+                      <Clock className="h-3 w-3" /> {s.duration_minutes} min
+                    </p>
+                  </div>
+                </div>
+                <span className="shrink-0 text-right">
+                  {hasVehicleVariation(s) && (
+                    <span className="block text-[10px] font-normal text-muted">
+                      a partir de
+                    </span>
+                  )}
+                  <span className="font-semibold text-brand">
+                    {formatCents(
+                      hasVehicleVariation(s) ? fromPriceCents(s) : s.price_cents,
+                    )}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+
+          {selected.length > 0 && (
             <button
-              key={s.id}
               type="button"
               onClick={() => {
-                setService(s);
                 setVehicle("");
-                // Só mostra o passo de veículo se houver porte com preço.
-                setStep(
-                  vehicleTypesWithPrice(s).length > 0 ? "vehicle" : "date",
-                );
+                setStep(vehicleLabels.length > 0 ? "vehicle" : "date");
               }}
-              className="tap flex w-full items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left hover:border-brand"
+              className="tap sticky bottom-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand text-base font-medium text-brand-foreground shadow-soft hover:bg-brand-hover"
             >
-              <div className="min-w-0">
-                <p className="truncate font-medium text-foreground">{s.name}</p>
-                <p className="mt-0.5 flex items-center gap-1 text-xs text-muted">
-                  <Clock className="h-3 w-3" /> {s.duration_minutes} min
-                </p>
-              </div>
-              <span className="shrink-0 text-right">
-                {hasVehicleVariation(s) && (
-                  <span className="block text-[10px] font-normal text-muted">
-                    a partir de
-                  </span>
-                )}
-                <span className="font-semibold text-brand">
-                  {formatCents(
-                    hasVehicleVariation(s) ? fromPriceCents(s) : s.price_cents,
-                  )}
-                </span>
-              </span>
+              Continuar · {selected.length}{" "}
+              {selected.length === 1 ? "serviço" : "serviços"}
             </button>
-          ))}
+          )}
         </div>
       )}
 
@@ -344,22 +389,17 @@ export function PublicBooking({
       )}
 
       {/* PASSO 4 — DADOS */}
-      {step === "details" && service && (
+      {step === "details" && selected.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-sm font-semibold text-foreground">Seus dados</h2>
 
           {/* Resumo */}
           <div className="rounded-xl bg-slate-50 p-3 text-sm">
-            <p className="font-medium text-foreground">{service.name}</p>
-            {service.description && (
-              <p className="mt-0.5 whitespace-pre-line text-muted">
-                {service.description}
-              </p>
-            )}
+            <p className="font-medium text-foreground">{combinedName}</p>
             {vehicle && <p className="mt-0.5 text-muted">Veículo: {vehicle}</p>}
             <p className="mt-0.5 text-muted">
               {formatDateBR(`${date}T12:00:00Z`, "UTC")} às {time} ·{" "}
-              {formatCents(vehiclePriceCents(service, vehicle))}
+              {totalDuration} min · {formatCents(totalPrice)}
             </p>
           </div>
 

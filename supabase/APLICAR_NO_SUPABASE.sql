@@ -59,7 +59,8 @@ create or replace function public.create_appointment(
   p_price_cents      integer default null,
   p_duration_minutes integer default null,
   p_notes            text default null,
-  p_idempotency_key  text default null
+  p_idempotency_key  text default null,
+  p_service_name     text default null
 )
 returns public.appointments
 language plpgsql
@@ -225,7 +226,7 @@ begin
       status, booking_source, notes, idempotency_key
     ) values (
       p_business_id, v_customer_id, v_service.id,
-      p_customer_name, p_customer_phone, v_service.name,
+      p_customer_name, p_customer_phone, coalesce(p_service_name, v_service.name),
       v_price, v_duration, p_start_at, v_end_at,
       'scheduled', p_booking_source, p_notes, p_idempotency_key
     )

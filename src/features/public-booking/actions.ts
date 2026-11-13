@@ -45,7 +45,7 @@ function mapDbError(message: string): string {
 
 export async function createPublicBooking(input: {
   slug: string;
-  serviceId: string;
+  serviceIds: string[];
   vehicle?: string;
   car?: string;
   date: string;
@@ -88,15 +88,21 @@ export async function createPublicBooking(input: {
   // atômica dentro de create_appointment (RPC). O erro volta como mensagem
   // neutra para o cliente final (ver mapDbError).
 
-  const { data: service } = await admin
-    // "*" é resiliente caso a migração 0010 (preço por porte) ainda não tenha
-    // sido aplicada: cai no preço base em vez de quebrar o agendamento.
+  // Serviços escolhidos (um ou mais), mantendo a ordem da seleção.
+  const serviceIds = (input.serviceIds ?? []).filter(Boolean);
+  if (serviceIds.length === 0) {
+    return { ok: false, error: "Escolha pelo menos um serviço." };
+  }
+  const { data: svcRows } = await admin
     .from("services")
     .select("*")
-    .eq("id", input.serviceId)
     .eq("business_id", business.id)
-    .maybeSingle();
-  if (!service || !service.is_active) {
+    .in("id", serviceIds);
+  const byId = new Map((svcRows ?? []).map((s) => [s.id as string, s]));
+  const services = serviceIds
+    .map((sid) => byId.get(sid))
+    .filter((s): s is NonNullable<typeof s> => !!s && s.is_active === true);
+  if (services.length !== serviceIds.length || services.length === 0) {
     return { ok: false, error: "Serviço indisponível." };
   }
 
@@ -120,36 +126,60 @@ export async function createPublicBooking(input: {
     trial_ends_at: business.trial_ends_at,
     paid_until: business.paid_until,
   });
-  const priceCents = caps.vehiclePricing
-    ? vehiclePriceCents(
-        {
-          price_cents: service.price_cents as number,
-          price_moto_pequena_cents:
-            service.price_moto_pequena_cents as number | null,
-          price_moto_grande_cents:
-            service.price_moto_grande_cents as number | null,
-          price_hatch_cents: service.price_hatch_cents as number | null,
-          price_sedan_cents: service.price_sedan_cents as number | null,
-          price_suv_cents: service.price_suv_cents as number | null,
-          price_caminhonete_cents:
-            service.price_caminhonete_cents as number | null,
-        },
-        vehicle,
-      )
-    : (service.price_cents as number);
 
-  const { data: appt, error } = await admin.rpc("create_appointment", {
+  // Nome, duração e preço combinados (somados) dos serviços escolhidos.
+  const combinedName = services.map((s) => s.name as string).join(" + ");
+  const totalDuration = services.reduce(
+    (sum, s) => sum + (s.duration_minutes as number),
+    0,
+  );
+  const totalPrice = services.reduce((sum, s) => {
+    const p = caps.vehiclePricing
+      ? vehiclePriceCents(
+          {
+            price_cents: s.price_cents as number,
+            price_moto_pequena_cents:
+              s.price_moto_pequena_cents as number | null,
+            price_moto_grande_cents:
+              s.price_moto_grande_cents as number | null,
+            price_hatch_cents: s.price_hatch_cents as number | null,
+            price_sedan_cents: s.price_sedan_cents as number | null,
+            price_suv_cents: s.price_suv_cents as number | null,
+            price_caminhonete_cents:
+              s.price_caminhonete_cents as number | null,
+          },
+          vehicle,
+        )
+      : (s.price_cents as number);
+    return sum + p;
+  }, 0);
+
+  // Cria UM agendamento com nome/duração/preço combinados.
+  // p_service_name só existe após a migração 0022; sem ela, refaz sem o nome
+  // combinado (o agendamento usa o nome do primeiro serviço).
+  const rpcArgs: Record<string, unknown> = {
     p_business_id: business.id,
-    p_service_id: input.serviceId,
+    p_service_id: services[0].id,
     p_customer_name: name,
     p_customer_phone: phone,
     p_start_at: startAt.toISOString(),
     p_booking_source: "public",
-    p_price_cents: priceCents,
-    p_duration_minutes: null,
+    p_price_cents: totalPrice,
+    p_duration_minutes: totalDuration,
     p_notes: notes,
     p_idempotency_key: input.idempotencyKey,
+  };
+  let { data: appt, error } = await admin.rpc("create_appointment", {
+    ...rpcArgs,
+    p_service_name: combinedName,
   });
+  if (
+    error &&
+    (error.code === "PGRST202" ||
+      /p_service_name|could not find the function/i.test(error.message))
+  ) {
+    ({ data: appt, error } = await admin.rpc("create_appointment", rpcArgs));
+  }
 
   if (error) return { ok: false, error: mapDbError(error.message) };
 
@@ -168,7 +198,7 @@ export async function createPublicBooking(input: {
     const tzName = business.timezone as string;
     await sendPushToBusiness(business.id as string, {
       title: "Novo agendamento!",
-      body: `${name} — ${service.name} — ${formatDateBR(
+      body: `${name} — ${combinedName} — ${formatDateBR(
         startAt,
         tzName,
       )} às ${formatTimeBR(startAt, tzName)}`,
@@ -182,15 +212,13 @@ export async function createPublicBooking(input: {
   return {
     ok: true,
     booking: {
-      serviceName: service.name as string,
+      serviceName: combinedName,
       startAtIso: (appt?.start_at as string) ?? startAt.toISOString(),
       endAtIso:
         (appt?.end_at as string) ??
-        new Date(
-          startAt.getTime() + (service.duration_minutes as number) * 60000,
-        ).toISOString(),
-      priceCents: (appt?.price_cents as number) ?? priceCents,
-      durationMinutes: service.duration_minutes as number,
+        new Date(startAt.getTime() + totalDuration * 60000).toISOString(),
+      priceCents: (appt?.price_cents as number) ?? totalPrice,
+      durationMinutes: totalDuration,
     },
   };
 }
