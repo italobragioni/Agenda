@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Plus, ShieldCheck, Users } from "lucide-react";
-import { navItems } from "@/features/navigation/nav-items";
+import { visibleNavItems } from "@/features/navigation/nav-items";
 import { EstablishmentLogo } from "@/components/brand/logo";
 import { PlanStatusChip } from "@/features/billing/plan-status";
 import type { PlanFields } from "@/features/billing/plan";
@@ -15,14 +15,17 @@ export function Sidebar({
   planFields,
   isAdmin,
   showTeam,
+  role = "owner",
 }: {
   businessName: string;
   logoUrl?: string | null;
   planFields: PlanFields;
   isAdmin?: boolean;
   showTeam?: boolean;
+  role?: string;
 }) {
   const pathname = usePathname();
+  const items = visibleNavItems(role);
 
   return (
     <aside className="hidden w-60 shrink-0 flex-col border-r border-border bg-card md:flex">
@@ -32,7 +35,7 @@ export function Sidebar({
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4">
-        {navItems.map((item) => {
+        {items.map((item) => {
           const active =
             pathname === item.href || pathname.startsWith(item.href + "/");
           return (

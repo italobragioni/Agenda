@@ -39,3 +39,20 @@ export const bottomNavRight: NavItem[] = [
   { href: "/financeiro", label: "Financeiro", icon: DollarSign },
   { href: "/menu", label: "Menu", icon: MenuIcon },
 ];
+
+/** Seções liberadas para o funcionário (staff): só Agenda e Clientes. */
+const STAFF_HREFS = new Set(["/agenda", "/clientes"]);
+
+/** Itens de navegação visíveis conforme o papel (dono vê tudo). */
+export function visibleNavItems(role: string): NavItem[] {
+  return role === "staff"
+    ? navItems.filter((i) => STAFF_HREFS.has(i.href))
+    : navItems;
+}
+
+/** Barra inferior (direita): funcionário não vê Financeiro, só o Menu. */
+export function visibleBottomRight(role: string): NavItem[] {
+  return role === "staff"
+    ? bottomNavRight.filter((i) => i.href === "/menu")
+    : bottomNavRight;
+}

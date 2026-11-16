@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Lock } from "lucide-react";
-import { requireActiveBusiness } from "@/features/billing/guard";
+import { requireOwner } from "@/features/billing/guard";
 import { capabilitiesFor, maxServicesFor, PLANS } from "@/features/billing/plan";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
@@ -14,7 +14,7 @@ import { createService } from "@/features/services/actions";
 export const metadata: Metadata = { title: "Novo serviço — Agenda" };
 
 export default async function NovoServicoPage() {
-  const ctx = await requireActiveBusiness();
+  const ctx = await requireOwner();
   if (!ctx) redirect("/login");
 
   // Limite de serviços do plano atingido? Bloqueia com mensagem clara.

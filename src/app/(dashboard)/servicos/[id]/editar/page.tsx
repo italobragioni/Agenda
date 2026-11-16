@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { requireActiveBusiness } from "@/features/billing/guard";
+import { requireOwner } from "@/features/billing/guard";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
@@ -17,7 +17,7 @@ export default async function EditarServicoPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const ctx = await requireActiveBusiness();
+  const ctx = await requireOwner();
   if (!ctx) redirect("/login");
 
   const supabase = await createClient();

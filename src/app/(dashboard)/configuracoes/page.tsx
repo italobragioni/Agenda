@@ -12,7 +12,7 @@ import {
   AlarmClock,
   Smartphone,
 } from "lucide-react";
-import { requireActiveBusiness } from "@/features/billing/guard";
+import { requireOwner } from "@/features/billing/guard";
 import { capabilitiesFor, maxBoxesFor } from "@/features/billing/plan";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
@@ -65,7 +65,7 @@ function LockedNote({ children }: { children: string }) {
 }
 
 export default async function ConfiguracoesPage() {
-  const ctx = await requireActiveBusiness();
+  const ctx = await requireOwner();
   if (!ctx) redirect("/login");
   const tz = ctx.business.timezone;
   const caps = capabilitiesFor(ctx.business);

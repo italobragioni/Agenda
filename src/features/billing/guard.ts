@@ -16,3 +16,13 @@ export async function requireActiveBusiness() {
   }
   return ctx;
 }
+
+/**
+ * Exige papel de DONO (owner). Funcionários (staff) só acessam Agenda e
+ * Clientes; nas demais telas são encaminhados para a Agenda.
+ */
+export async function requireOwner() {
+  const ctx = await requireActiveBusiness();
+  if (ctx.profile.role !== "owner") redirect("/agenda");
+  return ctx;
+}

@@ -22,6 +22,7 @@ export default async function DashboardLayout({
         businessName={ctx.business.name}
         logoUrl={ctx.business.logo_url}
         isAdmin={isAdminEmail(ctx.email)}
+        role={ctx.profile.role}
         showTeam={
           ctx.profile.role === "owner" && capabilitiesFor(ctx.business).team
         }
@@ -49,7 +50,7 @@ export default async function DashboardLayout({
         </main>
       </div>
 
-      <BottomNav />
+      <BottomNav role={ctx.profile.role} />
     </div>
   );
 }

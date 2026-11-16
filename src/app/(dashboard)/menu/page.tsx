@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { redirect } from "next/navigation";
-import { navItems } from "@/features/navigation/nav-items";
+import { visibleNavItems } from "@/features/navigation/nav-items";
 import { logout } from "@/features/auth/actions";
 import { getCurrentContext } from "@/features/auth/current";
 import { isAdminEmail } from "@/features/admin/config";
@@ -69,7 +69,7 @@ export default async function MenuPage() {
       )}
 
       <nav className="overflow-hidden rounded-2xl border border-border bg-card">
-        {navItems.map((item) => (
+        {visibleNavItems(ctx.profile.role).map((item) => (
           <Link
             key={item.href}
             href={item.href}

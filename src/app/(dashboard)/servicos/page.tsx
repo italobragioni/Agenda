@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Wrench, Plus, Clock, Pencil } from "lucide-react";
-import { requireActiveBusiness } from "@/features/billing/guard";
+import { requireOwner } from "@/features/billing/guard";
 import { maxServicesFor } from "@/features/billing/plan";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
@@ -17,7 +17,7 @@ import type { Service } from "@/types/database";
 export const metadata: Metadata = { title: "Serviços — Agenda" };
 
 export default async function ServicosPage() {
-  const ctx = await requireActiveBusiness();
+  const ctx = await requireOwner();
   if (!ctx) redirect("/login");
 
   const supabase = await createClient();

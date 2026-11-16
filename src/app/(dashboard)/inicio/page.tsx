@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CalendarPlus, Clock } from "lucide-react";
-import { requireActiveBusiness } from "@/features/billing/guard";
+import { requireOwner } from "@/features/billing/guard";
 import { getUsage } from "@/features/billing/usage";
 import { UsageIndicator } from "@/features/billing/usage-indicator";
 import { BonusDownload } from "@/features/billing/bonus-download";
@@ -19,7 +19,7 @@ import type { Appointment } from "@/types/database";
 export const metadata: Metadata = { title: "Início — Agenda" };
 
 export default async function InicioPage() {
-  const ctx = await requireActiveBusiness();
+  const ctx = await requireOwner();
   if (!ctx) redirect("/login");
 
   const supabase = await createClient();

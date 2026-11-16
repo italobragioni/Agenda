@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Plus } from "lucide-react";
-import { bottomNavLeft, bottomNavRight } from "@/features/navigation/nav-items";
+import { bottomNavLeft, visibleBottomRight } from "@/features/navigation/nav-items";
 import { cn } from "@/lib/utils";
 
 function NavLink({
@@ -44,10 +44,11 @@ function NavLink({
   );
 }
 
-export function BottomNav() {
+export function BottomNav({ role = "owner" }: { role?: string }) {
   const pathname = usePathname();
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");
+  const rightItems = visibleBottomRight(role);
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card md:hidden">
@@ -67,7 +68,7 @@ export function BottomNav() {
           </Link>
         </div>
 
-        {bottomNavRight.map((item) => (
+        {rightItems.map((item) => (
           <NavLink key={item.href} {...item} active={isActive(item.href)} />
         ))}
       </div>
