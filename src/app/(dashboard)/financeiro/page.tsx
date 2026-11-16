@@ -13,6 +13,7 @@ import { DonutChart, type DonutSlice } from "@/components/ui/donut-chart";
 import { EntryForm } from "@/features/financials/entry-form";
 import { EntryDeleteButton } from "@/features/financials/entry-delete-button";
 import { capabilitiesFor } from "@/features/billing/plan";
+import { excludedRevenueIds } from "@/features/appointments/revenue";
 import { formatCents } from "@/lib/money";
 import { localDayString, formatDateBR } from "@/lib/datetime";
 import {
@@ -62,10 +63,11 @@ export default async function FinanceiroPage({
   const earliestDay = localDayString(tz, earliest);
 
   const supabase = await createClient();
-  const [{ data: apptData }, { data: entryData }] = await Promise.all([
+  const [{ data: apptData }, { data: entryData }, excludedIds] =
+    await Promise.all([
     supabase
       .from("appointments")
-      .select("start_at, price_cents, service_name_snapshot, status")
+      .select("id, start_at, price_cents, service_name_snapshot, status")
       .eq("status", "completed")
       .gte("start_at", earliest.toISOString()),
     full
@@ -75,9 +77,12 @@ export default async function FinanceiroPage({
           .gte("occurred_on", earliestDay)
           .order("occurred_on", { ascending: false })
       : Promise.resolve({ data: [] as FinanceEntry[] }),
+    excludedRevenueIds(supabase, { gteStart: earliest.toISOString() }),
   ]);
 
-  const completed = (apptData ?? []) as CompletedAppt[];
+  const completed = ((apptData ?? []) as CompletedAppt[]).filter(
+    (a) => !excludedIds.has(a.id),
+  );
   const entries = (entryData ?? []) as FinanceEntry[];
   const entriesLite: EntryLite[] = entries.map((e) => ({
     type: e.type,

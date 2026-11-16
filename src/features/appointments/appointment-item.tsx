@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { STATUS_INFO } from "./status";
 import { AppointmentActions } from "./appointment-actions";
 import { EditPriceButton } from "./edit-price-button";
+import { RevenueToggleButton } from "./revenue-toggle-button";
 import { formatCents } from "@/lib/money";
 import { formatTimeBR } from "@/lib/datetime";
 import { whatsappLink, formatPhone } from "@/lib/phone";
@@ -21,6 +22,7 @@ export function AppointmentItem({
 }) {
   const dimmed = a.status === "cancelled" || a.status === "no_show";
   const phone = a.customer_phone_snapshot;
+  const excluded = a.excluded_from_revenue === true;
 
   return (
     <Card className={cn("p-4", dimmed && "opacity-60")}>
@@ -41,6 +43,11 @@ export function AppointmentItem({
             {a.service_name_snapshot} · {formatCents(a.price_cents)}
           </p>
           {a.notes && <p className="truncate text-xs text-muted">{a.notes}</p>}
+          {excluded && (
+            <span className="mt-1 inline-flex items-center rounded-md bg-amber-100 px-1.5 py-0.5 text-[11px] font-medium text-amber-700">
+              Fora do faturamento
+            </span>
+          )}
         </div>
 
         <Badge className={cn("shrink-0", STATUS_INFO[a.status].badgeClass)}>
@@ -100,6 +107,9 @@ export function AppointmentItem({
           </Link>
           <EditPriceButton id={a.id} priceCents={a.price_cents} />
           <AppointmentActions id={a.id} status={a.status} />
+          {a.status === "completed" && (
+            <RevenueToggleButton id={a.id} excluded={excluded} />
+          )}
         </div>
       )}
     </Card>

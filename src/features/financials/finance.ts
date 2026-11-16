@@ -6,7 +6,7 @@ export type Period = "7d" | "30d" | "mes";
 
 export type CompletedAppt = Pick<
   Appointment,
-  "start_at" | "price_cents" | "service_name_snapshot" | "status"
+  "id" | "start_at" | "price_cents" | "service_name_snapshot" | "status"
 >;
 
 /** Início do mês atual (no fuso), em UTC. */

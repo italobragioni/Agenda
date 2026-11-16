@@ -260,3 +260,7 @@ create table if not exists public.push_subscriptions (
 create index if not exists idx_push_subscriptions_business
   on public.push_subscriptions(business_id);
 alter table public.push_subscriptions enable row level security;
+
+-- (0023) Tirar um atendimento finalizado do faturamento (continua no histórico)
+alter table public.appointments
+  add column if not exists excluded_from_revenue boolean not null default false;

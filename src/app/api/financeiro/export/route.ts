@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { localDayString, dayRangeUtc } from "@/lib/datetime";
 import { periodDayStrings, type Period } from "@/features/financials/finance";
 import { capabilitiesFor } from "@/features/billing/plan";
+import { excludedRevenueIds } from "@/features/appointments/revenue";
 import type { Appointment, FinanceEntry } from "@/types/database";
 
 /** GET /api/financeiro/export?p=7d|30d|mes → baixa CSV do período. */
@@ -26,22 +27,25 @@ export async function GET(request: Request) {
   const start = dayRangeUtc(firstDay, tz).start;
 
   const supabase = await createClient();
-  const [{ data: apptData }, { data: entryData }] = await Promise.all([
+  const [{ data: apptData }, { data: entryData }, excludedIds] =
+    await Promise.all([
     supabase
       .from("appointments")
-      .select("start_at, price_cents, service_name_snapshot, customer_name_snapshot, status")
+      .select("id, start_at, price_cents, service_name_snapshot, customer_name_snapshot, status")
       .eq("status", "completed")
       .gte("start_at", start.toISOString()),
     supabase
       .from("finance_entries")
       .select("occurred_on, type, description, amount_cents")
       .gte("occurred_on", firstDay),
+    excludedRevenueIds(supabase, { gteStart: start.toISOString() }),
   ]);
 
   type Row = { date: string; tipo: string; descricao: string; valor: number };
   const rows: Row[] = [];
 
   for (const a of (apptData ?? []) as Appointment[]) {
+    if (excludedIds.has(a.id)) continue;
     const day = localDayString(tz, new Date(a.start_at));
     if (!daySet.has(day)) continue;
     rows.push({

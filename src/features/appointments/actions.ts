@@ -203,6 +203,34 @@ export async function setAppointmentStatus(
 }
 
 // ---------------------------------------------------------------------
+// Remover / incluir um atendimento finalizado no faturamento
+// (continua visível na agenda como histórico, mas não conta no Financeiro)
+// ---------------------------------------------------------------------
+export async function toggleAppointmentRevenue(id: string, exclude: boolean) {
+  const ctx = await getCurrentContext();
+  if (!ctx) redirect("/login");
+
+  const supabase = await createClient();
+  // O RLS garante que só é possível alterar agendamentos do próprio negócio.
+  const { error } = await supabase
+    .from("appointments")
+    .update({ excluded_from_revenue: exclude })
+    .eq("id", id);
+  if (error) {
+    return {
+      error:
+        "Não foi possível atualizar. Rode o comando do banco (passo a passo enviado) e tente de novo.",
+    };
+  }
+
+  revalidatePath("/agenda");
+  revalidatePath("/inicio");
+  revalidatePath("/clientes");
+  revalidatePath("/financeiro");
+  return { success: true as const };
+}
+
+// ---------------------------------------------------------------------
 // Editar o preço de um atendimento (desconto ou acréscimo)
 // ---------------------------------------------------------------------
 export async function updateAppointmentPrice(

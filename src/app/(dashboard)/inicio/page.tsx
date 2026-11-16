@@ -38,7 +38,7 @@ export default async function InicioPage() {
   const appointments = (data ?? []) as Appointment[];
 
   const revenueToday = appointments
-    .filter((a) => a.status === "completed")
+    .filter((a) => a.status === "completed" && a.excluded_from_revenue !== true)
     .reduce((sum, a) => sum + a.price_cents, 0);
 
   const now = new Date();

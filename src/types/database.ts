@@ -103,6 +103,8 @@ export interface Appointment {
   booking_source: BookingSource;
   notes: string | null;
   idempotency_key: string | null;
+  /** Quando true, o atendimento fica no histórico mas não entra no faturamento. */
+  excluded_from_revenue?: boolean | null;
   created_at: string;
   updated_at: string;
 }

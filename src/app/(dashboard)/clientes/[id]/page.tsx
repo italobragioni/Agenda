@@ -42,7 +42,9 @@ export default async function ClienteDetailPage({
   const appointments = (apptData ?? []) as Appointment[];
 
   const completed = appointments.filter((a) => a.status === "completed");
-  const totalSpent = completed.reduce((sum, a) => sum + a.price_cents, 0);
+  const totalSpent = completed
+    .filter((a) => a.excluded_from_revenue !== true)
+    .reduce((sum, a) => sum + a.price_cents, 0);
 
   const now = new Date();
   const nextAppointment = [...appointments]
