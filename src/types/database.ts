@@ -109,13 +109,27 @@ export interface Appointment {
   updated_at: string;
 }
 
+/** Um período de funcionamento no dia (ex.: 08:00–12:00). */
+export interface TimeRange {
+  start: string; // "HH:MM"
+  end: string; // "HH:MM"
+}
+
 export interface BusinessHours {
   id: string;
   business_id: string;
   weekday: number; // 0 = domingo ... 6 = sábado
   is_open: boolean;
+  /** Início do "envelope" do dia (= início do 1º período). Compatibilidade. */
   start_time: string | null; // "HH:MM:SS"
+  /** Fim do "envelope" do dia (= fim do último período). Compatibilidade. */
   end_time: string | null;
+  /**
+   * Períodos de funcionamento do dia. Quando preenchido, é a fonte da verdade
+   * (permite vários períodos, ex.: manhã e tarde). Ausente/vazio = usa apenas
+   * start_time/end_time (um único período).
+   */
+  time_ranges?: TimeRange[] | null;
 }
 
 export type FinanceEntryType = "income" | "expense";

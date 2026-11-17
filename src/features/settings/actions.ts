@@ -10,6 +10,7 @@ import { slugify } from "@/lib/slug";
 import { businessInfoSchema, slugSchema } from "@/validation/settings";
 import { zodFieldErrors, type ActionState } from "@/lib/forms";
 import { maxBoxesFor } from "@/features/billing/plan";
+import { normalizeEnd, isValidRange } from "@/features/settings/hours";
 
 // --- Meu negócio ---
 export async function updateBusinessInfo(
@@ -184,7 +185,7 @@ export async function updateLunch(
   };
 }
 
-// --- Horários de funcionamento ---
+// --- Horários de funcionamento (um ou vários períodos por dia) ---
 export async function updateHours(
   _prev: ActionState,
   formData: FormData,
@@ -192,34 +193,69 @@ export async function updateHours(
   const ctx = await getCurrentContext();
   if (!ctx) redirect("/login");
 
+  // O formulário envia tudo em um JSON: { "1": [{start,end}, ...], ... }
+  let parsed: Record<string, { start: string; end: string }[]>;
+  try {
+    parsed = JSON.parse(String(formData.get("hours_json") ?? "{}"));
+  } catch {
+    return { error: "Não foi possível ler os horários." };
+  }
+
   const rows = [];
   for (let weekday = 0; weekday <= 6; weekday++) {
-    const isOpen = formData.get(`open_${weekday}`) === "on";
-    const start = String(formData.get(`start_${weekday}`) ?? "");
-    const end = String(formData.get(`end_${weekday}`) ?? "");
+    const raw = Array.isArray(parsed[String(weekday)])
+      ? parsed[String(weekday)]
+      : [];
+    const ranges = raw
+      .map((r) => ({
+        start: String(r?.start ?? "").slice(0, 5),
+        // Meia-noite ("00:00") no fim = fim do dia ("24:00").
+        end: normalizeEnd(String(r?.end ?? "").slice(0, 5)),
+      }))
+      .filter((r) => r.start !== "" || r.end !== "");
 
-    if (isOpen) {
-      if (!/^\d{2}:\d{2}$/.test(start) || !/^\d{2}:\d{2}$/.test(end)) {
-        return { error: "Preencha os horários dos dias abertos." };
-      }
-      if (start >= end) {
-        return { error: "O horário de fim deve ser após o de início." };
+    for (const r of ranges) {
+      if (!isValidRange(r)) {
+        return {
+          error: "Verifique os períodos: o fim deve ser depois do início.",
+        };
       }
     }
+
+    const sorted = ranges.sort((a, b) => a.start.localeCompare(b.start));
+    const isOpen = sorted.length > 0;
 
     rows.push({
       business_id: ctx.business.id,
       weekday,
       is_open: isOpen,
-      start_time: isOpen ? start : null,
-      end_time: isOpen ? end : null,
+      // Envelope (compatibilidade): 1º início e último fim.
+      start_time: isOpen ? sorted[0].start : null,
+      end_time: isOpen ? sorted[sorted.length - 1].end : null,
+      // Lista completa de períodos.
+      time_ranges: isOpen ? sorted : null,
     });
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  let { error } = await supabase
     .from("business_hours")
     .upsert(rows, { onConflict: "business_id,weekday" });
+
+  // Resiliência: se a coluna time_ranges ainda não existir no banco, salva
+  // ao menos o 1º período (envelope), para o app não travar antes do SQL.
+  if (error) {
+    const fallback = rows.map((r) => ({
+      business_id: r.business_id,
+      weekday: r.weekday,
+      is_open: r.is_open,
+      start_time: r.start_time,
+      end_time: r.end_time,
+    }));
+    ({ error } = await supabase
+      .from("business_hours")
+      .upsert(fallback, { onConflict: "business_id,weekday" }));
+  }
   if (error) return { error: "Não foi possível salvar os horários." };
 
   revalidatePath("/configuracoes");

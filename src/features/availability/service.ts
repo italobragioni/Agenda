@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { computeAvailableSlots, type Interval } from "./engine";
+import { rangesForDay } from "@/features/settings/hours";
 import { dayRangeUtc, localToUtc } from "@/lib/datetime";
 import { formatInTimeZone } from "date-fns-tz";
 
@@ -51,18 +52,37 @@ export async function getAvailableSlots(params: {
   // Dia da semana da data (0 = domingo), independente de fuso.
   const weekday = new Date(`${dayStr}T00:00:00Z`).getUTCDay();
 
-  const { data: hours } = await admin
-    .from("business_hours")
-    .select("is_open, start_time, end_time")
-    .eq("business_id", businessId)
-    .eq("weekday", weekday)
-    .maybeSingle();
-  if (!hours || !hours.is_open || !hours.start_time || !hours.end_time) {
-    return [];
+  // Lê o horário do dia. Tenta com time_ranges (vários períodos); se a coluna
+  // ainda não existir no banco, cai para start_time/end_time (um período).
+  let hours: {
+    is_open?: boolean | null;
+    start_time?: string | null;
+    end_time?: string | null;
+    time_ranges?: { start: string; end: string }[] | null;
+  } | null = null;
+  {
+    const withRanges = await admin
+      .from("business_hours")
+      .select("is_open, start_time, end_time, time_ranges")
+      .eq("business_id", businessId)
+      .eq("weekday", weekday)
+      .maybeSingle();
+    if (withRanges.error) {
+      const basic = await admin
+        .from("business_hours")
+        .select("is_open, start_time, end_time")
+        .eq("business_id", businessId)
+        .eq("weekday", weekday)
+        .maybeSingle();
+      hours = basic.data;
+    } else {
+      hours = withRanges.data;
+    }
   }
 
-  const openUtc = localToUtc(dayStr, String(hours.start_time).slice(0, 5), tz);
-  const closeUtc = localToUtc(dayStr, String(hours.end_time).slice(0, 5), tz);
+  // Períodos de funcionamento do dia (um ou vários). Vazio = fechado.
+  const windows = hours ? rangesForDay(hours) : [];
+  if (windows.length === 0) return [];
 
   const { start: dayStart, end: dayEnd } = dayRangeUtc(dayStr, tz);
 
@@ -112,18 +132,37 @@ export async function getAvailableSlots(params: {
       ? fixedTimes.map((t) => localToUtc(dayStr, t.slice(0, 5), tz))
       : undefined;
 
-  const slots = computeAvailableSlots({
-    openUtc,
-    closeUtc,
-    durationMin,
-    intervalMin,
-    stepMin: SLOT_STEP_MIN,
-    existing,
-    blocked,
-    now: new Date(),
-    capacity,
-    fixedStartsUtc,
-  });
+  // Calcula os horários de cada período e junta tudo (sem duplicar).
+  const seen = new Set<number>();
+  const allSlots: Date[] = [];
+  for (const w of windows) {
+    const openUtc = localToUtc(dayStr, w.start, tz);
+    // "24:00"/"00:00" no fim = meia-noite (fim do dia) = início + 24h.
+    const closeUtc =
+      w.end === "24:00" || w.end === "00:00"
+        ? dayEnd
+        : localToUtc(dayStr, w.end, tz);
+    const slots = computeAvailableSlots({
+      openUtc,
+      closeUtc,
+      durationMin,
+      intervalMin,
+      stepMin: SLOT_STEP_MIN,
+      existing,
+      blocked,
+      now: new Date(),
+      capacity,
+      fixedStartsUtc,
+    });
+    for (const s of slots) {
+      const t = s.getTime();
+      if (!seen.has(t)) {
+        seen.add(t);
+        allSlots.push(s);
+      }
+    }
+  }
 
-  return slots.map((d) => formatInTimeZone(d, tz, "HH:mm"));
+  allSlots.sort((a, b) => a.getTime() - b.getTime());
+  return allSlots.map((d) => formatInTimeZone(d, tz, "HH:mm"));
 }

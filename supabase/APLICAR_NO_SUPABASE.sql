@@ -48,6 +48,10 @@ alter table public.businesses
 alter table public.businesses
   add column if not exists fixed_slot_times time[];
 
+-- (0024) Vários períodos de funcionamento por dia (ex.: manhã e tarde)
+alter table public.business_hours
+  add column if not exists time_ranges jsonb;
+
 -- Função de agendamento (versão final: cota do ciclo + almoço + horários fixos)
 -- Remove a versão anterior (10 parâmetros) para não deixar duas versões da
 -- função (o que causaria ambiguidade ao agendar).
@@ -152,6 +156,21 @@ begin
      or v_local_end::time > v_hours.end_time
      or v_local_end::date <> v_local_start::date then
     raise exception 'FORA_DO_HORARIO';
+  end if;
+
+  -- Vários períodos no mesmo dia (ex.: manhã e tarde): o atendimento precisa
+  -- caber inteiramente dentro de um dos períodos (fora deles = intervalo).
+  if v_hours.time_ranges is not null
+     and jsonb_typeof(v_hours.time_ranges) = 'array'
+     and jsonb_array_length(v_hours.time_ranges) > 0 then
+    if not exists (
+      select 1
+        from jsonb_array_elements(v_hours.time_ranges) as r
+       where v_local_start::time >= (r->>'start')::time
+         and v_local_end::time   <= (r->>'end')::time
+    ) then
+      raise exception 'FORA_DO_HORARIO';
+    end if;
   end if;
 
   -- Horário de almoço permanente.
