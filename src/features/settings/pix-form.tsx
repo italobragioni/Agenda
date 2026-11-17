@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { updatePix } from "./actions";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Alert } from "@/components/ui/alert";
@@ -16,8 +17,28 @@ export function PixForm({
   pixName: string | null;
   pixCity: string | null;
 }) {
+  const router = useRouter();
   const [state, action] = useActionState(updatePix, {} as ActionState);
+
   const [enabled, setEnabled] = useState(Boolean(pixKey));
+  const [key, setKey] = useState(pixKey ?? "");
+  const [name, setName] = useState(pixName ?? "");
+  const [city, setCity] = useState(pixCity ?? "");
+
+  // Re-sincroniza com o que está salvo no banco (depois de salvar/recarregar).
+  const signature = `${pixKey ?? ""}|${pixName ?? ""}|${pixCity ?? ""}`;
+  useEffect(() => {
+    setEnabled(Boolean(pixKey));
+    setKey(pixKey ?? "");
+    setName(pixName ?? "");
+    setCity(pixCity ?? "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signature]);
+
+  // Após salvar com sucesso, busca os dados novos do servidor.
+  useEffect(() => {
+    if (state.success) router.refresh();
+  }, [state, router]);
 
   return (
     <form action={action} className="space-y-4">
@@ -58,7 +79,8 @@ export function PixForm({
           <input
             id="pix_key"
             name="pix_key"
-            defaultValue={pixKey ?? ""}
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
             disabled={!enabled}
             placeholder="CPF, CNPJ, celular, e-mail ou chave aleatória"
             className="h-11 w-full rounded-xl border border-border bg-card px-3 text-sm focus:border-brand focus:outline-2 focus:outline-brand"
@@ -84,7 +106,8 @@ export function PixForm({
           <input
             id="pix_name"
             name="pix_name"
-            defaultValue={pixName ?? ""}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             disabled={!enabled}
             placeholder="Ex.: João da Silva"
             maxLength={25}
@@ -107,7 +130,8 @@ export function PixForm({
           <input
             id="pix_city"
             name="pix_city"
-            defaultValue={pixCity ?? ""}
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
             disabled={!enabled}
             placeholder="Ex.: Belo Horizonte"
             maxLength={15}
