@@ -45,6 +45,12 @@ export interface Business {
   cakto_customer_id: string | null;
   cakto_subscription_id: string | null;
   subscription_status: string | null;
+  /** Chave Pix do recebedor (para o cliente pagar ao agendar). */
+  pix_key: string | null;
+  /** Nome do recebedor no Pix (aparece no código). */
+  pix_name: string | null;
+  /** Cidade do recebedor no Pix (exigida pelo padrão). */
+  pix_city: string | null;
   created_at: string;
   updated_at: string;
 }

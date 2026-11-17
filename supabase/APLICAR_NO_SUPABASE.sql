@@ -52,6 +52,12 @@ alter table public.businesses
 alter table public.business_hours
   add column if not exists time_ranges jsonb;
 
+-- (0025) Chave Pix (mostrada ao cliente ao concluir o agendamento)
+alter table public.businesses
+  add column if not exists pix_key  text,
+  add column if not exists pix_name text,
+  add column if not exists pix_city text;
+
 -- Função de agendamento (versão final: cota do ciclo + almoço + horários fixos)
 -- Remove a versão anterior (10 parâmetros) para não deixar duas versões da
 -- função (o que causaria ambiguidade ao agendar).

@@ -11,6 +11,7 @@ import {
   Coffee,
   AlarmClock,
   Smartphone,
+  QrCode,
 } from "lucide-react";
 import { requireOwner } from "@/features/billing/guard";
 import { capabilitiesFor, maxBoxesFor } from "@/features/billing/plan";
@@ -24,6 +25,7 @@ import { IntervalForm } from "@/features/settings/interval-form";
 import { CapacityForm } from "@/features/settings/capacity-form";
 import { LunchForm } from "@/features/settings/lunch-form";
 import { FixedSlotsForm } from "@/features/settings/fixed-slots-form";
+import { PixForm } from "@/features/settings/pix-form";
 import { InstallButton } from "@/components/pwa/pwa";
 import { BlockedTimesManager } from "@/features/settings/blocked-times-manager";
 import { LogoutButton } from "@/features/auth/logout-button";
@@ -149,6 +151,14 @@ export default async function ConfiguracoesPage() {
 
       <Section icon={Timer} title="Intervalo entre clientes">
         <IntervalForm value={ctx.business.appointment_interval_minutes} />
+      </Section>
+
+      <Section icon={QrCode} title="Pix (pagamento ao agendar)">
+        <PixForm
+          pixKey={ctx.business.pix_key}
+          pixName={ctx.business.pix_name}
+          pixCity={ctx.business.pix_city}
+        />
       </Section>
 
       <Section icon={Ban} title="Bloqueios de horário">

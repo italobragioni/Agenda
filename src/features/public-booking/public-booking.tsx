@@ -12,6 +12,8 @@ import {
   Car,
   Truck,
   Bike,
+  Copy,
+  QrCode,
 } from "lucide-react";
 import { createPublicBooking, type PublicBookingResult } from "./actions";
 import {
@@ -87,6 +89,25 @@ export function PublicBooking({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string>();
   const [result, setResult] = useState<PublicBookingResult["booking"]>();
+  const [pixCopied, setPixCopied] = useState(false);
+
+  async function copyPix(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Fallback para navegadores sem clipboard API.
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+      } catch {}
+      document.body.removeChild(ta);
+    }
+    setPixCopied(true);
+    setTimeout(() => setPixCopied(false), 2500);
+  }
 
   const [idempotencyKey] = useState<string>(() =>
     typeof crypto !== "undefined" && crypto.randomUUID
@@ -493,6 +514,73 @@ export function PublicBooking({
               {result.durationMinutes} min · {formatCents(result.priceCents)}
             </p>
           </div>
+
+          {/* PAGAMENTO POR PIX */}
+          {result.pix && (
+            <div className="mx-auto mt-5 max-w-xs rounded-2xl border border-brand/30 bg-brand-soft p-5 text-left">
+              <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                <QrCode className="h-4 w-4 text-brand" aria-hidden />
+                Pague com Pix
+              </p>
+              <p className="mt-1 text-sm text-muted">
+                Valor:{" "}
+                <span className="font-semibold text-foreground">
+                  {formatCents(result.priceCents)}
+                </span>
+              </p>
+
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={result.pix.qrDataUrl}
+                alt="QR Code do Pix"
+                className="mx-auto mt-3 h-44 w-44 rounded-lg bg-white p-2"
+              />
+
+              <button
+                type="button"
+                onClick={() => copyPix(result.pix!.payload)}
+                className="tap mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand text-sm font-semibold text-brand-foreground hover:bg-brand-hover"
+              >
+                {pixCopied ? (
+                  <>
+                    <Check className="h-4 w-4" /> Código copiado!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4" /> Copiar código Pix
+                  </>
+                )}
+              </button>
+              <p className="mt-2 break-all text-[11px] leading-snug text-muted">
+                Chave: {result.pix.key}
+              </p>
+
+              {/* Mensagem destacada: enviar o comprovante */}
+              <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-3">
+                <p className="text-sm font-semibold text-amber-900">
+                  Importante
+                </p>
+                <p className="mt-0.5 text-xs leading-snug text-amber-800">
+                  Após o pagamento, envie o comprovante no WhatsApp
+                  {businessWhatsapp ? "" : " do estabelecimento"} ou mostre na
+                  hora de pegar o carro.
+                </p>
+                {businessWhatsapp && (
+                  <a
+                    href={whatsappLink(
+                      businessWhatsapp,
+                      `Olá! Acabei de agendar ${result.serviceName} e segue o comprovante do Pix (${formatCents(result.priceCents)}).`,
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="tap mt-2 flex h-10 items-center justify-center gap-2 rounded-lg bg-green-600 text-sm font-semibold text-white hover:bg-green-700"
+                  >
+                    <MessageCircle className="h-4 w-4" /> Enviar comprovante
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="mx-auto mt-6 flex max-w-xs flex-col gap-3">
             <a

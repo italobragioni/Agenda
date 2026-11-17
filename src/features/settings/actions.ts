@@ -144,6 +144,53 @@ export async function updateFixedSlots(
   };
 }
 
+// --- Chave Pix (mostrada ao cliente ao concluir o agendamento) ---
+export async function updatePix(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const ctx = await getCurrentContext();
+  if (!ctx) redirect("/login");
+
+  const enabled = formData.get("pix_enabled") === "on";
+  const key = String(formData.get("pix_key") ?? "").trim();
+  const name = String(formData.get("pix_name") ?? "").trim();
+  const city = String(formData.get("pix_city") ?? "").trim();
+
+  let values: { pix_key: string | null; pix_name: string | null; pix_city: string | null };
+  if (enabled) {
+    if (key.length < 3) {
+      return { fieldErrors: { pix_key: "Informe a chave Pix." } };
+    }
+    if (name.length < 2) {
+      return { fieldErrors: { pix_name: "Informe o nome do recebedor." } };
+    }
+    if (city.length < 2) {
+      return { fieldErrors: { pix_city: "Informe a cidade." } };
+    }
+    values = { pix_key: key, pix_name: name, pix_city: city };
+  } else {
+    values = { pix_key: null, pix_name: null, pix_city: null };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("businesses")
+    .update(values)
+    .eq("id", ctx.business.id);
+  if (error) {
+    return {
+      error:
+        "Não foi possível salvar o Pix. Rode o comando do banco (enviado) e tente de novo.",
+    };
+  }
+
+  revalidatePath("/configuracoes");
+  return {
+    success: enabled ? "Chave Pix salva." : "Pix desativado.",
+  };
+}
+
 // --- Horário de almoço (permanente, recorrente todo dia) ---
 export async function updateLunch(
   _prev: ActionState,

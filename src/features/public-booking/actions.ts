@@ -7,6 +7,8 @@ import { localToUtc, formatDateBR, formatTimeBR } from "@/lib/datetime";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { sendPushToBusiness } from "@/lib/push";
 import { capabilitiesFor } from "@/features/billing/plan";
+import { buildPixPayload } from "@/lib/pix";
+import QRCode from "qrcode";
 import { isVehicleType, vehiclePriceCents } from "./vehicle";
 
 /** Mensagem neutra para o cliente final (sem expor dados da assinatura). */
@@ -22,6 +24,12 @@ export interface PublicBookingResult {
     endAtIso: string;
     priceCents: number;
     durationMinutes: number;
+    /** Pix para pagamento (só quando o estabelecimento configurou a chave). */
+    pix?: {
+      payload: string; // copia e cola, já com o valor
+      qrDataUrl: string; // QR Code como imagem (data URL)
+      key: string; // chave crua (para quem prefere copiar só a chave)
+    };
   };
 }
 
@@ -209,6 +217,36 @@ export async function createPublicBooking(input: {
     // Nunca quebra o agendamento por causa da notificação.
   }
 
+  const finalPrice = (appt?.price_cents as number) ?? totalPrice;
+
+  // Pix (melhor esforço): se o estabelecimento configurou a chave, monta o
+  // "copia e cola" com o valor e o QR. Se as colunas ainda não existirem no
+  // banco, a consulta apenas não retorna nada e o agendamento segue normal.
+  let pix: NonNullable<PublicBookingResult["booking"]>["pix"] | undefined;
+  try {
+    const { data: pb } = await admin
+      .from("businesses")
+      .select("pix_key, pix_name, pix_city")
+      .eq("id", business.id)
+      .maybeSingle();
+    const key = (pb?.pix_key as string | null) ?? null;
+    if (key && key.trim().length >= 3) {
+      const payload = buildPixPayload({
+        key,
+        name: (pb?.pix_name as string | null) ?? "",
+        city: (pb?.pix_city as string | null) ?? "",
+        amountCents: finalPrice,
+      });
+      const qrDataUrl = await QRCode.toDataURL(payload, {
+        margin: 1,
+        width: 320,
+      });
+      pix = { payload, qrDataUrl, key: key.trim() };
+    }
+  } catch {
+    // Nunca quebra o agendamento por causa do Pix.
+  }
+
   return {
     ok: true,
     booking: {
@@ -217,8 +255,9 @@ export async function createPublicBooking(input: {
       endAtIso:
         (appt?.end_at as string) ??
         new Date(startAt.getTime() + totalDuration * 60000).toISOString(),
-      priceCents: (appt?.price_cents as number) ?? totalPrice,
+      priceCents: finalPrice,
       durationMinutes: totalDuration,
+      pix,
     },
   };
 }
