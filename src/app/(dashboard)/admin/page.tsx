@@ -25,6 +25,36 @@ import type { Business } from "@/types/database";
 
 export const metadata: Metadata = { title: "Administrador — Carvi" };
 
+// Sempre renderiza com dados atuais (assinaturas que expiram entram na hora).
+export const dynamic = "force-dynamic";
+
+/** Momento em que o acesso terminou (fim do pago ou do teste, o mais recente). */
+function expiredAt(b: Business): Date | null {
+  const times = [b.paid_until, b.trial_ends_at]
+    .filter(Boolean)
+    .map((d) => new Date(d as string).getTime())
+    .filter((t) => !Number.isNaN(t));
+  if (times.length === 0) return null;
+  return new Date(Math.max(...times));
+}
+
+/** "há 3 dias", "há 2 meses"... a partir de uma data no passado. */
+function timeAgoPt(from: Date, now: Date): string {
+  const ms = now.getTime() - from.getTime();
+  if (ms < 0) return "agora";
+  const hours = Math.floor(ms / 3_600_000);
+  const days = Math.floor(hours / 24);
+  if (days < 1) {
+    if (hours < 1) return "há menos de 1 hora";
+    return `há ${hours} ${hours === 1 ? "hora" : "horas"}`;
+  }
+  if (days < 30) return `há ${days} ${days === 1 ? "dia" : "dias"}`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `há ${months} ${months === 1 ? "mês" : "meses"}`;
+  const years = Math.floor(days / 365);
+  return `há ${years} ${years === 1 ? "ano" : "anos"}`;
+}
+
 type Filter = "todos" | "assinantes" | "renovar" | "expirados";
 
 const FILTERS: { key: Filter; label: string }[] = [
@@ -149,6 +179,15 @@ export default async function AdminPage({
     visible = [...visible].sort((a, b) =>
       (b.updated_at ?? "").localeCompare(a.updated_at ?? ""),
     );
+  }
+  // Na aba de expiradas: quem expirou há menos tempo primeiro, depois as mais
+  // antigas (ordem decrescente pela data em que o acesso terminou).
+  if (filter === "renovar") {
+    visible = [...visible].sort((a, b) => {
+      const ta = expiredAt(a)?.getTime() ?? 0;
+      const tb = expiredAt(b)?.getTime() ?? 0;
+      return tb - ta;
+    });
   }
 
   // Busca por nome, e-mail ou celular.
@@ -308,6 +347,18 @@ export default async function AdminPage({
                       <p className="mt-0.5 text-xs text-muted">
                         Cadastro: {formatDateBR(b.created_at, tz)}
                       </p>
+                      {!active &&
+                        wasSubscriber(b) &&
+                        (() => {
+                          const exp = expiredAt(b);
+                          if (!exp) return null;
+                          return (
+                            <p className="mt-0.5 text-xs font-medium text-amber-700">
+                              Expirou {timeAgoPt(exp, now)} ·{" "}
+                              {formatDateBR(exp.toISOString(), tz)}
+                            </p>
+                          );
+                        })()}
                     </div>
 
                     <div className="flex shrink-0 flex-col items-end gap-1 text-right">
