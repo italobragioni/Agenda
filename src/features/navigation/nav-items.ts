@@ -7,6 +7,7 @@ import {
   Settings,
   CreditCard,
   Share2,
+  FileText,
   Menu as MenuIcon,
   type LucideIcon,
 } from "lucide-react";
@@ -22,6 +23,7 @@ export const navItems: NavItem[] = [
   { href: "/inicio", label: "Dashboard", icon: LayoutDashboard },
   { href: "/agenda", label: "Agenda", icon: Calendar },
   { href: "/clientes", label: "Clientes", icon: Users },
+  { href: "/orcamento", label: "Orçamento", icon: FileText },
   { href: "/servicos", label: "Serviços", icon: Wrench },
   { href: "/link", label: "Link de agendamento", icon: Share2 },
   { href: "/financeiro", label: "Financeiro", icon: DollarSign },
