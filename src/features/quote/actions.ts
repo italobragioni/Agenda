@@ -17,7 +17,7 @@ export interface SaveQuoteInput {
 
 export async function saveQuote(
   input: SaveQuoteInput,
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; id?: string; error?: string }> {
   const ctx = await getCurrentContext();
   if (!ctx) redirect("/login");
 
@@ -39,15 +39,19 @@ export async function saveQuote(
     : null;
 
   const supabase = await createClient();
-  const { error } = await supabase.from("quotes").insert({
-    business_id: ctx.business.id,
-    client_name: clientName,
-    client_phone: clientPhone,
-    items,
-    note: (input.note ?? "").trim() || null,
-    validity: (input.validity ?? "").trim() || null,
-    total_cents: totalCents,
-  });
+  const { data, error } = await supabase
+    .from("quotes")
+    .insert({
+      business_id: ctx.business.id,
+      client_name: clientName,
+      client_phone: clientPhone,
+      items,
+      note: (input.note ?? "").trim() || null,
+      validity: (input.validity ?? "").trim() || null,
+      total_cents: totalCents,
+    })
+    .select("id")
+    .maybeSingle();
   if (error) {
     return {
       ok: false,
@@ -57,7 +61,7 @@ export async function saveQuote(
   }
 
   revalidatePath("/orcamento");
-  return { ok: true };
+  return { ok: true, id: (data?.id as string) ?? undefined };
 }
 
 export async function deleteQuote(id: string): Promise<void> {

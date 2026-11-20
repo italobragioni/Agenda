@@ -12,18 +12,23 @@ import type { Quote } from "@/types/database";
 function QuoteRow({ quote, businessName, tz }: { quote: Quote; businessName: string; tz: string }) {
   const [deleting, startDelete] = useTransition();
 
-  const message = buildQuoteMessage({
-    businessName,
-    clientName: quote.client_name,
-    items: quote.items,
-    note: quote.note,
-    validity: quote.validity,
-    totalCents: quote.total_cents,
-  });
   const phoneNorm = quote.client_phone ? normalizePhone(quote.client_phone) : null;
-  const waHref = phoneNorm
-    ? whatsappLink(phoneNorm, message)
-    : `https://wa.me/?text=${encodeURIComponent(message)}`;
+
+  function sendWhatsApp() {
+    const message = buildQuoteMessage({
+      businessName,
+      clientName: quote.client_name,
+      items: quote.items,
+      note: quote.note,
+      validity: quote.validity,
+      totalCents: quote.total_cents,
+      pdfUrl: `${window.location.origin}/o/${quote.id}/pdf`,
+    });
+    const wa = phoneNorm
+      ? whatsappLink(phoneNorm, message)
+      : `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(wa, "_blank");
+  }
 
   return (
     <li className="rounded-2xl border border-border bg-card p-4">
@@ -43,15 +48,14 @@ function QuoteRow({ quote, businessName, tz }: { quote: Quote; businessName: str
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3">
-        <a
-          href={waHref}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          type="button"
+          onClick={sendWhatsApp}
           className="tap inline-flex items-center gap-1 rounded-lg bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-green-700"
         >
           <MessageCircle className="h-3.5 w-3.5" aria-hidden />
           WhatsApp
-        </a>
+        </button>
         <a
           href={`/orcamento/${quote.id}/pdf?download=1`}
           className="tap inline-flex items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-slate-50"

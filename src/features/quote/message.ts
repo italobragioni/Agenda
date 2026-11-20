@@ -9,8 +9,11 @@ export function buildQuoteMessage(opts: {
   note?: string | null;
   validity?: string | null;
   totalCents: number;
+  /** Link público do PDF (quando o orçamento foi salvo). */
+  pdfUrl?: string | null;
 }): string {
-  const { businessName, clientName, items, note, validity, totalCents } = opts;
+  const { businessName, clientName, items, note, validity, totalCents, pdfUrl } =
+    opts;
   const lines: string[] = [];
   lines.push(`*Orçamento — ${businessName}*`);
   lines.push("");
@@ -33,6 +36,10 @@ export function buildQuoteMessage(opts: {
   if (validity && validity.trim()) {
     lines.push("");
     lines.push(`Validade: ${validity.trim()}`);
+  }
+  if (pdfUrl && pdfUrl.trim()) {
+    lines.push("");
+    lines.push(`Orçamento em PDF: ${pdfUrl.trim()}`);
   }
   lines.push("");
   lines.push("Qualquer dúvida, estou à disposição!");

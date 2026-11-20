@@ -43,6 +43,7 @@ export function QuoteBuilder({
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saving, startSaving] = useTransition();
+  const [sending, setSending] = useState(false);
 
   const parsedItems = useMemo(
     () =>
@@ -94,9 +95,53 @@ export function QuoteBuilder({
 
   const canSend = parsedItems.length > 0;
   const phoneNorm = normalizePhone(clientPhone);
-  const waHref = phoneNorm
-    ? whatsappLink(phoneNorm, message)
-    : `https://wa.me/?text=${encodeURIComponent(message)}`;
+
+  function openWhatsApp(win: Window | null, pdfUrl?: string) {
+    const msg = buildQuoteMessage({
+      businessName,
+      clientName,
+      items: parsedItems,
+      note,
+      validity,
+      totalCents,
+      pdfUrl,
+    });
+    const wa = phoneNorm
+      ? whatsappLink(phoneNorm, msg)
+      : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    if (win && !win.closed) win.location.href = wa;
+    else window.location.href = wa;
+  }
+
+  async function handleSendWhatsApp() {
+    if (!canSend || sending) return;
+    setSaveError(null);
+    setSending(true);
+    // Abre uma aba já no clique (evita bloqueio de pop-up ao enviar depois).
+    const win = window.open("", "_blank");
+    try {
+      const res = await saveQuote({
+        clientName,
+        clientPhone,
+        items: parsedItems,
+        note,
+        validity,
+      });
+      if (res.ok && res.id) {
+        const pdfUrl = `${window.location.origin}/o/${res.id}/pdf`;
+        openWhatsApp(win, pdfUrl);
+        router.refresh();
+      } else {
+        // Sem salvar (ex.: comando do banco ainda não rodado): envia o texto.
+        if (res.error) setSaveError(`${res.error} Enviei sem o PDF por enquanto.`);
+        openWhatsApp(win);
+      }
+    } catch {
+      openWhatsApp(win);
+    } finally {
+      setSending(false);
+    }
+  }
 
   async function copyMsg() {
     try {
@@ -235,21 +280,23 @@ export function QuoteBuilder({
 
       {/* Ações */}
       <div className="flex flex-col gap-2">
-        <a
-          href={canSend ? waHref : undefined}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-disabled={!canSend}
-          onClick={(e) => {
-            if (!canSend) e.preventDefault();
-          }}
+        <button
+          type="button"
+          onClick={handleSendWhatsApp}
+          disabled={!canSend || sending}
           className={`tap flex h-12 items-center justify-center gap-2 rounded-xl text-base font-semibold text-white shadow-soft ${
-            canSend ? "bg-green-600 hover:bg-green-700" : "cursor-not-allowed bg-green-600/50"
+            canSend && !sending
+              ? "bg-green-600 hover:bg-green-700"
+              : "cursor-not-allowed bg-green-600/50"
           }`}
         >
-          <MessageCircle className="h-5 w-5" aria-hidden />
-          Enviar no WhatsApp
-        </a>
+          {sending ? (
+            <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+          ) : (
+            <MessageCircle className="h-5 w-5" aria-hidden />
+          )}
+          {sending ? "Gerando PDF..." : "Enviar no WhatsApp (com PDF)"}
+        </button>
         <div className="flex gap-2">
           <button type="button" onClick={handleSave} disabled={!canSend || saving} className="tap flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-card text-sm font-medium text-foreground hover:bg-slate-50 disabled:opacity-50">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : saved ? <Check className="h-4 w-4" aria-hidden /> : <Save className="h-4 w-4" aria-hidden />}
