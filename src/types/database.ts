@@ -151,6 +151,24 @@ export interface FinanceEntry {
   created_at: string;
 }
 
+/** Um item de orçamento: descrição + valor em centavos. */
+export interface QuoteItem {
+  desc: string;
+  cents: number;
+}
+
+export interface Quote {
+  id: string;
+  business_id: string;
+  client_name: string | null;
+  client_phone: string | null;
+  items: QuoteItem[];
+  note: string | null;
+  validity: string | null;
+  total_cents: number;
+  created_at: string;
+}
+
 export interface BlockedTime {
   id: string;
   business_id: string;
