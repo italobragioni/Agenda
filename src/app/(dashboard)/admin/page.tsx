@@ -91,6 +91,22 @@ function wasSubscriber(b: Business): boolean {
   );
 }
 
+/** Busca TODOS os usuários do Auth, paginando (listUsers traz 1 página por vez). */
+async function listAllAuthUsers(
+  admin: ReturnType<typeof createAdminClient>,
+): Promise<{ id: string; email?: string | null }[]> {
+  const all: { id: string; email?: string | null }[] = [];
+  const perPage = 1000;
+  for (let page = 1; page <= 100; page++) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage });
+    const users = data?.users ?? [];
+    if (error || users.length === 0) break;
+    for (const u of users) all.push({ id: u.id, email: u.email });
+    if (users.length < perPage) break; // última página
+  }
+  return all;
+}
+
 export default async function AdminPage({
   searchParams,
 }: {
@@ -111,7 +127,7 @@ export default async function AdminPage({
   const admin = createAdminClient();
   const tz = ctx.business.timezone;
 
-  const [{ data: businessesData }, { data: profilesData }, usersRes] =
+  const [{ data: businessesData }, { data: profilesData }, allUsers] =
     await Promise.all([
       admin
         .from("businesses")
@@ -120,7 +136,7 @@ export default async function AdminPage({
         )
         .order("created_at", { ascending: false }),
       admin.from("profiles").select("id, business_id, full_name"),
-      admin.auth.admin.listUsers({ perPage: 1000 }),
+      listAllAuthUsers(admin),
     ]);
 
   const businesses = (businessesData ?? []) as Business[];
@@ -132,7 +148,7 @@ export default async function AdminPage({
 
   // Mapa business_id -> email e nome do dono.
   const userEmail = new Map<string, string>();
-  for (const u of usersRes.data?.users ?? []) {
+  for (const u of allUsers) {
     if (u.id && u.email) userEmail.set(u.id, u.email);
   }
   const bizEmail = new Map<string, string>();
