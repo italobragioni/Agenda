@@ -38,6 +38,8 @@ export default async function AppointmentPhotosPage({
 
   const tz = ctx.business.timezone;
   const photos = await listAppointmentPhotos(ctx.business.id, id);
+  const totalPhotos =
+    photos.antes.length + photos.depois.length + photos.outras.length;
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -70,7 +72,7 @@ export default async function AppointmentPhotosPage({
           appointmentId={id}
           customerPhone={appt.customer_phone_snapshot}
           businessName={ctx.business.name}
-          hasPhotos={photos.length > 0}
+          hasPhotos={totalPhotos > 0}
         />
       </div>
     </div>

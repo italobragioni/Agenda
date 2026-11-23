@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MessageCircle, Copy, Check, Share2 } from "lucide-react";
+import { MessageCircle, Copy, Check, Share2, FileDown } from "lucide-react";
 import { normalizePhone, whatsappLink } from "@/lib/phone";
 
 /**
@@ -24,9 +24,15 @@ export function SharePhotos({
   function link() {
     return `${window.location.origin}/f/${appointmentId}`;
   }
+  function pdfLink() {
+    return `${window.location.origin}/f/${appointmentId}/pdf`;
+  }
 
   function sendWhatsApp() {
-    const msg = `Olá! Seguem as fotos do seu atendimento em ${businessName}:\n${link()}`;
+    const msg =
+      `Olá! Seguem as fotos do seu atendimento em ${businessName}:\n` +
+      `Ver as fotos: ${link()}\n` +
+      `Baixar em PDF: ${pdfLink()}`;
     const phoneNorm = customerPhone ? normalizePhone(customerPhone) : null;
     const wa = phoneNorm
       ? whatsappLink(phoneNorm, msg)
@@ -89,6 +95,15 @@ export function SharePhotos({
           )}
         </button>
       </div>
+      {hasPhotos && (
+        <a
+          href={`/f/${appointmentId}/pdf?download=1`}
+          className="tap mt-2 flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card text-sm font-medium text-foreground hover:bg-slate-50"
+        >
+          <FileDown className="h-4 w-4" aria-hidden />
+          Baixar PDF das fotos
+        </a>
+      )}
       {!hasPhotos && (
         <p className="mt-2 text-xs text-muted">
           Adicione ao menos uma foto para poder compartilhar.

@@ -31,35 +31,67 @@ async function ownsAppointment(appointmentId: string): Promise<boolean> {
 }
 
 export interface AppointmentPhoto {
-  name: string;
+  /** Caminho relativo à pasta do atendimento (ex.: "antes/uuid.jpg"). */
+  path: string;
   url: string;
 }
 
-/** Lista as fotos de um atendimento com URLs temporárias (assinadas). */
-export async function listAppointmentPhotos(
+export interface GroupedPhotos {
+  antes: AppointmentPhoto[];
+  depois: AppointmentPhoto[];
+  /** Fotos antigas, enviadas antes da separação por fase. */
+  outras: AppointmentPhoto[];
+}
+
+export type PhotoPhase = "antes" | "depois";
+
+/** Lista uma subpasta (ou a raiz) do atendimento com URLs assinadas. */
+async function listFolder(
+  admin: ReturnType<typeof createAdminClient>,
   businessId: string,
   appointmentId: string,
+  sub: "" | PhotoPhase,
 ): Promise<AppointmentPhoto[]> {
-  const admin = createAdminClient();
-  const folder = `${businessId}/${appointmentId}`;
+  const base = `${businessId}/${appointmentId}`;
+  const folder = sub ? `${base}/${sub}` : base;
   const { data } = await admin.storage
     .from(BUCKET)
     .list(folder, { limit: 200, sortBy: { column: "created_at", order: "asc" } });
-  const files = (data ?? []).filter((f) => f.name && !f.name.startsWith("."));
+  // Na raiz, as subpastas (antes/depois) aparecem como entradas sem id — ignora.
+  const files = (data ?? []).filter(
+    (f) => f.name && !f.name.startsWith(".") && f.id,
+  );
 
   const out: AppointmentPhoto[] = [];
   for (const f of files) {
     const { data: signed } = await admin.storage
       .from(BUCKET)
       .createSignedUrl(`${folder}/${f.name}`, 60 * 60); // 1 hora
-    if (signed?.signedUrl) out.push({ name: f.name, url: signed.signedUrl });
+    if (signed?.signedUrl) {
+      out.push({ path: sub ? `${sub}/${f.name}` : f.name, url: signed.signedUrl });
+    }
   }
   return out;
 }
 
-/** Envia uma ou mais fotos para o atendimento. */
+/** Lista as fotos do atendimento separadas em antes / depois / outras. */
+export async function listAppointmentPhotos(
+  businessId: string,
+  appointmentId: string,
+): Promise<GroupedPhotos> {
+  const admin = createAdminClient();
+  const [antes, depois, outras] = await Promise.all([
+    listFolder(admin, businessId, appointmentId, "antes"),
+    listFolder(admin, businessId, appointmentId, "depois"),
+    listFolder(admin, businessId, appointmentId, ""),
+  ]);
+  return { antes, depois, outras };
+}
+
+/** Envia uma ou mais fotos para o atendimento, na fase indicada. */
 export async function uploadAppointmentPhotos(
   appointmentId: string,
+  phase: PhotoPhase,
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
@@ -68,6 +100,7 @@ export async function uploadAppointmentPhotos(
   if (!(await ownsAppointment(appointmentId))) {
     return { error: "Atendimento não encontrado." };
   }
+  const safePhase: PhotoPhase = phase === "depois" ? "depois" : "antes";
 
   const files = formData
     .getAll("photos")
@@ -86,7 +119,7 @@ export async function uploadAppointmentPhotos(
       continue;
     }
     const ext = EXT[file.type] ?? "jpg";
-    const path = `${ctx.business.id}/${appointmentId}/${randomUUID()}.${ext}`;
+    const path = `${ctx.business.id}/${appointmentId}/${safePhase}/${randomUUID()}.${ext}`;
     const bytes = new Uint8Array(await file.arrayBuffer());
     const { error } = await admin.storage
       .from(BUCKET)
@@ -111,21 +144,21 @@ export async function uploadAppointmentPhotos(
   };
 }
 
-/** Remove uma foto do atendimento. */
+/** Remove uma foto do atendimento (path relativo, ex.: "antes/uuid.jpg"). */
 export async function removeAppointmentPhoto(
   appointmentId: string,
-  name: string,
+  relPath: string,
 ): Promise<void> {
   const ctx = await getCurrentContext();
   if (!ctx) redirect("/login");
   if (!(await ownsAppointment(appointmentId))) return;
-  // Evita sair da pasta do atendimento.
-  if (name.includes("/") || name.includes("..")) return;
+  // Só aceita "nome.ext" ou "antes/nome.ext" / "depois/nome.ext".
+  if (!/^(antes\/|depois\/)?[A-Za-z0-9._-]+$/.test(relPath)) return;
 
   const admin = createAdminClient();
   await admin.storage
     .from(BUCKET)
-    .remove([`${ctx.business.id}/${appointmentId}/${name}`])
+    .remove([`${ctx.business.id}/${appointmentId}/${relPath}`])
     .catch(() => {});
 
   revalidatePath(`/agenda/${appointmentId}/fotos`);
