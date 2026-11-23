@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Download, Eye } from "lucide-react";
+import { Download, Eye, Camera } from "lucide-react";
 import { ReceiptDocument } from "@/features/appointments/receipt-document";
 import { loadReceiptById } from "@/features/appointments/receipt-data";
+import { listAppointmentPhotos } from "@/features/appointments/photo-actions";
 
 export const metadata: Metadata = {
   title: "Recibo — Carvi",
@@ -23,6 +24,10 @@ export default async function PublicReceiptPage({
   const loaded = await loadReceiptById(id);
   if (!loaded) notFound();
   const { appointment, business } = loaded;
+
+  const photos = await listAppointmentPhotos(business.id, id);
+  const hasPhotos =
+    photos.antes.length + photos.depois.length + photos.outras.length > 0;
 
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-8">
@@ -51,6 +56,16 @@ export default async function PublicReceiptPage({
           Baixar PDF
         </a>
       </div>
+
+      {hasPhotos && (
+        <a
+          href={`/f/${id}`}
+          className="tap mx-auto mt-3 flex h-12 w-full max-w-[460px] items-center justify-center gap-2 rounded-xl border border-border bg-card px-5 text-base font-medium text-foreground transition-colors hover:bg-slate-50"
+        >
+          <Camera className="h-4 w-4" aria-hidden />
+          Ver fotos do atendimento
+        </a>
+      )}
     </main>
   );
 }
