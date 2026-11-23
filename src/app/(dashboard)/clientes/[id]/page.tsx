@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Phone, CalendarClock, Car, Pencil } from "lucide-react";
+import { ArrowLeft, Phone, CalendarClock, Car, Pencil, Camera } from "lucide-react";
 import { requireActiveBusiness } from "@/features/billing/guard";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
@@ -130,19 +130,30 @@ export default async function ClienteDetailPage({
         <ul className="space-y-2">
           {appointments.map((a) => (
             <li key={a.id}>
-              <Card className="flex items-center gap-3 p-4">
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-foreground">
-                    {a.service_name_snapshot}
-                  </p>
-                  <p className="truncate text-xs text-muted">
-                    {formatDateTimeBR(a.start_at, tz)} ·{" "}
-                    {formatCents(a.price_cents)}
-                  </p>
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {a.service_name_snapshot}
+                    </p>
+                    <p className="truncate text-xs text-muted">
+                      {formatDateTimeBR(a.start_at, tz)} ·{" "}
+                      {formatCents(a.price_cents)}
+                    </p>
+                  </div>
+                  <Badge className={STATUS_INFO[a.status].badgeClass}>
+                    {STATUS_INFO[a.status].label}
+                  </Badge>
                 </div>
-                <Badge className={STATUS_INFO[a.status].badgeClass}>
-                  {STATUS_INFO[a.status].label}
-                </Badge>
+                <div className="mt-3 border-t border-border pt-3">
+                  <Link
+                    href={`/agenda/${a.id}/fotos`}
+                    className="tap inline-flex items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-slate-50"
+                  >
+                    <Camera className="h-3.5 w-3.5" aria-hidden />
+                    Fotos
+                  </Link>
+                </div>
               </Card>
             </li>
           ))}
