@@ -8,6 +8,7 @@ import {
   listAppointmentPhotos,
 } from "@/features/appointments/photo-actions";
 import { AppointmentPhotos } from "@/features/appointments/appointment-photos";
+import { SharePhotos } from "@/features/appointments/share-photos";
 import { PageHeader } from "@/components/ui/page-header";
 import { formatCents } from "@/lib/money";
 import { formatDateTimeBR } from "@/lib/datetime";
@@ -63,6 +64,15 @@ export default async function AppointmentPhotosPage({
       </div>
 
       <AppointmentPhotos appointmentId={id} photos={photos} />
+
+      <div className="mt-6">
+        <SharePhotos
+          appointmentId={id}
+          customerPhone={appt.customer_phone_snapshot}
+          businessName={ctx.business.name}
+          hasPhotos={photos.length > 0}
+        />
+      </div>
     </div>
   );
 }
