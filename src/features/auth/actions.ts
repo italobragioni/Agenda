@@ -10,6 +10,7 @@ import {
 } from "@/validation/auth";
 import { normalizePhone } from "@/lib/phone";
 import { slugify } from "@/lib/slug";
+import { consumePendingForEmail } from "@/features/billing/activation";
 
 export interface ActionState {
   error?: string;
@@ -130,6 +131,10 @@ export async function signup(
     }));
     const { error: hoursErr } = await admin.from("business_hours").insert(hours);
     if (hoursErr) throw hoursErr;
+
+    // Venda por afiliado: se já houver um pagamento pendente para este e-mail,
+    // ativa a assinatura automaticamente (não quebra o cadastro se falhar).
+    await consumePendingForEmail(admin, email, business.id).catch(() => {});
   } catch {
     // Desfaz o usuário criado para não deixar conta órfã.
     await admin.auth.admin.deleteUser(userId);
@@ -174,6 +179,31 @@ export async function login(
   });
   if (error) {
     return { error: "E-mail ou senha incorretos." };
+  }
+
+  // Rede de segurança: se houver um pagamento pendente (venda por afiliado)
+  // para este e-mail, ativa a assinatura no login. Nunca bloqueia o login.
+  try {
+    const admin = createAdminClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user?.id && user.email) {
+      const { data: prof } = await admin
+        .from("profiles")
+        .select("business_id")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (prof?.business_id) {
+        await consumePendingForEmail(
+          admin,
+          user.email,
+          prof.business_id as string,
+        );
+      }
+    }
+  } catch {
+    // ignora
   }
 
   redirect("/inicio");

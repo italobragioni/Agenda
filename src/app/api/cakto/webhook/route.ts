@@ -6,6 +6,10 @@ import {
   planFromOfferId,
   SUBSCRIPTION_PERIOD_DAYS,
 } from "@/lib/cakto";
+import {
+  findBusinessIdByEmail,
+  storePendingActivation,
+} from "@/features/billing/activation";
 import type { PaidPlan } from "@/features/billing/plan";
 
 export const runtime = "nodejs";
@@ -15,7 +19,7 @@ type Order = {
   status?: string;
   callback?: string;
   offer?: { id?: string };
-  customer?: { id?: string | number };
+  customer?: { id?: string | number; email?: string };
   subscription?: { id?: string } | null;
 };
 
@@ -100,6 +104,13 @@ async function findBusiness(
       };
     }
   }
+  // 4) Venda por afiliado/checkout externo: casa pelo e-mail do comprador, se
+  //    já existir uma conta com esse e-mail (o plano vem da oferta paga).
+  const email = order.customer?.email;
+  if (email) {
+    const bid = await findBusinessIdByEmail(admin, String(email));
+    if (bid) return { businessId: bid, plan: null };
+  }
   return null;
 }
 
@@ -115,6 +126,26 @@ async function applyOrder(admin: Admin, event: string, order: Order) {
 
   const found = await findBusiness(admin, order);
   if (!found) {
+    // Pagamento sem conta (venda por afiliado antes do cadastro): guarda como
+    // pendente pelo e-mail para ativar automaticamente quando a pessoa entrar.
+    if (SUCCESS_EVENTS.has(event)) {
+      const email = order.customer?.email ? String(order.customer.email) : null;
+      const offerId = order.offer?.id;
+      const plan = offerId ? planFromOfferId(offerId) : null;
+      if (email && plan) {
+        const now = new Date();
+        await storePendingActivation(admin, {
+          email,
+          plan,
+          paidUntil: new Date(now.getTime() + PERIOD_MS).toISOString(),
+          currentPeriodStart: now.toISOString(),
+          caktoCustomerId:
+            order.customer?.id != null ? String(order.customer.id) : null,
+          caktoSubscriptionId: order.subscription?.id ?? null,
+        });
+        return;
+      }
+    }
     await recordUnreconciled(admin, event, order, "conta não identificada");
     return;
   }
